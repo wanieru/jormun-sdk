@@ -1,0 +1,14 @@
+{
+    "name": "jormun-sdk",
+    "version": "0.0.1",
+    "description": "SDK for interacting with jormun-sync",
+    "main": "index.js",
+    "scripts":{
+        "build": "tsc src/index.ts --outDir dist -d",
+        "watch": "npm run build --watch"
+    },
+    "dependencies": 
+    {
+        "typescript": "^4.4.3"
+    }
+}
