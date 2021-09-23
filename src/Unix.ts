@@ -1,0 +1,1 @@
+export const Unix = () => new Date().getTime();

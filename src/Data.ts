@@ -1,28 +1,26 @@
 import { Jormun } from "./Jormun";
 import { Pref } from "./Pref";
 
-interface StoredData<T>
-{
-    timestamp : number,
-    data : T
-}
 export class Data
 {
     private jormun : Jormun;
     private key : string;
     private object = {};
-    private pref : Pref<StoredData<string>>;
 
     public constructor(jormun : Jormun, key : string)
     {
         this.jormun = jormun;
         this.key = key;
         this.object = {};
-        this.pref = new Pref(this.key);
     }
-    public async get() //Generic or something??
+    public get<T extends object>() : T
     {
-
+        return <T>this.object;
+    }
+    private updateValue(json : string)
+    {
+        const from = JSON.parse(json);
+        this.deepClone(from, this.object);
     }
     private deepClone(from : object, to : object)
     {
