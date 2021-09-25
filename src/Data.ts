@@ -1,13 +1,16 @@
-import { ILocal } from "./ILocal";
 import { Jormun } from "./Jormun";
-
+import {Unix} from "./Unix";
+export interface LocalData
+{
+    timestamp : number,
+    isDirty : boolean,
+    json : string
+}
 export class Data
 {
-    private json : string;
     private prefix : string;
     private fragment : string;
     private key : string;
-
     public constructor(prefix : string, fragment : string)
     {
         this.prefix = prefix;
@@ -18,15 +21,29 @@ export class Data
     {
         await Jormun.sync([this]);
     }
-    public get = () => JSON.parse(this.json);
-    public set(value)
+    public async getRaw()
     {
-        this.json = JSON.stringify(value);
-        Jormun.local.setValue(this.key, this.json);
+        return <LocalData>await Jormun.local.getValue(this.key);
+    }
+    public async get()
+    {
+        const localData = await this.getRaw();
+        return JSON.parse(localData.json);
+    }
+    public async set(value : any)
+    {
+        const localData : LocalData = 
+        {
+            timestamp : Unix(), 
+            isDirty : true, 
+            json : JSON.stringify(value)
+        };
+        await Jormun.local.setValue(this.key, localData);
     }
     public async setAndSync(value)
     {
-        this.set(value);
+        await this.set(value);
         await this.sync();
     }
+    public getKey = () => this.key;
 }

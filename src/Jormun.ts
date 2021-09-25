@@ -1,5 +1,4 @@
 import { ILocal } from "./ILocal";
-import {Pref} from "./Pref";
 import * as bcrypt from "bcrypt";
 import { IRemote } from "./IRemote";
 import { Data } from "./Data";
@@ -24,32 +23,33 @@ export interface JormunDataSet
 type AlertDelegate = (message : string, options : string[]) => Promise<number>;
 export class Jormun
 {
+    private static REMOTE_SETTINGS_KEY = "$$$jormun_remote$$$";
+
     private static alertDelegate : AlertDelegate;
 
     private static options : JormunOptions;
     public static local : ILocal;
     public static remote : IRemote;
-    private static remoteOptions : Pref<JormunRemote>;
-
     private static data : {local:JormunDataSet, [id:number] : JormunDataSet};
 
-    public static initialize(app : string)
+    public static async initialize(app : string)
     {
+        //TODO: Set local implementation.
         this.data = {local:{}};
-        this.remoteOptions = new Pref<JormunRemote>("$$$jormun_remote$$$", true);
-        if(this.remoteOptions.get() != null)
+        if(this.local.getValue(this.REMOTE_SETTINGS_KEY) != null)
         {
-            this.setup({app:app, type : "LocalAndRemote", remote : this.remoteOptions.get()});
+            await this.setup({app:app, type : "LocalAndRemote", remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
         }
         else
         {
-            this.setup({app: app, type : "LocalOnly", remote: null});
+            await this.setup({app: app, type : "LocalOnly", remote: null});
         }
     }
     public static async login(remote : JormunRemote)
     {
         remote.password = await bcrypt.hash(remote.password, "");
-        this.setup({app:this.options.app, type : "LocalAndRemote", remote : this.remoteOptions.get()});
+        await this.local.setValue(this.REMOTE_SETTINGS_KEY, remote);
+        await this.setup({app:this.options.app, type : "LocalAndRemote", remote : remote});
     }
     public static async syncAll()
     {
@@ -69,19 +69,26 @@ export class Jormun
     }
     
 
-    private static setup(options : JormunOptions)
+    private static async setup(options : JormunOptions)
     {
         this.options = options;
-        //Set local implementation.
         if(options.type == "LocalAndRemote")
         {
-            //Set remote implementation
+            //TODO: Set remote implementation
         }
-
+        const localFragments = await this.local.getLocalFragments();
+        const sharedKeys = await this.local.getSharedKeys();
+        const newData = {local:{}};
+        
+        for(const fragment in localFragments)
+        {
+            newData.local[fragment] = this.data.local[fragment] ?? new Data("", fragment);
+        }
         //Setup data objects based on local keys.
-        //
+        //Continue the todo list. Access the data keys directly. 
+        //Sould self-keys (fragments) have prefixes?
     }
-    public static hashedRemote = () => this.remoteOptions.get();
+    public static hashedRemote = () => this.local.getValue(this.REMOTE_SETTINGS_KEY);
 
     public static async alert(message : string)
     {
