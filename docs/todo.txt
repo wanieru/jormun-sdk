@@ -3,20 +3,26 @@ List of concerns:
         -Electron versions and native app versions will solve it
         -Raise alert when pref saving fails.
     
+    1. One or more remotes are added
+    2. Get keys from all remotes
 
 
 
-    1. Keys are loaded from prefs...
+
+
+    1. Keys are loaded from local into memory...
     
-    2. Keys are loaded from sync server if there is login info.
+    2. Keys are loaded from remote if there is login info saved.
     3. If any keys have older timestamp or different timestamp && is_dirty, ask how to resolve
-    4. If resolve is "download" or no conflicts were found, find all keys with newer timestamps and download them in one request.
-        a. downloaded results are written to Data and to respective Pref.
+    4. If resolve is "download" or no conflicts were found, find all keys with newer timestamps on remote and download them in one request.
+        a. downloaded results are written to memory and to local.
     5. If conflict was found and resolve was "upload", find all keys with conflicts and upload them.
+
+    6. 
 
     6. User get: await current request (new requests can always chain onto the current request promise).
     7. Access data on user object
-    8. Call get<any>()
-    9. //How to change object so it is marked as dirty? Similar system to react? Also, how to best hook up a data point to a react class state? Saved in pref includes dirty.
+    8. Call get(). Parses saved string to new obj.
+    9. Set with set(obj). Dirty is marked and saved to pref as well.
     
     10. Save individual data or from jormun, all dirty objects and mark them as not dirty.

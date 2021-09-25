@@ -1,49 +1,21 @@
-import { Data } from "./Data";
-import { Unix } from "./Unix";
 
-interface JormunUser
-{
-    [key : string] : Data
-}
-type MergeConflictResult = "download" | "upload";
-type MergeConflictResolver = () => Promise<MergeConflictResult>;
-type AlertResolver = (message : string) => void;
+type AlertDelegate = (message : string, options : string[]) => Promise<number>;
 export class Jormun
 {
     private app : string;
-    private mergeConflictResolver : MergeConflictResolver;
-    private alertResolver : AlertResolver;
-    private users : {[id : number]: JormunUser};
-    private lastResolve : {response : MergeConflictResult, time : number} | null;
+    private alertDelegate : AlertDelegate;
 
     public constructor(app : string)
     {
         this.app = app;
     }
-    public async resolveConflict() : Promise<MergeConflictResult>
-    {
-        if(this.lastResolve == null || Unix() - this.lastResolve.time > 10)
-        {
-            this.lastResolve = {response:await this.mergeConflictResolver(), time: Unix()};
-        }
-        return this.lastResolve.response;
-    }
+
     public alert(message : string)
     {
-        this.alertResolver(message);
+        this.alertDelegate(message, []);
     }
-    public setMergeConflictResolver(resolver : MergeConflictResolver)
+    public setAlertDelegate(resolver : AlertDelegate)
     {
-        this.mergeConflictResolver = resolver;
-    }
-    public setAlertResolver(resolver : AlertResolver)
-    {
-        this.alertResolver = resolver;
-    }
-    public async user(id : number) : Promise<JormunUser | null>
-    {
-        if(this.users[id])
-            return this.users[id];
-        return null;
+        this.alertDelegate = resolver;
     }
 }
