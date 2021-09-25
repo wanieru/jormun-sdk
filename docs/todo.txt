@@ -3,11 +3,7 @@ List of concerns:
         -Electron versions and native app versions will solve it
         -Raise alert when pref saving fails.
     
-    1. One or more remotes are added
-    2. Get keys from all remotes
-
-
-
+    
 
 
     1. Keys are loaded from local into memory...
@@ -18,7 +14,7 @@ List of concerns:
         a. downloaded results are written to memory and to local.
     5. If conflict was found and resolve was "upload", find all keys with conflicts and upload them.
 
-    6. 
+    6. Get user by id or 
 
     6. User get: await current request (new requests can always chain onto the current request promise).
     7. Access data on user object
