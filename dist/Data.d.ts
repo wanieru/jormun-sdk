@@ -13,6 +13,7 @@ export declare class Data {
     preset(value: any, timestamp: number, isDirty: boolean): Promise<void>;
     set(value: any): Promise<void>;
     setAndSync(value: any): Promise<void>;
+    remove(): Promise<void>;
     getKey: () => Key;
     getFragment: () => string;
 }

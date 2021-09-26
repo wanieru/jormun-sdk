@@ -9,4 +9,5 @@ export interface ILocal {
     getValues(keys: Key[]): Promise<{
         [key: string]: any;
     }>;
+    removeValue(key: Key): Promise<void>;
 }

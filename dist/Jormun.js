@@ -43,7 +43,7 @@ var Key_1 = require("./Key");
 var Jormun = /** @class */ (function () {
     function Jormun() {
     }
-    Jormun.initialize = function (app) {
+    Jormun.initialize = function (app, alertDelegate) {
         return __awaiter(this, void 0, void 0, function () {
             var _b;
             var _c;
@@ -51,6 +51,7 @@ var Jormun = /** @class */ (function () {
                 switch (_d.label) {
                     case 0:
                         //TODO: Set local implementation.
+                        this.alertDelegate = alertDelegate;
                         this.REMOTE_SETTINGS_KEY = new Key_1.Key(app, -9999, "REMOTE_SETTINGS");
                         this.data = {};
                         if (!(this.local.getValue(this.REMOTE_SETTINGS_KEY) != null)) return [3 /*break*/, 3];
@@ -92,12 +93,243 @@ var Jormun = /** @class */ (function () {
         });
     };
     Jormun.sync = function () {
+        var _b;
         return __awaiter(this, void 0, void 0, function () {
-            var download, upload;
-            return __generator(this, function (_b) {
-                download = false;
-                upload = false;
-                return [2 /*return*/];
+            var status, keys, comparison, choice, uploadData, newTimestamps, _c, _d, _i, key, parsed, remoteString, getKeys, result, result;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
+                    case 0:
+                        if (!this.remote)
+                            return [2 /*return*/];
+                        return [4 /*yield*/, this.remote.status()];
+                    case 1:
+                        status = _e.sent();
+                        return [4 /*yield*/, this.remote.keys()];
+                    case 2:
+                        keys = _e.sent();
+                        return [4 /*yield*/, this.compareRemoteKeys(status, keys)];
+                    case 3:
+                        comparison = _e.sent();
+                        if (!(comparison.download && comparison.upload)) return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.ask("The local and remote data cannot be combined. Which do you want to keep?", ["Local", "Remote"])];
+                    case 4:
+                        choice = _e.sent();
+                        if (choice == 0)
+                            comparison.download = false;
+                        else if (choice == 1)
+                            comparison.upload = false;
+                        _e.label = 5;
+                    case 5:
+                        if (!comparison.upload) return [3 /*break*/, 13];
+                        return [4 /*yield*/, this.remote["delete"](comparison.missingLocal)];
+                    case 6:
+                        _e.sent();
+                        return [4 /*yield*/, this.getUploadData(status, comparison.newerLocal.concat(comparison.missingRemote))];
+                    case 7:
+                        uploadData = _e.sent();
+                        return [4 /*yield*/, this.remote.set(uploadData)];
+                    case 8:
+                        newTimestamps = _e.sent();
+                        _c = [];
+                        for (_d in newTimestamps)
+                            _c.push(_d);
+                        _i = 0;
+                        _e.label = 9;
+                    case 9:
+                        if (!(_i < _c.length)) return [3 /*break*/, 12];
+                        key = _c[_i];
+                        parsed = Key_1.Key.parse(key, status.userId);
+                        remoteString = parsed.stringifyRemote(status.userId);
+                        return [4 /*yield*/, this.data[parsed.userId][parsed.fragment].preset(uploadData[remoteString], newTimestamps[key], false)];
+                    case 10:
+                        _e.sent();
+                        _e.label = 11;
+                    case 11:
+                        _i++;
+                        return [3 /*break*/, 9];
+                    case 12: return [3 /*break*/, 17];
+                    case 13:
+                        if (!comparison.download) return [3 /*break*/, 17];
+                        return [4 /*yield*/, this.removeLocalKeys(comparison.missingRemote)];
+                    case 14:
+                        _e.sent();
+                        getKeys = comparison.missingLocal.concat(comparison.newerRemote);
+                        return [4 /*yield*/, this.remote.get(getKeys)];
+                    case 15:
+                        result = _e.sent();
+                        return [4 /*yield*/, this.processDataResponse(status, keys, result)];
+                    case 16:
+                        _e.sent();
+                        _e.label = 17;
+                    case 17:
+                        if (!((_b = this.options.remote) === null || _b === void 0 ? void 0 : _b.downloadSharedData)) return [3 /*break*/, 21];
+                        return [4 /*yield*/, this.removeLocalKeys(comparison.deleteShared)];
+                    case 18:
+                        _e.sent();
+                        return [4 /*yield*/, this.remote.get(comparison.newShared)];
+                    case 19:
+                        result = _e.sent();
+                        return [4 /*yield*/, this.processDataResponse(status, keys, result)];
+                    case 20:
+                        _e.sent();
+                        _e.label = 21;
+                    case 21: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Jormun.getUploadData = function (status, keys) {
+        return __awaiter(this, void 0, void 0, function () {
+            var uploadData, _b, _c, _i, i, key, keyString, _d, _e;
+            return __generator(this, function (_f) {
+                switch (_f.label) {
+                    case 0:
+                        uploadData = {};
+                        _b = [];
+                        for (_c in keys)
+                            _b.push(_c);
+                        _i = 0;
+                        _f.label = 1;
+                    case 1:
+                        if (!(_i < _b.length)) return [3 /*break*/, 4];
+                        i = _b[_i];
+                        key = keys[i];
+                        keyString = key.stringifyRemote(status.userId);
+                        _d = uploadData;
+                        _e = keyString;
+                        return [4 /*yield*/, this.data[key.userId][key.fragment].get()];
+                    case 2:
+                        _d[_e] = _f.sent();
+                        _f.label = 3;
+                    case 3:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [2 /*return*/, uploadData];
+                }
+            });
+        });
+    };
+    Jormun.removeLocalKeys = function (keys) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _b, _c, _i, i, key;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        _b = [];
+                        for (_c in keys)
+                            _b.push(_c);
+                        _i = 0;
+                        _d.label = 1;
+                    case 1:
+                        if (!(_i < _b.length)) return [3 /*break*/, 4];
+                        i = _b[_i];
+                        key = keys[i];
+                        return [4 /*yield*/, this.data[key.userId][key.fragment].remove()];
+                    case 2:
+                        _d.sent();
+                        delete this.data[key.userId][key.fragment];
+                        _d.label = 3;
+                    case 3:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Jormun.processDataResponse = function (status, keys, result) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _b, _c, _i, key, parsed;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        _b = [];
+                        for (_c in result)
+                            _b.push(_c);
+                        _i = 0;
+                        _d.label = 1;
+                    case 1:
+                        if (!(_i < _b.length)) return [3 /*break*/, 4];
+                        key = _b[_i];
+                        parsed = Key_1.Key.parse(key, status.userId);
+                        if (!this.data[parsed.userId])
+                            this.data[parsed.userId] = {};
+                        if (!this.data[parsed.userId][parsed.fragment])
+                            this.data[parsed.userId][parsed.fragment] = new Data_1.Data(parsed);
+                        return [4 /*yield*/, this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false)];
+                    case 2:
+                        _d.sent();
+                        _d.label = 3;
+                    case 3:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Jormun.compareRemoteKeys = function (status, remoteKeys) {
+        return __awaiter(this, void 0, void 0, function () {
+            var missingLocal, missingRemote, newerLocal, newerRemote, newShared, deleteShared, _b, _c, _i, key, parsed, local, localTime, remoteTime, user, fragment, key, download, upload;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        missingLocal = [];
+                        missingRemote = [];
+                        newerLocal = [];
+                        newerRemote = [];
+                        newShared = [];
+                        deleteShared = [];
+                        _b = [];
+                        for (_c in remoteKeys)
+                            _b.push(_c);
+                        _i = 0;
+                        _d.label = 1;
+                    case 1:
+                        if (!(_i < _b.length)) return [3 /*break*/, 5];
+                        key = _b[_i];
+                        parsed = Key_1.Key.parse(key, status.userId);
+                        local = parsed.userId == status.userId;
+                        if (local) {
+                            parsed.userId = -1;
+                        }
+                        if (!(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])) return [3 /*break*/, 2];
+                        (local ? missingLocal : newShared).push(parsed);
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, this.data[parsed.userId][parsed.fragment].getRaw()];
+                    case 3:
+                        localTime = (_d.sent()).timestamp;
+                        remoteTime = remoteKeys[key];
+                        if (localTime > remoteTime)
+                            (local ? newerLocal : newShared).push(parsed);
+                        else if (remoteTime > localTime)
+                            newerRemote.push(parsed);
+                        _d.label = 4;
+                    case 4:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 5:
+                        for (user in this.data) {
+                            for (fragment in this.data[user]) {
+                                key = this.data[user][fragment].getKey();
+                                if (!remoteKeys[key.stringifyRemote(status.userId)])
+                                    (user == "-1" ? missingRemote : deleteShared).push(key);
+                            }
+                        }
+                        download = false;
+                        upload = false;
+                        if (missingLocal.length > 0 || missingRemote.length > 0) {
+                            download = true;
+                            upload = true;
+                        }
+                        if (newerLocal.length > 0) {
+                            upload = true;
+                        }
+                        if (newerRemote.length > 0) {
+                            download = true;
+                        }
+                        return [2 /*return*/, { download: download, upload: upload, missingLocal: missingLocal, missingRemote: missingRemote, newerLocal: newerLocal, newerRemote: newerRemote, newShared: newShared, deleteShared: deleteShared }];
+                }
             });
         });
     };
@@ -124,7 +356,13 @@ var Jormun = /** @class */ (function () {
                             else
                                 newData[key.userId][key.fragment] = new Data_1.Data(key);
                         }
-                        return [2 /*return*/];
+                        this.data = newData;
+                        if (!this.remote) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.sync()];
+                    case 2:
+                        _b.sent();
+                        _b.label = 3;
+                    case 3: return [2 /*return*/];
                 }
             });
         });
@@ -132,12 +370,34 @@ var Jormun = /** @class */ (function () {
     Jormun.alert = function (message) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_b) {
-                return [2 /*return*/, this.alertDelegate(message, [])];
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.alertDelegate(message, [])];
+                    case 1:
+                        _b.sent();
+                        return [2 /*return*/];
+                }
             });
         });
     };
-    Jormun.setAlertDelegate = function (resolver) {
-        this.alertDelegate = resolver;
+    Jormun.ask = function (message, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_b) {
+                return [2 /*return*/, this.alertDelegate(message, options)];
+            });
+        });
+    };
+    Jormun.me = function () {
+        if (!this.data[-1])
+            this.data[-1] = {};
+        return this.data[-1];
+    };
+    Jormun.user = function (userId) {
+        var _b, _c;
+        if (userId == ((_c = (_b = this.remote) === null || _b === void 0 ? void 0 : _b.cachedStatus()) === null || _c === void 0 ? void 0 : _c.userId))
+            return this.me();
+        if (!this.data[userId])
+            return null;
+        return this.data[userId];
     };
     var _a;
     _a = Jormun;

@@ -127,6 +127,18 @@ var Data = /** @class */ (function () {
             });
         });
     };
+    Data.prototype.remove = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Jormun_1.Jormun.local.removeValue(this.key)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return Data;
 }());
 exports.Data = Data;

@@ -3,6 +3,8 @@ import * as bcrypt from "bcrypt";
 import { DataResponse, IRemote, KeyResponse, StatusResponse } from "./IRemote";
 import { Data } from "./Data";
 import { Key } from "./Key";
+import { LocalStorage } from "./LocalStorage";
+import { JomrunSyncRemote } from "./JormunSyncRemote";
 
 export interface JormunOptions
 {
@@ -35,7 +37,7 @@ export class Jormun
 
     public static async initialize(app : string, alertDelegate : AlertDelegate)
     {
-        //TODO: Set local implementation.
+        this.local = new LocalStorage();
         this.alertDelegate = alertDelegate;
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};
@@ -153,11 +155,12 @@ export class Jormun
             }
             else
             {
-                const localTime = (await this.data[parsed.userId][parsed.fragment].getRaw()).timestamp;
+                const raw = await this.data[parsed.userId][parsed.fragment].getRaw();
+                const localTime = raw.timestamp;
                 const remoteTime = remoteKeys[key];
-                if(localTime > remoteTime)
+                if(localTime > remoteTime || raw.isDirty)
                     (local ? newerLocal : newShared).push(parsed);
-                else if(remoteTime > localTime)
+                if(remoteTime > localTime)
                     newerRemote.push(parsed);
             }
         }
@@ -193,9 +196,9 @@ export class Jormun
     private static async setup(options : JormunOptions)
     {
         this.options = options;
-        if(options.type == "LocalAndRemote")
+        if(options.type == "LocalAndRemote" && options.remote)
         {
-            //TODO: Set remote implementation
+            this.remote = new JomrunSyncRemote(options.remote);
         }
         const keys = await this.local.getKeys();
         const newData = {};
