@@ -37,45 +37,126 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.JomrunSyncRemote = void 0;
+var Ajax_1 = require("./Ajax");
+var Jormun_1 = require("./Jormun");
 var JomrunSyncRemote = /** @class */ (function () {
     function JomrunSyncRemote(jormunOptions) {
         this.jormunOptions = jormunOptions;
     }
+    JomrunSyncRemote.prototype.request = function (endpoint, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var uri, response;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        uri = this.jormunOptions.remote.host + "/" + endpoint;
+                        return [4 /*yield*/, (0, Ajax_1.Ajax)(uri, data)];
+                    case 1:
+                        response = _a.sent();
+                        if (!(response.status != 200)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, Jormun_1.Jormun.alert(uri + " returned " + response.status + ": " + response.body.message)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, null];
+                    case 3: return [2 /*return*/, response.body];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.baseRequest = function () {
+        return { username: this.jormunOptions.remote.username, password: this.jormunOptions.remote.password, app: this.jormunOptions.app };
+    };
     JomrunSyncRemote.prototype.cachedStatus = function () {
         return this.statusCache;
     };
     JomrunSyncRemote.prototype.status = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var response;
             return __generator(this, function (_a) {
-                throw new Error("Method not implemented.");
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.request("status", this.baseRequest())];
+                    case 1:
+                        response = _a.sent();
+                        if (response == null)
+                            return [2 /*return*/, null];
+                        this.statusCache = response;
+                        return [2 /*return*/, response];
+                }
             });
         });
     };
     JomrunSyncRemote.prototype.keys = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var response;
             return __generator(this, function (_a) {
-                throw new Error("Method not implemented.");
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.request("keys", this.baseRequest())];
+                    case 1:
+                        response = _a.sent();
+                        if (response == null)
+                            return [2 /*return*/, null];
+                        return [2 /*return*/, response];
+                }
             });
         });
     };
     JomrunSyncRemote.prototype.get = function (keys) {
         return __awaiter(this, void 0, void 0, function () {
+            var array, i, request, response;
             return __generator(this, function (_a) {
-                throw new Error("Method not implemented.");
+                switch (_a.label) {
+                    case 0:
+                        array = [];
+                        for (i in keys) {
+                            array.push(keys[i].stringifyRemote(this.statusCache.userId));
+                        }
+                        request = this.baseRequest();
+                        request["keys"] = array;
+                        return [4 /*yield*/, this.request("get", request)];
+                    case 1:
+                        response = _a.sent();
+                        if (response == null)
+                            return [2 /*return*/, null];
+                        return [2 /*return*/, response];
+                }
             });
         });
     };
     JomrunSyncRemote.prototype.set = function (data) {
         return __awaiter(this, void 0, void 0, function () {
+            var request, response;
             return __generator(this, function (_a) {
-                throw new Error("Method not implemented.");
+                switch (_a.label) {
+                    case 0:
+                        request = this.baseRequest();
+                        request["data"] = data;
+                        return [4 /*yield*/, this.request("set", request)];
+                    case 1:
+                        response = _a.sent();
+                        if (response == null)
+                            return [2 /*return*/, null];
+                        return [2 /*return*/, response];
+                }
             });
         });
     };
     JomrunSyncRemote.prototype["delete"] = function (keys) {
         return __awaiter(this, void 0, void 0, function () {
+            var array, i, request;
             return __generator(this, function (_a) {
-                throw new Error("Method not implemented.");
+                switch (_a.label) {
+                    case 0:
+                        array = [];
+                        for (i in keys) {
+                            array.push(keys[i].stringifyRemote(this.statusCache.userId));
+                        }
+                        request = this.baseRequest();
+                        request["keys"] = array;
+                        return [4 /*yield*/, this.request("delete", request)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
             });
         });
     };

@@ -5,6 +5,8 @@ export declare class JomrunSyncRemote implements IRemote {
     private jormunOptions;
     private statusCache;
     constructor(jormunOptions: JormunOptions);
+    private request;
+    private baseRequest;
     cachedStatus(): StatusResponse;
     status(): Promise<StatusResponse>;
     keys(): Promise<KeyResponse>;
