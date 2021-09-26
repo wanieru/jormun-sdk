@@ -1,15 +1,15 @@
 import { DataResponse, IRemote, KeyResponse, StatusResponse } from "./IRemote";
-import { JormunRemote } from "./Jormun";
+import { JormunOptions } from "./Jormun";
 import { Key } from "./Key";
 
 export class JomrunSyncRemote implements IRemote
 {
-    private remoteOptions : JormunRemote;
+    private jormunOptions : JormunOptions;
     private statusCache : StatusResponse;
 
-    public constructor(remoteOptions : JormunRemote)
+    public constructor(jormunOptions : JormunOptions)
     {
-        this.remoteOptions = remoteOptions;
+        this.jormunOptions = jormunOptions;
     }
 
     public cachedStatus(): StatusResponse 

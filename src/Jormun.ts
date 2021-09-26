@@ -198,7 +198,7 @@ export class Jormun
         this.options = options;
         if(options.type == "LocalAndRemote" && options.remote)
         {
-            this.remote = new JomrunSyncRemote(options.remote);
+            this.remote = new JomrunSyncRemote(options);
         }
         const keys = await this.local.getKeys();
         const newData = {};
