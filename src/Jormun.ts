@@ -2,6 +2,7 @@ import { ILocal } from "./ILocal";
 import * as bcrypt from "bcrypt";
 import { IRemote } from "./IRemote";
 import { Data } from "./Data";
+import { Key } from "./Key";
 
 export interface JormunOptions
 {
@@ -23,7 +24,7 @@ export interface JormunDataSet
 type AlertDelegate = (message : string, options : string[]) => Promise<number>;
 export class Jormun
 {
-    private static REMOTE_SETTINGS_KEY = "$$$jormun_remote$$$";
+    private static REMOTE_SETTINGS_KEY : Key;
 
     private static alertDelegate : AlertDelegate;
 
@@ -35,6 +36,7 @@ export class Jormun
     public static async initialize(app : string)
     {
         //TODO: Set local implementation.
+        this.REMOTE_SETTINGS_KEY = {app: app, userId: -9999, fragment: "REMOTE_SETTINGS"};
         this.data = {local:{}};
         if(this.local.getValue(this.REMOTE_SETTINGS_KEY) != null)
         {
@@ -51,21 +53,21 @@ export class Jormun
         await this.local.setValue(this.REMOTE_SETTINGS_KEY, remote);
         await this.setup({app:this.options.app, type : "LocalAndRemote", remote : remote});
     }
-    public static async syncAll()
+    public static async sync()
     {
-        const dataArray : Data[] = [];
-        for(const user in this.data)
-        {
-            for(const fragment in this.data[user])
-            {
-                dataArray.push(this.data[user][fragment]);
-            }
-        }
-        await this.sync(dataArray);
-    }
-    public static async sync(data : Data[])
-    {
-        //TODO: implement this :D
+        //Gather info
+
+        let download = false;
+        //If there are any newer timestamps on the server, or keys that are only on either side, download is true
+
+        let upload = false;
+        //If there are any newer timestamps locally or any dirty, or keys that are only on either side, upload is true
+
+
+        //If both upload and download are true, ask what to do.
+        //Do one of them, downloading or uploading only the neccessary data.
+
+        //Alawys redownload shared keys if remote options allows it.
     }
     
 
@@ -80,10 +82,24 @@ export class Jormun
         const sharedKeys = await this.local.getSharedKeys();
         const newData = {local:{}};
         
+        for(const existingFragment in this.data.local)
+        {
+            if(!localFragments[existingFragment])
+            {
+                delete this.data.local[existingFragment];
+            }
+        }
         for(const fragment in localFragments)
         {
-            newData.local[fragment] = this.data.local[fragment] ?? new Data("", fragment);
+            const key = 
+            {
+                app: options.app,
+                userId: -1,
+                fragment: fragment
+            };
+            newData.local[fragment] = this.data.local[fragment] ?? new Data(key);
         }
+
         //Setup data objects based on local keys.
         //Continue the todo list. Access the data keys directly. 
         //Sould self-keys (fragments) have prefixes?

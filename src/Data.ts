@@ -1,4 +1,5 @@
 import { Jormun } from "./Jormun";
+import { Key } from "./Key";
 import {Unix} from "./Unix";
 export interface LocalData
 {
@@ -8,18 +9,14 @@ export interface LocalData
 }
 export class Data
 {
-    private prefix : string;
-    private fragment : string;
-    private key : string;
-    public constructor(prefix : string, fragment : string)
+    private key : Key;
+    public constructor(key : Key)
     {
-        this.prefix = prefix;
-        this.fragment = fragment;
-        this.key = `${this.prefix}${this.fragment}`;
+        this.key = key;
     }
     public async sync()
     {
-        await Jormun.sync([this]);
+        await Jormun.sync();
     }
     public async getRaw()
     {
@@ -46,4 +43,5 @@ export class Data
         await this.sync();
     }
     public getKey = () => this.key;
+    public getFragment = () => this.key.fragment;
 }
