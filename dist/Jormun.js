@@ -40,6 +40,8 @@ exports.Jormun = void 0;
 var bcrypt = require("bcrypt");
 var Data_1 = require("./Data");
 var Key_1 = require("./Key");
+var LocalStorage_1 = require("./LocalStorage");
+var JormunSyncRemote_1 = require("./JormunSyncRemote");
 var Jormun = /** @class */ (function () {
     function Jormun() {
     }
@@ -50,7 +52,7 @@ var Jormun = /** @class */ (function () {
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        //TODO: Set local implementation.
+                        this.local = new LocalStorage_1.LocalStorage();
                         this.alertDelegate = alertDelegate;
                         this.REMOTE_SETTINGS_KEY = new Key_1.Key(app, -9999, "REMOTE_SETTINGS");
                         this.data = {};
@@ -270,7 +272,7 @@ var Jormun = /** @class */ (function () {
     };
     Jormun.compareRemoteKeys = function (status, remoteKeys) {
         return __awaiter(this, void 0, void 0, function () {
-            var missingLocal, missingRemote, newerLocal, newerRemote, newShared, deleteShared, _b, _c, _i, key, parsed, local, localTime, remoteTime, user, fragment, key, download, upload;
+            var missingLocal, missingRemote, newerLocal, newerRemote, newShared, deleteShared, _b, _c, _i, key, parsed, local, raw, localTime, remoteTime, user, fragment, key, download, upload;
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
@@ -298,11 +300,12 @@ var Jormun = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 2: return [4 /*yield*/, this.data[parsed.userId][parsed.fragment].getRaw()];
                     case 3:
-                        localTime = (_d.sent()).timestamp;
+                        raw = _d.sent();
+                        localTime = raw.timestamp;
                         remoteTime = remoteKeys[key];
-                        if (localTime > remoteTime)
+                        if (localTime > remoteTime || raw.isDirty)
                             (local ? newerLocal : newShared).push(parsed);
-                        else if (remoteTime > localTime)
+                        if (remoteTime > localTime)
                             newerRemote.push(parsed);
                         _d.label = 4;
                     case 4:
@@ -340,8 +343,8 @@ var Jormun = /** @class */ (function () {
                 switch (_b.label) {
                     case 0:
                         this.options = options;
-                        if (options.type == "LocalAndRemote") {
-                            //TODO: Set remote implementation
+                        if (options.type == "LocalAndRemote" && options.remote) {
+                            this.remote = new JormunSyncRemote_1.JomrunSyncRemote(options);
                         }
                         return [4 /*yield*/, this.local.getKeys()];
                     case 1:
