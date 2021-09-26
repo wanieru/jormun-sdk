@@ -27,20 +27,28 @@ export class Data
         const localData = await this.getRaw();
         return JSON.parse(localData.json);
     }
-    public async set(value : any)
+    public async preset(value : any, timestamp : number, isDirty : boolean)
     {
         const localData : LocalData = 
         {
-            timestamp : Unix(), 
-            isDirty : true, 
+            timestamp : timestamp, 
+            isDirty : isDirty, 
             json : JSON.stringify(value)
         };
         await Jormun.local.setValue(this.key, localData);
     }
-    public async setAndSync(value)
+    public async set(value : any)
+    {
+        await this.preset(value, Unix(), true);
+    }
+    public async setAndSync(value : any)
     {
         await this.set(value);
         await this.sync();
+    }
+    public async remove()
+    {
+        await Jormun.local.removeValue(this.key);
     }
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;

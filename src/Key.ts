@@ -9,14 +9,25 @@ export class Key
         this.userId = userId;
         this.fragment = fragment;
     }
-    public static parse(json : string)
+    public static parse(json : string, remoteId : number)
     {
         const parsed = <Key>JSON.parse(json); //Not actually a key instance
         const key = new Key(parsed.app, parsed.userId, parsed.app);
+        if(key.userId == remoteId)
+            key.userId = -1;
         return key;
     }
-    public stringify()
+    public stringifyLocal()
     {
         return JSON.stringify(this);
+    }
+    public stringifyRemote(remoteId : number)
+    {
+        const originalId = this.userId;
+        if(this.userId == -1)
+            this.userId = remoteId;
+        const json = JSON.stringify(this);
+        this.userId = originalId;
+        return json;
     }
 }

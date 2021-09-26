@@ -1,6 +1,6 @@
 import { ILocal } from "./ILocal";
 import * as bcrypt from "bcrypt";
-import { IRemote } from "./IRemote";
+import { DataResponse, IRemote, KeyResponse, StatusResponse } from "./IRemote";
 import { Data } from "./Data";
 import { Key } from "./Key";
 
@@ -31,13 +31,14 @@ export class Jormun
     private static options : JormunOptions;
     public static local : ILocal;
     public static remote : IRemote;
-    private static data : {local:JormunDataSet, [id:number] : JormunDataSet};
+    private static data : {[id:number] : JormunDataSet};
 
-    public static async initialize(app : string)
+    public static async initialize(app : string, alertDelegate : AlertDelegate)
     {
         //TODO: Set local implementation.
+        this.alertDelegate = alertDelegate;
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
-        this.data = {local:{}};
+        this.data = {};
         if(this.local.getValue(this.REMOTE_SETTINGS_KEY) != null)
         {
             await this.setup({app:app, type : "LocalAndRemote", remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
@@ -55,19 +56,137 @@ export class Jormun
     }
     public static async sync()
     {
-        //Gather info
+        if(!this.remote)
+            return;
+        const status = await this.remote.status();
+        const keys = await this.remote.keys();
+
+        const comparison = await this.compareRemoteKeys(status, keys);
+
+        if(comparison.download && comparison.upload)
+        {
+            const choice = await this.ask("The local and remote data cannot be combined. Which do you want to keep?", ["Local", "Remote"]);
+            if(choice == 0)
+                comparison.download = false;
+            else if(choice == 1)
+                comparison.upload = false;
+        }
+        if(comparison.upload)
+        {
+            await this.remote.delete(comparison.missingLocal);
+            const uploadData = await this.getUploadData(status, comparison.newerLocal.concat(comparison.missingRemote));
+            const newTimestamps = await this.remote.set(uploadData);
+            for(const key in newTimestamps)
+            {
+                const parsed = Key.parse(key, status.userId);
+                const remoteString = parsed.stringifyRemote(status.userId);
+                await this.data[parsed.userId][parsed.fragment].preset(uploadData[remoteString], newTimestamps[key], false);
+            }
+        }
+        else if(comparison.download)
+        {
+            await this.removeLocalKeys(comparison.missingRemote);
+            const getKeys = comparison.missingLocal.concat(comparison.newerRemote);
+            const result = await this.remote.get(getKeys);
+            await this.processDataResponse(status, keys, result);
+        }
+        if(this.options.remote?.downloadSharedData)
+        {
+            await this.removeLocalKeys(comparison.deleteShared);
+            const result = await this.remote.get(comparison.newShared);
+            await this.processDataResponse(status, keys, result);
+        }
+    }
+    private static async getUploadData(status : StatusResponse, keys : Key[])
+    {
+        const uploadData = {};
+        for(const i in keys)
+        {
+            const key = keys[i];
+            const keyString = key.stringifyRemote(status.userId);
+            uploadData[keyString] = await this.data[key.userId][key.fragment].get();
+        }
+        return uploadData;
+    }
+    private static async removeLocalKeys(keys : Key[])
+    {
+        for(const i in keys)
+        {
+            const key = keys[i];
+            await this.data[key.userId][key.fragment].remove();
+            delete this.data[key.userId][key.fragment];
+        }
+    }
+    private static async processDataResponse(status : StatusResponse, keys : KeyResponse, result : DataResponse)
+    {
+        for(const key in result)
+        {
+            const parsed = Key.parse(key, status.userId);
+            if(!this.data[parsed.userId])
+                this.data[parsed.userId] = {};
+            if(!this.data[parsed.userId][parsed.fragment])
+                this.data[parsed.userId][parsed.fragment] = new Data(parsed);
+            await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false); 
+        }
+    }
+    private static async compareRemoteKeys(status : StatusResponse, remoteKeys : KeyResponse)
+    {
+        let missingLocal : Key[] = []; //Keys that exist on remote but not on local
+        let missingRemote : Key[] = []; //Keys that exist on local but not on remote
+        let newerLocal : Key[] = []; //Keys that are newer on local
+        let newerRemote : Key[] = []; //Keys that are newer on remote
+
+        let newShared : Key[] = []; //Shared keys that are newer on remote
+        let deleteShared : Key[] = []; //Shared keys that exist on local but not on remote
+
+        for(const key in remoteKeys)
+        {
+            const parsed = Key.parse(key, status.userId);
+            const local = parsed.userId == status.userId;
+            if(local)
+            {
+                parsed.userId = -1;
+            }
+            if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
+            {
+                (local ? missingLocal : newShared).push(parsed);
+            }
+            else
+            {
+                const localTime = (await this.data[parsed.userId][parsed.fragment].getRaw()).timestamp;
+                const remoteTime = remoteKeys[key];
+                if(localTime > remoteTime)
+                    (local ? newerLocal : newShared).push(parsed);
+                else if(remoteTime > localTime)
+                    newerRemote.push(parsed);
+            }
+        }
+        for(const user in this.data)
+        {
+            for(const fragment in this.data[user])
+            {
+                const key = this.data[user][fragment].getKey();
+                if(!remoteKeys[key.stringifyRemote(status.userId)])
+                    (user == "-1" ? missingRemote : deleteShared).push(key);
+            }
+        }
 
         let download = false;
-        //If there are any newer timestamps on the server, or keys that are only on either side, download is true
-
         let upload = false;
-        //If there are any newer timestamps locally or any dirty, or keys that are only on either side, upload is true
-
-
-        //If both upload and download are true, ask what to do.
-        //Do one of them, downloading or uploading only the neccessary data.
-
-        //Alawys redownload shared keys if remote options allows it.
+        if(missingLocal.length > 0 || missingRemote.length > 0)
+        {
+            download = true;
+            upload = true;
+        }
+        if(newerLocal.length > 0)
+        {
+            upload = true;
+        }
+        if(newerRemote.length > 0)
+        {
+            download = true;
+        }
+        return {download: download, upload: upload, missingLocal : missingLocal, missingRemote : missingRemote, newerLocal : newerLocal, newerRemote : newerRemote, newShared : newShared, deleteShared : deleteShared};
     }
     
 
@@ -78,36 +197,48 @@ export class Jormun
         {
             //TODO: Set remote implementation
         }
-        const localKeys = await this.local.getLocalFragments();
-        const sharedKeys = await this.local.getSharedKeys();
-        const newData = {local:{}};
+        const keys = await this.local.getKeys();
+        const newData = {};
         
-        for(const existingFragment in this.data.local)
+        for(const i in keys)
         {
-            const key = new Key(options.app, -1, existingFragment);
-            if(!localKeys[key.stringify()])
-            {
-                delete this.data.local[existingFragment];
-            }
+            const key = keys[i];
+            if(!newData[key.userId])
+                newData[key.userId] = {};
+            if(this.data[key.userId] && this.data[key.userId][key.fragment])
+                newData[key.userId][key.fragment] = this.data[key.userId][key.fragment];
+            else
+                newData[key.userId][key.fragment] = new Data(key);
         }
-        for(const key in localKeys)
+        this.data = newData;
+        if(this.remote)
         {
-            const parsed = Key.parse(key);
-            newData.local[parsed.fragment] = this.data.local[parsed.fragment] ?? new Data(parsed);
+            await this.sync();
         }
-
-        //Setup data objects based on local keys.
-        //Continue the todo list. Access the data keys directly. 
-        //Sould self-keys (fragments) have prefixes?
     }
     public static hashedRemote = () => this.local.getValue(this.REMOTE_SETTINGS_KEY);
 
     public static async alert(message : string)
     {
-        return this.alertDelegate(message, []);
+        await this.alertDelegate(message, []);
     }
-    public static setAlertDelegate(resolver : AlertDelegate)
+    public static async ask(message : string, options : string[])
     {
-        this.alertDelegate = resolver;
+        return this.alertDelegate(message, options);
     }
+    
+    public static me() : JormunDataSet
+    {
+        if(!this.data[-1])
+            this.data[-1] = {};
+        return this.data[-1];
+    }
+    public static user(userId : number) : JormunDataSet
+    {
+        if(userId == this.remote?.cachedStatus()?.userId)
+            return this.me();
+        if(!this.data[userId])
+            return null;
+        return this.data[userId];
+    } 
 }
