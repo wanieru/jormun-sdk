@@ -23,7 +23,7 @@ export interface JormunDataSet
 {
     [fragment:string] : Data
 }
-type AlertDelegate = (message : string, options : string[]) => Promise<number>;
+export type AlertDelegate = (message : string, options : string[]) => Promise<number>;
 export class Jormun
 {
     private static REMOTE_SETTINGS_KEY : Key;

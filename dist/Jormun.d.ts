@@ -15,7 +15,7 @@ export interface JormunRemote {
 export interface JormunDataSet {
     [fragment: string]: Data;
 }
-declare type AlertDelegate = (message: string, options: string[]) => Promise<number>;
+export declare type AlertDelegate = (message: string, options: string[]) => Promise<number>;
 export declare class Jormun {
     private static REMOTE_SETTINGS_KEY;
     private static alertDelegate;
@@ -37,4 +37,3 @@ export declare class Jormun {
     static me(): JormunDataSet;
     static user(userId: number): JormunDataSet;
 }
-export {};
