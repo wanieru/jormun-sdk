@@ -36,7 +36,7 @@ export class Jormun
     public static async initialize(app : string)
     {
         //TODO: Set local implementation.
-        this.REMOTE_SETTINGS_KEY = {app: app, userId: -9999, fragment: "REMOTE_SETTINGS"};
+        this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {local:{}};
         if(this.local.getValue(this.REMOTE_SETTINGS_KEY) != null)
         {
@@ -78,26 +78,22 @@ export class Jormun
         {
             //TODO: Set remote implementation
         }
-        const localFragments = await this.local.getLocalFragments();
+        const localKeys = await this.local.getLocalFragments();
         const sharedKeys = await this.local.getSharedKeys();
         const newData = {local:{}};
         
         for(const existingFragment in this.data.local)
         {
-            if(!localFragments[existingFragment])
+            const key = new Key(options.app, -1, existingFragment);
+            if(!localKeys[key.stringify()])
             {
                 delete this.data.local[existingFragment];
             }
         }
-        for(const fragment in localFragments)
+        for(const key in localKeys)
         {
-            const key = 
-            {
-                app: options.app,
-                userId: -1,
-                fragment: fragment
-            };
-            newData.local[fragment] = this.data.local[fragment] ?? new Data(key);
+            const parsed = Key.parse(key);
+            newData.local[parsed.fragment] = this.data.local[parsed.fragment] ?? new Data(parsed);
         }
 
         //Setup data objects based on local keys.
