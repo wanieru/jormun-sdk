@@ -1,5 +1,5 @@
 import { JormunEvent } from "./Event";
-import { Jormun, JormunEventHandler, JormunEventPayload } from "./Jormun";
+import { Jormun, JormunEventPayload } from "./Jormun";
 import { Key } from "./Key";
 import {Unix} from "./Unix";
 export interface LocalData
@@ -72,7 +72,7 @@ export class Data
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;
     
-    public onChange(handler : JormunEventHandler) : number
+    public onChange(handler : (payload : JormunEventPayload) => void) : number
     {
         const key = this.key.stringifyLocal();
         if(!Jormun.onDataChange[key])

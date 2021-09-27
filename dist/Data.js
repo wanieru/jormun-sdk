@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.Data = void 0;
+var Event_1 = require("./Event");
 var Jormun_1 = require("./Jormun");
 var Unix_1 = require("./Unix");
 var Data = /** @class */ (function () {
@@ -81,9 +82,32 @@ var Data = /** @class */ (function () {
             });
         });
     };
+    Data.prototype.getEventPayload = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var payload;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = {
+                            data: this
+                        };
+                        return [4 /*yield*/, this.getRaw()];
+                    case 1:
+                        _a.raw = _b.sent();
+                        return [4 /*yield*/, this.get()];
+                    case 2:
+                        payload = (_a.value = _b.sent(),
+                            _a.key = this.getKey(),
+                            _a);
+                        return [2 /*return*/, payload];
+                }
+            });
+        });
+    };
     Data.prototype.preset = function (value, timestamp, isDirty) {
         return __awaiter(this, void 0, void 0, function () {
-            var localData;
+            var localData, keyString, payload;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -95,7 +119,14 @@ var Data = /** @class */ (function () {
                         return [4 /*yield*/, Jormun_1.Jormun.local.setValue(this.key, localData)];
                     case 1:
                         _a.sent();
-                        return [2 /*return*/];
+                        keyString = this.key.stringifyLocal();
+                        if (!Jormun_1.Jormun.onDataChange[keyString]) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.getEventPayload()];
+                    case 2:
+                        payload = _a.sent();
+                        Jormun_1.Jormun.onDataChange[keyString].trigger(payload);
+                        _a.label = 3;
+                    case 3: return [2 /*return*/];
                 }
             });
         });
@@ -138,6 +169,18 @@ var Data = /** @class */ (function () {
                 }
             });
         });
+    };
+    Data.prototype.onChange = function (handler) {
+        var key = this.key.stringifyLocal();
+        if (!Jormun_1.Jormun.onDataChange[key])
+            Jormun_1.Jormun.onDataChange[key] = new Event_1.JormunEvent();
+        return Jormun_1.Jormun.onDataChange[key].on(handler);
+    };
+    Data.prototype.offChange = function (eventId) {
+        var key = this.key.stringifyLocal();
+        if (Jormun_1.Jormun.onDataChange[key]) {
+            Jormun_1.Jormun.onDataChange[key].off(eventId);
+        }
     };
     return Data;
 }());

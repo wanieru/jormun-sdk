@@ -42,6 +42,7 @@ var Data_1 = require("./Data");
 var Key_1 = require("./Key");
 var LocalStorage_1 = require("./LocalStorage");
 var JormunSyncRemote_1 = require("./JormunSyncRemote");
+var Event_1 = require("./Event");
 var Jormun = /** @class */ (function () {
     function Jormun() {
     }
@@ -103,6 +104,7 @@ var Jormun = /** @class */ (function () {
                     case 0:
                         if (!this.remote)
                             return [2 /*return*/];
+                        this.onSync.trigger(true);
                         return [4 /*yield*/, this.remote.status()];
                     case 1:
                         status = _e.sent();
@@ -175,7 +177,9 @@ var Jormun = /** @class */ (function () {
                     case 20:
                         _e.sent();
                         _e.label = 21;
-                    case 21: return [2 /*return*/];
+                    case 21:
+                        this.onSync.trigger(false);
+                        return [2 /*return*/];
                 }
             });
         });
@@ -404,6 +408,8 @@ var Jormun = /** @class */ (function () {
     };
     var _a;
     _a = Jormun;
+    Jormun.onDataChange = {};
+    Jormun.onSync = new Event_1.JormunEvent();
     Jormun.hashedRemote = function () { return _a.local.getValue(_a.REMOTE_SETTINGS_KEY); };
     return Jormun;
 }());

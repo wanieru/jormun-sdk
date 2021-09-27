@@ -1,6 +1,8 @@
 import { ILocal } from "./ILocal";
 import { IRemote } from "./IRemote";
-import { Data } from "./Data";
+import { Data, LocalData } from "./Data";
+import { Key } from "./Key";
+import { JormunEvent } from "./Event";
 export interface JormunOptions {
     app: string;
     type: "LocalOnly" | "LocalAndRemote";
@@ -16,6 +18,12 @@ export interface JormunDataSet {
     [fragment: string]: Data;
 }
 export declare type AlertDelegate = (message: string, options: string[]) => Promise<number>;
+export declare type JormunEventPayload = {
+    key: Key;
+    data: Data;
+    value: any;
+    raw: LocalData;
+};
 export declare class Jormun {
     private static REMOTE_SETTINGS_KEY;
     private static alertDelegate;
@@ -23,6 +31,10 @@ export declare class Jormun {
     static local: ILocal;
     static remote: IRemote;
     private static data;
+    static onDataChange: {
+        [key: string]: JormunEvent<JormunEventPayload>;
+    };
+    static onSync: JormunEvent<boolean>;
     static initialize(app: string, alertDelegate: AlertDelegate): Promise<void>;
     static login(remote: JormunRemote): Promise<void>;
     static sync(): Promise<void>;
