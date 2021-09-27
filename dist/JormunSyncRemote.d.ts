@@ -1,4 +1,5 @@
-import { DataResponse, IRemote, KeyResponse, StatusResponse } from "./IRemote";
+import { DataResponse, KeyResponse, StatusResponse } from "./ApiTypes";
+import { IRemote } from "./IRemote";
 import { JormunOptions } from "./Jormun";
 import { Key } from "./Key";
 export declare class JomrunSyncRemote implements IRemote {

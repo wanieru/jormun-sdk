@@ -1,5 +1,6 @@
 import { Ajax } from "./Ajax";
-import { DataResponse, IRemote, KeyResponse, StatusResponse } from "./IRemote";
+import { DataResponse, KeyResponse, StatusResponse, StatusReuqest as StatusRequest } from "./ApiTypes";
+import { IRemote } from "./IRemote";
 import { Jormun, JormunOptions } from "./Jormun";
 import { Key } from "./Key";
 
@@ -35,7 +36,8 @@ export class JomrunSyncRemote implements IRemote
     }
     public async status(): Promise<StatusResponse> 
     {
-        const response : StatusResponse = await this.request("status", this.baseRequest());
+        const request : StatusRequest = this.baseRequest();
+        const response : StatusResponse = await this.request("status", request);
         if(response == null)
             return null;
         this.statusCache = response;

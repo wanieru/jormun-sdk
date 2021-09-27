@@ -71,10 +71,12 @@ var JomrunSyncRemote = /** @class */ (function () {
     };
     JomrunSyncRemote.prototype.status = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response;
+            var request, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.request("status", this.baseRequest())];
+                    case 0:
+                        request = this.baseRequest();
+                        return [4 /*yield*/, this.request("status", request)];
                     case 1:
                         response = _a.sent();
                         if (response == null)

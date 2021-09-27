@@ -1,11 +1,12 @@
 import { ILocal } from "./ILocal";
 import * as bcrypt from "bcrypt";
-import { DataResponse, IRemote, KeyResponse, StatusResponse } from "./IRemote";
+import { IRemote} from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
 import { LocalStorage } from "./LocalStorage";
 import { JomrunSyncRemote } from "./JormunSyncRemote";
 import { JormunEvent } from "./Event";
+import { DataResponse, KeyResponse, StatusResponse } from "./ApiTypes";
 
 export interface JormunOptions
 {

@@ -1,16 +1,5 @@
+import { DataResponse, KeyResponse, StatusResponse } from "./ApiTypes";
 import { Key } from "./Key";
-export interface StatusResponse {
-    userId: number;
-    isAdmin: boolean;
-    storage: number;
-    used: number;
-}
-export interface KeyResponse {
-    [key: string]: number;
-}
-export interface DataResponse {
-    [key: string]: any;
-}
 export interface IRemote {
     cachedStatus(): StatusResponse;
     status(): Promise<StatusResponse>;
