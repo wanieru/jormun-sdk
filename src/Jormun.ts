@@ -5,6 +5,7 @@ import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
 import { LocalStorage } from "./LocalStorage";
 import { JomrunSyncRemote } from "./JormunSyncRemote";
+import { JormunEvent } from "./Event";
 
 export interface JormunOptions
 {
@@ -25,7 +26,6 @@ export interface JormunDataSet
 }
 export type AlertDelegate = (message : string, options : string[]) => Promise<number>;
 export type JormunEventPayload = {key : Key, data : Data, value : any, raw : LocalData};
-export type JormunEventHandler = (eventData :  JormunEventPayload) => void;
 export class Jormun
 {
     private static REMOTE_SETTINGS_KEY : Key;
@@ -37,8 +37,8 @@ export class Jormun
     public static remote : IRemote;
     private static data : {[id:number] : JormunDataSet};
 
-    private static events : {[key : string] : {[eventId : number] : JormunEventHandler}};
-    private static eventIdKeys : string[] = [];
+    public static onDataChange : {[key : string] : JormunEvent<JormunEventPayload>} = {};
+    public static onSync = new JormunEvent<boolean>();
 
     public static async initialize(app : string, alertDelegate : AlertDelegate)
     {
@@ -65,6 +65,9 @@ export class Jormun
     {
         if(!this.remote)
             return;
+
+        this.onSync.trigger(true);
+
         const status = await this.remote.status();
         const keys = await this.remote.keys();
 
@@ -103,6 +106,8 @@ export class Jormun
             const result = await this.remote.get(comparison.newShared);
             await this.processDataResponse(status, keys, result);
         }
+
+        this.onSync.trigger(false);
     }
     private static async getUploadData(status : StatusResponse, keys : Key[])
     {
@@ -249,48 +254,4 @@ export class Jormun
             return null;
         return this.data[userId];
     } 
-    public static async triggerEvent(data : Data)
-    {
-        const payload : JormunEventPayload = 
-        {
-            data : data,
-            raw : await data.getRaw(),
-            value : await data.get(),
-            key : data.getKey()
-        };
-        const keyString = payload.key.stringifyLocal();
-        if(this.events[keyString])
-        {
-            for(var eventId in this.events[keyString])
-            {
-                this.events[keyString][eventId](payload);
-            }
-        }
-    }
-    public static onUser(userId : number, fragment : string, handler : JormunEventHandler) : number
-    {
-        const key = new Key(this.options.app, userId, fragment).stringifyLocal();
-        const id = this.eventIdKeys.length;
-        this.eventIdKeys.push(key);
-        if(!this.events[key])
-            this.events[key] = {};
-        this.events[key][id] = handler;
-        return id;
-    }
-    public static onMe(fragment : string, handler : JormunEventHandler) : number
-    {
-        return this.onUser(-1, fragment, handler);
-    }
-    public static off(eventId : number)
-    {
-        const key = this.eventIdKeys[eventId];
-        if(key)
-        {
-            this.eventIdKeys[eventId] = null;
-            if(this.events[key] && this.events[key][eventId])
-            {
-                delete this.events[key][eventId];
-            }
-        }
-    }
 }

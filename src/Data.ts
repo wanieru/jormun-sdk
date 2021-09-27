@@ -1,4 +1,5 @@
-import { Jormun, JormunEventHandler } from "./Jormun";
+import { JormunEvent } from "./Event";
+import { Jormun, JormunEventHandler, JormunEventPayload } from "./Jormun";
 import { Key } from "./Key";
 import {Unix} from "./Unix";
 export interface LocalData
@@ -27,6 +28,17 @@ export class Data
         const localData = await this.getRaw();
         return JSON.parse(localData.json);
     }
+    private async getEventPayload() : Promise<JormunEventPayload>
+    {
+        const payload : JormunEventPayload = 
+        {
+            data : this,
+            raw : await this.getRaw(),
+            value : await this.get(),
+            key : this.getKey()
+        };
+        return payload;
+    }
     public async preset(value : any, timestamp : number, isDirty : boolean)
     {
         const localData : LocalData = 
@@ -36,7 +48,13 @@ export class Data
             json : JSON.stringify(value)
         };
         await Jormun.local.setValue(this.key, localData);
-        await Jormun.triggerEvent(this);
+
+        const keyString = this.key.stringifyLocal();
+        if(Jormun.onDataChange[keyString])
+        {
+            const payload = await this.getEventPayload();
+            Jormun.onDataChange[keyString].trigger(payload);
+        }
     }
     public async set(value : any)
     {
@@ -54,12 +72,19 @@ export class Data
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;
     
-    public on(handler : JormunEventHandler) : number
+    public onChange(handler : JormunEventHandler) : number
     {
-        return Jormun.onUser(this.key.userId, this.key.fragment, handler);
+        const key = this.key.stringifyLocal();
+        if(!Jormun.onDataChange[key])
+            Jormun.onDataChange[key] = new JormunEvent<JormunEventPayload>();
+        return Jormun.onDataChange[key].on(handler);
     }
-    public off(eventId : number)
+    public offChange(eventId : number)
     {
-        Jormun.off(eventId);
+        const key = this.key.stringifyLocal();
+        if(Jormun.onDataChange[key])
+        {
+            Jormun.onDataChange[key].off(eventId);
+        }
     }
 }
