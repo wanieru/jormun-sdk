@@ -1,4 +1,4 @@
-import { Jormun } from "./Jormun";
+import { Jormun, JormunEventHandler } from "./Jormun";
 import { Key } from "./Key";
 import {Unix} from "./Unix";
 export interface LocalData
@@ -36,6 +36,7 @@ export class Data
             json : JSON.stringify(value)
         };
         await Jormun.local.setValue(this.key, localData);
+        await Jormun.triggerEvent(this);
     }
     public async set(value : any)
     {
@@ -52,4 +53,13 @@ export class Data
     }
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;
+    
+    public on(handler : JormunEventHandler) : number
+    {
+        return Jormun.onUser(this.key.userId, this.key.fragment, handler);
+    }
+    public off(eventId : number)
+    {
+        Jormun.off(eventId);
+    }
 }
