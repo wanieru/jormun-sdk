@@ -66,43 +66,40 @@ var JomrunSyncRemote = /** @class */ (function () {
     JomrunSyncRemote.prototype.baseRequest = function () {
         return { username: this.jormunOptions.remote.username, password: this.jormunOptions.remote.password, app: this.jormunOptions.app };
     };
+    JomrunSyncRemote.prototype.adminRequest = function () {
+        return { username: this.jormunOptions.remote.username, password: this.jormunOptions.remote.password };
+    };
     JomrunSyncRemote.prototype.cachedStatus = function () {
         return this.statusCache;
     };
     JomrunSyncRemote.prototype.status = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.request("status", this.baseRequest())];
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = this;
+                        return [4 /*yield*/, this.request("status", this.baseRequest())];
                     case 1:
-                        response = _a.sent();
-                        if (response == null)
-                            return [2 /*return*/, null];
-                        this.statusCache = response;
-                        return [2 /*return*/, response];
+                        _a.statusCache = _b.sent();
+                        return [2 /*return*/, this.statusCache];
                 }
             });
         });
     };
     JomrunSyncRemote.prototype.keys = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.request("keys", this.baseRequest())];
-                    case 1:
-                        response = _a.sent();
-                        if (response == null)
-                            return [2 /*return*/, null];
-                        return [2 /*return*/, response];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
     JomrunSyncRemote.prototype.get = function (keys) {
         return __awaiter(this, void 0, void 0, function () {
-            var array, i, request, response;
+            var array, i, request;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -113,29 +110,21 @@ var JomrunSyncRemote = /** @class */ (function () {
                         request = this.baseRequest();
                         request["keys"] = array;
                         return [4 /*yield*/, this.request("get", request)];
-                    case 1:
-                        response = _a.sent();
-                        if (response == null)
-                            return [2 /*return*/, null];
-                        return [2 /*return*/, response];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
     JomrunSyncRemote.prototype.set = function (data) {
         return __awaiter(this, void 0, void 0, function () {
-            var request, response;
+            var request;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         request = this.baseRequest();
                         request["data"] = data;
                         return [4 /*yield*/, this.request("set", request)];
-                    case 1:
-                        response = _a.sent();
-                        if (response == null)
-                            return [2 /*return*/, null];
-                        return [2 /*return*/, response];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -153,9 +142,172 @@ var JomrunSyncRemote = /** @class */ (function () {
                         request = this.baseRequest();
                         request["keys"] = array;
                         return [4 /*yield*/, this.request("delete", request)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.share = function (keys, users) {
+        return __awaiter(this, void 0, void 0, function () {
+            var array, i, request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        array = [];
+                        for (i in keys) {
+                            array.push(keys[i].stringifyRemote(this.statusCache.userId));
+                        }
+                        request = this.baseRequest();
+                        request["keys"] = array;
+                        request["users"] = users;
+                        return [4 /*yield*/, this.request("share", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.unshare = function (keys, users) {
+        return __awaiter(this, void 0, void 0, function () {
+            var array, i, request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        array = [];
+                        for (i in keys) {
+                            array.push(keys[i].stringifyRemote(this.statusCache.userId));
+                        }
+                        request = this.baseRequest();
+                        request["keys"] = array;
+                        request["users"] = users;
+                        return [4 /*yield*/, this.request("unshare", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.leave = function (keys) {
+        return __awaiter(this, void 0, void 0, function () {
+            var array, i, request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        array = [];
+                        for (i in keys) {
+                            array.push(keys[i].stringifyRemote(this.statusCache.userId));
+                        }
+                        request = this.baseRequest();
+                        request["keys"] = array;
+                        return [4 /*yield*/, this.request("leave", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.password = function (newPassword) {
+        return __awaiter(this, void 0, void 0, function () {
+            var request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        request = this.adminRequest();
+                        request["newPassword"] = newPassword;
+                        return [4 /*yield*/, this.request("password", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.register = function (newUsername, newPassword) {
+        return __awaiter(this, void 0, void 0, function () {
+            var request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        request = this.adminRequest();
+                        request["newUsername"] = newUsername;
+                        request["newPassword"] = newPassword;
+                        return [4 /*yield*/, this.request("register", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.empty = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.request("empty", {})];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.setup = function (username, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        request = { username: username, password: password };
+                        return [4 /*yield*/, this.request("setup", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.ban = function (bannedUsername) {
+        return __awaiter(this, void 0, void 0, function () {
+            var request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        request = this.adminRequest();
+                        request["bannedUsername"] = bannedUsername;
+                        return [4 /*yield*/, this.request("ban", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.rename = function (oldUsername, newUsername) {
+        return __awaiter(this, void 0, void 0, function () {
+            var request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        request = this.adminRequest();
+                        request["oldUsername"] = oldUsername;
+                        request["newUsername"] = newUsername;
+                        return [4 /*yield*/, this.request("rename", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.resize = function (targetUsername, newSize) {
+        return __awaiter(this, void 0, void 0, function () {
+            var request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        request = this.adminRequest();
+                        request["targetUsername"] = targetUsername;
+                        request["newSize"] = newSize;
+                        return [4 /*yield*/, this.request("resize", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    JomrunSyncRemote.prototype.users = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var request;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        request = this.adminRequest();
+                        return [4 /*yield*/, this.request("users", request)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });

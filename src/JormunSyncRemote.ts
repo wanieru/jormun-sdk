@@ -4,7 +4,7 @@ import { DeleteRequest, DeleteResponse } from "./ApiTypes/Delete";
 import { EmptyRequest, EmptyResponse } from "./ApiTypes/Empty";
 import { GetRequest, GetResponse } from "./ApiTypes/Get";
 import { KeysRequest, KeysResponse } from "./ApiTypes/Keys";
-import { LeaveRequest, LeaveResponse } from "./ApiTypes/LEave";
+import { LeaveRequest, LeaveResponse } from "./ApiTypes/Leave";
 import { PasswordRequest, PasswordResponse } from "./ApiTypes/Password";
 import { RegisterRequest, RegisterResponse } from "./ApiTypes/Register";
 import { RenameRequest, RenameResponse } from "./ApiTypes/Rename";

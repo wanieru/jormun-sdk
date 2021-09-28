@@ -3,7 +3,7 @@ import { DeleteResponse } from "./ApiTypes/Delete";
 import { EmptyResponse } from "./ApiTypes/Empty";
 import { GetResponse } from "./ApiTypes/Get";
 import { KeysResponse } from "./ApiTypes/Keys";
-import { LeaveResponse } from "./ApiTypes/LEave";
+import { LeaveResponse } from "./ApiTypes/Leave";
 import { PasswordResponse } from "./ApiTypes/Password";
 import { RegisterResponse } from "./ApiTypes/Register";
 import { RenameResponse } from "./ApiTypes/Rename";
