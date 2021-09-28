@@ -5,4 +5,5 @@ export const emptyRequest = zod.object(
 export type EmptyRequest = zod.infer<typeof emptyRequest>;
 export interface EmptyResponse
 {
+    empty : boolean
 }

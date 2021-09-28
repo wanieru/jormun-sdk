@@ -1,5 +1,7 @@
 import { Ajax } from "./Ajax";
-import { GetResponse, KeysResponse, StatusResponse, StatusRequest as StatusRequest } from "./ApiTypes";
+import { GetResponse } from "./ApiTypes/Get";
+import { KeysResponse } from "./ApiTypes/Keys";
+import { StatusRequest, StatusResponse } from "./ApiTypes/Status";
 import { IRemote } from "./IRemote";
 import { Jormun, JormunOptions } from "./Jormun";
 import { Key } from "./Key";

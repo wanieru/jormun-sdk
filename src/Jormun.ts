@@ -6,7 +6,9 @@ import { Key } from "./Key";
 import { LocalStorage } from "./LocalStorage";
 import { JomrunSyncRemote } from "./JormunSyncRemote";
 import { JormunEvent } from "./Event";
-import { DataResponse, KeysResponse, StatusResponse } from "./ApiTypes";
+import { StatusResponse } from "./ApiTypes/Status";
+import { KeysResponse } from "./ApiTypes/Keys";
+import { GetResponse } from "./ApiTypes/Get";
 
 export interface JormunOptions
 {
@@ -130,7 +132,7 @@ export class Jormun
             delete this.data[key.userId][key.fragment];
         }
     }
-    private static async processDataResponse(status : StatusResponse, keys : KeysResponse, result : DataResponse)
+    private static async processDataResponse(status : StatusResponse, keys : KeysResponse, result : GetResponse)
     {
         for(const key in result)
         {
