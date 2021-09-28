@@ -1,5 +1,6 @@
 import { GetResponse } from "./ApiTypes/Get";
 import { KeysResponse } from "./ApiTypes/Keys";
+import { SetResponse } from "./ApiTypes/Set";
 import { StatusResponse } from "./ApiTypes/Status";
 import { IRemote } from "./IRemote";
 import { JormunOptions } from "./Jormun";
@@ -14,6 +15,6 @@ export declare class JomrunSyncRemote implements IRemote {
     status(): Promise<StatusResponse>;
     keys(): Promise<KeysResponse>;
     get(keys: Key[]): Promise<GetResponse>;
-    set(data: GetResponse): Promise<KeysResponse>;
+    set(data: GetResponse): Promise<SetResponse>;
     delete(keys: Key[]): Promise<void>;
 }
