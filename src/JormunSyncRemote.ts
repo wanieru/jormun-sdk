@@ -1,3 +1,4 @@
+import * as bcrypt from "bcrypt";
 import { Ajax } from "./Ajax";
 import { BanRequest, BanResponse } from "./ApiTypes/Ban";
 import { DeleteRequest, DeleteResponse } from "./ApiTypes/Delete";
@@ -135,16 +136,20 @@ export class JomrunSyncRemote implements IRemote
     }
     public async password(newPassword: string): Promise<PasswordResponse> 
     {
+        newPassword = await bcrypt.hash(newPassword, "");
         const request = this.adminRequest();
         request["newPassword"] = newPassword;
 
         return await this.request<PasswordRequest, PasswordResponse>("password", request);
     }
-    public async register(newUsername: string, newPassword: string): Promise<RegisterResponse> 
+    public async register(newUsername: string, newPassword: string, size : number, isAdmin : boolean): Promise<RegisterResponse> 
     {
+        newPassword = await bcrypt.hash(newPassword, "");
         const request = this.adminRequest();
         request["newUsername"] = newUsername;
         request["newPassword"] = newPassword;
+        request["size"] = size;
+        request["isAdmin"] = isAdmin;
 
         return await this.request<RegisterRequest , RegisterResponse>("register", request);
     }
@@ -154,6 +159,7 @@ export class JomrunSyncRemote implements IRemote
     }
     public async setup(username: string, password: string): Promise<SetupResponse> 
     {
+        password = await bcrypt.hash(password, "");
         const request = {username : username, password : password};
         return await this.request<SetupRequest, SetupResponse>("setup", request);
     }

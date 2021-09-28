@@ -5,6 +5,8 @@ export const registerRequest = zod.object(
     password : zod.string().min(1),
     newUsername : zod.string().min(1),
     newPassword : zod.string().min(1),
+    size : zod.number().min(1),
+    isAdmin : zod.boolean()
 });
 export type RegisterRequest = zod.infer<typeof registerRequest>;
 export interface RegisterResponse

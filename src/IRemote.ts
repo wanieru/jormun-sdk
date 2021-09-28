@@ -29,7 +29,7 @@ export interface IRemote
     delete(keys : Key[]) : Promise<DeleteResponse>;
 
     password(newPassword : string) : Promise<PasswordResponse>;
-    register(newUsername : string, newPassword : string) : Promise<RegisterResponse>;
+    register(newUsername : string, newPassword : string, size : number, isAdmin : boolean) : Promise<RegisterResponse>;
     empty() : Promise<EmptyResponse>;
     setup(username : string, password : string) : Promise<SetupResponse>;
     ban(bannedUsername : string) : Promise<BanResponse>;

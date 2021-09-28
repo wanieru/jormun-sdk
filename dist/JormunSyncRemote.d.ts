@@ -34,7 +34,7 @@ export declare class JomrunSyncRemote implements IRemote {
     unshare(keys: Key[], users: string[]): Promise<UnshareResponse>;
     leave(keys: Key[]): Promise<LeaveResponse>;
     password(newPassword: string): Promise<PasswordResponse>;
-    register(newUsername: string, newPassword: string): Promise<RegisterResponse>;
+    register(newUsername: string, newPassword: string, size: number, isAdmin: boolean): Promise<RegisterResponse>;
     empty(): Promise<EmptyResponse>;
     setup(username: string, password: string): Promise<SetupResponse>;
     ban(bannedUsername: string): Promise<BanResponse>;

@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.JomrunSyncRemote = void 0;
+var bcrypt = require("bcrypt");
 var Ajax_1 = require("./Ajax");
 var Jormun_1 = require("./Jormun");
 var JomrunSyncRemote = /** @class */ (function () {
@@ -208,26 +209,32 @@ var JomrunSyncRemote = /** @class */ (function () {
             var request;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, bcrypt.hash(newPassword, "")];
+                    case 1:
+                        newPassword = _a.sent();
                         request = this.adminRequest();
                         request["newPassword"] = newPassword;
                         return [4 /*yield*/, this.request("password", request)];
-                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
-    JomrunSyncRemote.prototype.register = function (newUsername, newPassword) {
+    JomrunSyncRemote.prototype.register = function (newUsername, newPassword, size, isAdmin) {
         return __awaiter(this, void 0, void 0, function () {
             var request;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, bcrypt.hash(newPassword, "")];
+                    case 1:
+                        newPassword = _a.sent();
                         request = this.adminRequest();
                         request["newUsername"] = newUsername;
                         request["newPassword"] = newPassword;
+                        request["size"] = size;
+                        request["isAdmin"] = isAdmin;
                         return [4 /*yield*/, this.request("register", request)];
-                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -247,10 +254,12 @@ var JomrunSyncRemote = /** @class */ (function () {
             var request;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
+                    case 0: return [4 /*yield*/, bcrypt.hash(password, "")];
+                    case 1:
+                        password = _a.sent();
                         request = { username: username, password: password };
                         return [4 /*yield*/, this.request("setup", request)];
-                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2: return [2 /*return*/, _a.sent()];
                 }
             });
         });
