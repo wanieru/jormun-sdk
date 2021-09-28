@@ -1,5 +1,5 @@
 import { Ajax } from "./Ajax";
-import { DataResponse, KeyResponse, StatusResponse, StatusRequest as StatusRequest } from "./ApiTypes";
+import { GetResponse, KeysResponse, StatusResponse, StatusRequest as StatusRequest } from "./ApiTypes";
 import { IRemote } from "./IRemote";
 import { Jormun, JormunOptions } from "./Jormun";
 import { Key } from "./Key";
@@ -43,14 +43,14 @@ export class JomrunSyncRemote implements IRemote
         this.statusCache = response;
         return response;
     }
-    public async keys(): Promise<KeyResponse> 
+    public async keys(): Promise<KeysResponse> 
     {
-        const response : KeyResponse = await this.request("keys", this.baseRequest());
+        const response : KeysResponse = await this.request("keys", this.baseRequest());
         if(response == null)
             return null;
         return response;
     }
-    public async get(keys: Key[]): Promise<DataResponse> 
+    public async get(keys: Key[]): Promise<GetResponse> 
     {
         const array : string[] = [];
         for(const i in keys)
@@ -60,17 +60,17 @@ export class JomrunSyncRemote implements IRemote
         const request = this.baseRequest();
         request["keys"] = array;
 
-        const response : DataResponse = await this.request("get", request);
+        const response : GetResponse = await this.request("get", request);
         if(response == null)
             return null;
         return response;
     }
-    public async set(data: DataResponse): Promise<KeyResponse> 
+    public async set(data: GetResponse): Promise<KeysResponse> 
     {
         const request = this.baseRequest();
         request["data"] = data;
 
-        const response : KeyResponse = await this.request("set", request);
+        const response : KeysResponse = await this.request("set", request);
         if(response == null)
             return null;
         return response;

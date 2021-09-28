@@ -1,0 +1,18 @@
+{
+    "ApiType":
+    {
+        "prefix" : [
+            "apitype"
+        ],
+        "body" :[
+            "import * as zod from \"zod\";",
+            "export const ${1:endpoint}Request = zod.object(",
+            "{",
+            "});",
+            "export type ${2:Endpoint}Request = zod.infer<typeof ${1:endpoint}Request>;",
+            "export interface ${2:Endpoint}Response",
+            "{",
+            "}"
+        ]
+    }
+}

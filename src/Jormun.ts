@@ -6,7 +6,7 @@ import { Key } from "./Key";
 import { LocalStorage } from "./LocalStorage";
 import { JomrunSyncRemote } from "./JormunSyncRemote";
 import { JormunEvent } from "./Event";
-import { DataResponse, KeyResponse, StatusResponse } from "./ApiTypes";
+import { DataResponse, KeysResponse, StatusResponse } from "./ApiTypes";
 
 export interface JormunOptions
 {
@@ -130,7 +130,7 @@ export class Jormun
             delete this.data[key.userId][key.fragment];
         }
     }
-    private static async processDataResponse(status : StatusResponse, keys : KeyResponse, result : DataResponse)
+    private static async processDataResponse(status : StatusResponse, keys : KeysResponse, result : DataResponse)
     {
         for(const key in result)
         {
@@ -142,7 +142,7 @@ export class Jormun
             await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false); 
         }
     }
-    private static async compareRemoteKeys(status : StatusResponse, remoteKeys : KeyResponse)
+    private static async compareRemoteKeys(status : StatusResponse, remoteKeys : KeysResponse)
     {
         let missingLocal : Key[] = []; //Keys that exist on remote but not on local
         let missingRemote : Key[] = []; //Keys that exist on local but not on remote

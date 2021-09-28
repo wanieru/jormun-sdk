@@ -1,5 +1,4 @@
 import * as zod from "zod";
-
 export const statusRequest = zod.object(
 {
     username : zod.string().min(1),
@@ -13,14 +12,4 @@ export interface StatusResponse
     isAdmin : boolean,
     storage : number,
     used : number
-}
-
-
-export interface KeyResponse
-{
-    [key : string] : number
-}
-export interface DataResponse
-{
-    [key : string] : any;
 }
