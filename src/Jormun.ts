@@ -9,6 +9,7 @@ import { JormunEvent } from "./Event";
 import { StatusResponse } from "./ApiTypes/Status";
 import { KeysResponse } from "./ApiTypes/Keys";
 import { GetResponse } from "./ApiTypes/Get";
+import { Unix } from "./Unix";
 
 export interface JormunOptions
 {
@@ -143,6 +144,15 @@ export class Jormun
                 this.data[parsed.userId][parsed.fragment] = new Data(parsed);
             await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false); 
         }
+    }
+    public static async new(fragment : string, data : any) : Promise<Data>
+    {
+        if(!this.data[-1])
+            this.data[-1] = {};
+        if(!this.data[-1][fragment])
+            this.data[-1][fragment] = new Data(new Key(this.options.app, -1, fragment));
+        await this.data[-1][fragment].preset(data, Unix(), true); 
+        return this.data[-1][fragment];
     }
     private static async compareRemoteKeys(status : StatusResponse, remoteKeys : KeysResponse)
     {
