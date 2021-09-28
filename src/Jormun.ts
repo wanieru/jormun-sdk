@@ -145,7 +145,7 @@ export class Jormun
             await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false); 
         }
     }
-    public static async new(fragment : string, data : any) : Promise<Data>
+    public static async add(fragment : string, data : any) : Promise<Data>
     {
         if(!this.data[-1])
             this.data[-1] = {};
