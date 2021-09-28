@@ -6,7 +6,7 @@ export const statusRequest = zod.object(
     password : zod.string().min(1),
     app : zod.string().min(1)
 });
-export type StatusReuqest = zod.infer<typeof statusRequest>;
+export type StatusRequest = zod.infer<typeof statusRequest>;
 export interface StatusResponse
 {
     userId : number,
