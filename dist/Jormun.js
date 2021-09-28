@@ -43,6 +43,7 @@ var Key_1 = require("./Key");
 var LocalStorage_1 = require("./LocalStorage");
 var JormunSyncRemote_1 = require("./JormunSyncRemote");
 var Event_1 = require("./Event");
+var Unix_1 = require("./Unix");
 var Jormun = /** @class */ (function () {
     function Jormun() {
     }
@@ -270,6 +271,23 @@ var Jormun = /** @class */ (function () {
                         _i++;
                         return [3 /*break*/, 1];
                     case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Jormun["new"] = function (fragment, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (!this.data[-1])
+                            this.data[-1] = {};
+                        if (!this.data[-1][fragment])
+                            this.data[-1][fragment] = new Data_1.Data(new Key_1.Key(this.options.app, -1, fragment));
+                        return [4 /*yield*/, this.data[-1][fragment].preset(data, (0, Unix_1.Unix)(), true)];
+                    case 1:
+                        _b.sent();
+                        return [2 /*return*/, this.data[-1][fragment]];
                 }
             });
         });

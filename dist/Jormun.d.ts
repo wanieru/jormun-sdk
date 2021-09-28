@@ -41,6 +41,7 @@ export declare class Jormun {
     private static getUploadData;
     private static removeLocalKeys;
     private static processDataResponse;
+    static new(fragment: string, data: any): Promise<Data>;
     private static compareRemoteKeys;
     private static setup;
     static hashedRemote: () => Promise<any>;
