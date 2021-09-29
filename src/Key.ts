@@ -17,6 +17,15 @@ export class Key
             key.userId = -1;
         return key;
     }
+    public static parseAll(jsons : string[], remoteId : number)
+    {
+        const result = [];
+        for(const json of jsons)
+        {
+            result.push(Key.parse(json, remoteId));
+        }
+        return result;
+    }
     public stringifyLocal()
     {
         return JSON.stringify(this);

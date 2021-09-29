@@ -14,6 +14,14 @@ var Key = /** @class */ (function () {
             key.userId = -1;
         return key;
     };
+    Key.parseAll = function (jsons, remoteId) {
+        var result = [];
+        for (var _i = 0, jsons_1 = jsons; _i < jsons_1.length; _i++) {
+            var json = jsons_1[_i];
+            result.push(Key.parse(json, remoteId));
+        }
+        return result;
+    };
     Key.prototype.stringifyLocal = function () {
         return JSON.stringify(this);
     };
