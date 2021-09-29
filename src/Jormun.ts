@@ -10,6 +10,7 @@ import { StatusResponse } from "./ApiTypes/Status";
 import { KeysResponse } from "./ApiTypes/Keys";
 import { GetResponse } from "./ApiTypes/Get";
 import { Unix } from "./Unix";
+import { IndexedDB } from "./IndexedDB";
 
 export interface JormunOptions
 {
@@ -46,7 +47,9 @@ export class Jormun
 
     public static async initialize(app : string, alertDelegate : AlertDelegate)
     {
-        this.local = new LocalStorage();
+
+        this.local = window.indexedDB ? new IndexedDB(app) : new LocalStorage();
+
         this.alertDelegate = alertDelegate;
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};

@@ -44,6 +44,7 @@ var LocalStorage_1 = require("./LocalStorage");
 var JormunSyncRemote_1 = require("./JormunSyncRemote");
 var Event_1 = require("./Event");
 var Unix_1 = require("./Unix");
+var IndexedDB_1 = require("./IndexedDB");
 var Jormun = /** @class */ (function () {
     function Jormun() {
     }
@@ -54,7 +55,7 @@ var Jormun = /** @class */ (function () {
             return __generator(this, function (_d) {
                 switch (_d.label) {
                     case 0:
-                        this.local = new LocalStorage_1.LocalStorage();
+                        this.local = window.indexedDB ? new IndexedDB_1.IndexedDB(app) : new LocalStorage_1.LocalStorage();
                         this.alertDelegate = alertDelegate;
                         this.REMOTE_SETTINGS_KEY = new Key_1.Key(app, -9999, "REMOTE_SETTINGS");
                         this.data = {};

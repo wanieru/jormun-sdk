@@ -77,7 +77,9 @@ export class Data
         const key = this.key.stringifyLocal();
         if(!Jormun.onDataChange[key])
             Jormun.onDataChange[key] = new JormunEvent<JormunEventPayload>();
-        return Jormun.onDataChange[key].on(handler);
+        const id = Jormun.onDataChange[key].on(handler);
+        this.getEventPayload().then(payload => handler(payload));
+        return id;
     }
     public offChange(eventId : number)
     {

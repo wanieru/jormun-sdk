@@ -174,7 +174,9 @@ var Data = /** @class */ (function () {
         var key = this.key.stringifyLocal();
         if (!Jormun_1.Jormun.onDataChange[key])
             Jormun_1.Jormun.onDataChange[key] = new Event_1.JormunEvent();
-        return Jormun_1.Jormun.onDataChange[key].on(handler);
+        var id = Jormun_1.Jormun.onDataChange[key].on(handler);
+        this.getEventPayload().then(function (payload) { return handler(payload); });
+        return id;
     };
     Data.prototype.offChange = function (eventId) {
         var key = this.key.stringifyLocal();
