@@ -19,7 +19,7 @@ export class Key
     }
     public static parseAll(jsons : string[], remoteId : number)
     {
-        const result = [];
+        const result : Key[] = [];
         for(const json of jsons)
         {
             result.push(Key.parse(json, remoteId));
