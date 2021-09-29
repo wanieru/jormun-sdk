@@ -44,10 +44,25 @@ if (typeof localStorage === "undefined" || localStorage === null) {
 }
 var LocalStorage = /** @class */ (function () {
     function LocalStorage() {
-        var _a;
+        var _a, _b;
         this.keys = {};
-        this.keys = JSON.parse((_a = localStorage.getItem(LocalStorage.KEYS_KEY)) !== null && _a !== void 0 ? _a : "{}");
+        this.version = (_a = JSON.parse(localStorage.getItem(LocalStorage.VER_KEY))) !== null && _a !== void 0 ? _a : 1;
+        this.migrate();
+        localStorage.setItem(LocalStorage.VER_KEY, JSON.stringify(this.version));
+        this.keys = JSON.parse((_b = localStorage.getItem(LocalStorage.KEYS_KEY)) !== null && _b !== void 0 ? _b : "{}");
     }
+    LocalStorage.prototype.migrate = function () {
+        if (this.version == 1) {
+            //Do upgrade from 1 to 2.
+            //dummy example. Don't delete, though!! The first live version is 3.
+            this.version++;
+        }
+        if (this.version == 2) {
+            //Do upgrade from 2 to 3.
+            //dummy example 2. Don't delete, though!! The first live version is 3.
+            this.version++;
+        }
+    };
     LocalStorage.prototype.addKey = function (key) {
         if (!this.keys[key]) {
             this.keys[key] = 1;
@@ -124,6 +139,7 @@ var LocalStorage = /** @class */ (function () {
         });
     };
     LocalStorage.KEYS_KEY = "$$KEYS$$";
+    LocalStorage.VER_KEY = "$$VERSION$$";
     return LocalStorage;
 }());
 exports.LocalStorage = LocalStorage;

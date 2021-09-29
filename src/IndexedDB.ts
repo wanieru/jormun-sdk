@@ -1,4 +1,3 @@
-import { isThisTypeNode } from "typescript";
 import { ILocal } from "./ILocal";
 import { Key } from "./Key";
 
@@ -10,15 +9,20 @@ export class IndexedDB implements ILocal
     {
         this.app = app;
     }
+    private migrate(db: IDBDatabase)
+    {
+        if(!db.objectStoreNames.contains("v1"))
+        {
+            db.createObjectStore("v1");
+            db.createObjectStore("data", {keyPath : "key"});
+        }
+        //Add more by checking and creating v2, v3 etc...
+    }
     private async db()
     {
         if(!this._db)
         {
-            this._db = await this.createDb((db) => 
-            {
-                if(!db.objectStoreNames.contains("data"))
-                    db.createObjectStore("data", {keyPath : "key"});
-            });    
+            this._db = await this.createDb(this.migrate);    
         }
         return this._db;
     }

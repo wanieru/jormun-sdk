@@ -10,12 +10,33 @@ if (typeof localStorage === "undefined" || localStorage === null)
 export class LocalStorage implements ILocal
 {
     private static KEYS_KEY = "$$KEYS$$";
+    private static VER_KEY = "$$VERSION$$";
     private keys : {[key : string] : number} = {};
+    private version : number;
     
 
     public constructor()
     {
+        this.version = JSON.parse(localStorage.getItem(LocalStorage.VER_KEY)) ?? 1;
+        this.migrate();
+        localStorage.setItem(LocalStorage.VER_KEY, JSON.stringify(this.version));
+
         this.keys = JSON.parse(localStorage.getItem(LocalStorage.KEYS_KEY) ?? "{}");
+    }
+    private migrate()
+    {
+        if(this.version == 1)
+        {
+            //Do upgrade from 1 to 2.
+            //dummy example. Don't delete, though!! The first live version is 3.
+            this.version++;
+        }
+        if(this.version == 2)
+        {
+            //Do upgrade from 2 to 3.
+            //dummy example 2. Don't delete, though!! The first live version is 3.
+            this.version++;
+        }
     }
 
     private addKey(key : string)

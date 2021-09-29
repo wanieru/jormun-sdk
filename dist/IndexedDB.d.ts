@@ -4,6 +4,7 @@ export declare class IndexedDB implements ILocal {
     private app;
     private _db;
     constructor(app: string);
+    private migrate;
     private db;
     private createDb;
     private request;

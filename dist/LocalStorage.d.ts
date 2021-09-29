@@ -2,8 +2,11 @@ import { ILocal } from "./ILocal";
 import { Key } from "./Key";
 export declare class LocalStorage implements ILocal {
     private static KEYS_KEY;
+    private static VER_KEY;
     private keys;
+    private version;
     constructor();
+    private migrate;
     private addKey;
     private removeKey;
     getKeys(): Promise<Key[]>;

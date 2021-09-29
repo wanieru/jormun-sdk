@@ -42,6 +42,13 @@ var IndexedDB = /** @class */ (function () {
     function IndexedDB(app) {
         this.app = app;
     }
+    IndexedDB.prototype.migrate = function (db) {
+        if (!db.objectStoreNames.contains("v1")) {
+            db.createObjectStore("v1");
+            db.createObjectStore("data", { keyPath: "key" });
+        }
+        //Add more by checking and creating v2, v3 etc...
+    };
     IndexedDB.prototype.db = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _a;
@@ -50,10 +57,7 @@ var IndexedDB = /** @class */ (function () {
                     case 0:
                         if (!!this._db) return [3 /*break*/, 2];
                         _a = this;
-                        return [4 /*yield*/, this.createDb(function (db) {
-                                if (!db.objectStoreNames.contains("data"))
-                                    db.createObjectStore("data", { keyPath: "key" });
-                            })];
+                        return [4 /*yield*/, this.createDb(this.migrate)];
                     case 1:
                         _a._db = _b.sent();
                         _b.label = 2;
