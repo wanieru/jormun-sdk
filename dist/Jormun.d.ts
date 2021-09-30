@@ -49,4 +49,7 @@ export declare class Jormun {
     static ask(message: string, options: string[]): Promise<number>;
     static me(): JormunDataSet;
     static user(userId: number): JormunDataSet;
+    static friends(): {
+        [id: number]: string;
+    };
 }

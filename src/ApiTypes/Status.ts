@@ -11,5 +11,6 @@ export interface StatusResponse
     userId : number,
     isAdmin : boolean,
     storage : number,
-    used : number
+    used : number,
+    friends : {[id : number] : string }
 }

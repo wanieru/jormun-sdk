@@ -270,4 +270,8 @@ export class Jormun
             return null;
         return this.data[userId];
     } 
+    public static friends() : {[id : number] : string}
+    {
+        return this.remote?.cachedStatus()?.friends;
+    }
 }

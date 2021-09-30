@@ -425,6 +425,10 @@ var Jormun = /** @class */ (function () {
             return null;
         return this.data[userId];
     };
+    Jormun.friends = function () {
+        var _b, _c;
+        return (_c = (_b = this.remote) === null || _b === void 0 ? void 0 : _b.cachedStatus()) === null || _c === void 0 ? void 0 : _c.friends;
+    };
     var _a;
     _a = Jormun;
     Jormun.onDataChange = {};

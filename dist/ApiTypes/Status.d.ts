@@ -18,4 +18,7 @@ export interface StatusResponse {
     isAdmin: boolean;
     storage: number;
     used: number;
+    friends: {
+        [id: number]: string;
+    };
 }
