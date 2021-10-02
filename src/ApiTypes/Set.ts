@@ -4,7 +4,7 @@ export const setRequest = zod.object(
     username : zod.string().min(1),
     password : zod.string().min(1),
     app : zod.string().min(1),
-    data : zod.object({})
+    data : zod.map(zod.string(), zod.string())
 });
 export type SetRequest = zod.infer<typeof setRequest>;
 export interface SetResponse

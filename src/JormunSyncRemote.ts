@@ -57,7 +57,7 @@ export class JomrunSyncRemote implements IRemote
     }
     public async status(): Promise<StatusResponse> 
     {
-        this.statusCache = await this.request<StatusRequest, StatusResponse>("status", this.baseRequest());
+        this.statusCache = await this.request<StatusRequest, StatusResponse>("status", this.adminRequest());
         return this.statusCache;
     }
     public async keys(): Promise<KeysResponse> 

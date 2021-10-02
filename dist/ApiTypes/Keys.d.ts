@@ -4,12 +4,12 @@ export declare const keysRequest: zod.ZodObject<{
     password: zod.ZodString;
     app: zod.ZodString;
 }, "strip", zod.ZodTypeAny, {
-    password?: string;
     username?: string;
+    password?: string;
     app?: string;
 }, {
-    password?: string;
     username?: string;
+    password?: string;
     app?: string;
 }>;
 export declare type KeysRequest = zod.infer<typeof keysRequest>;

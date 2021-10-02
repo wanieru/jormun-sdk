@@ -6,13 +6,13 @@ export declare const deleteRequest: zod.ZodObject<{
     keys: zod.ZodArray<zod.ZodString, "many">;
 }, "strip", zod.ZodTypeAny, {
     keys?: string[];
-    password?: string;
     username?: string;
+    password?: string;
     app?: string;
 }, {
     keys?: string[];
-    password?: string;
     username?: string;
+    password?: string;
     app?: string;
 }>;
 export declare type DeleteRequest = zod.infer<typeof deleteRequest>;

@@ -2,9 +2,10 @@
     "compilerOptions": {
         "esModuleInterop": true,
         "outDir": "dist",
-        "declaration": true
+        "declaration": true,
+        "inlineSourceMap": true
       },
-    "files": [
-        "src/index.ts"
+    "include": [
+        "src/**/*.ts"
     ]
 }

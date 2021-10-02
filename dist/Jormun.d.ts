@@ -43,6 +43,7 @@ export declare class Jormun {
     private static processDataResponse;
     static add(fragment: string, data: any): Promise<Data>;
     private static compareRemoteKeys;
+    static different(): Promise<boolean>;
     private static setup;
     static hashedRemote: () => Promise<any>;
     static alert(message: string): Promise<void>;
