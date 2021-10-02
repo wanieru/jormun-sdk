@@ -50,7 +50,6 @@ export class Jormun
         this.local = window.indexedDB ? new IndexedDB(app) : new LocalStorage();
 
         this.alertDelegate = alertDelegate;
-        this.alert("Hey!");
 
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};
@@ -149,13 +148,15 @@ export class Jormun
             await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false); 
         }
     }
-    public static async add(fragment : string, data : any) : Promise<Data>
+    public static async add(fragment : string, defaultValue : any) : Promise<Data>
     {
         if(!this.data[-1])
             this.data[-1] = {};
         if(!this.data[-1][fragment])
+        {
             this.data[-1][fragment] = new Data(new Key(this.options.app, -1, fragment));
-        await this.data[-1][fragment].preset(data, Unix(), true); 
+            await this.data[-1][fragment].preset(defaultValue, Unix(), true); 
+        }
         return this.data[-1][fragment];
     }
     private static async compareRemoteKeys(status : StatusResponse, remoteKeys : KeysResponse)
