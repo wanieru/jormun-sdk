@@ -62,7 +62,8 @@ export class IndexedDB implements ILocal
         const db = await this.db();
         const tx = db.transaction("data", "readwrite");
         const store = tx.objectStore("data");
-        await this.request(store.put({"key" : key, "value" : JSON.stringify(value)}));
+        console.log(`Adding data ${key.stringifyLocal()} : ${JSON.stringify(value)}`);
+        await this.request(store.put({"key" : key.stringifyLocal(), "value" : JSON.stringify(value)}));
     }
     public async setValues(data: { [key: string]: any; }): Promise<void> 
     {

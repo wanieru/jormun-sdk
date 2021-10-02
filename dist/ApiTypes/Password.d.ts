@@ -4,12 +4,12 @@ export declare const passwordRequest: zod.ZodObject<{
     password: zod.ZodString;
     newPassword: zod.ZodString;
 }, "strip", zod.ZodTypeAny, {
-    password?: string;
     username?: string;
+    password?: string;
     newPassword?: string;
 }, {
-    password?: string;
     username?: string;
+    password?: string;
     newPassword?: string;
 }>;
 export declare type PasswordRequest = zod.infer<typeof passwordRequest>;

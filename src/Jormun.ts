@@ -47,10 +47,11 @@ export class Jormun
 
     public static async initialize(app : string, alertDelegate : AlertDelegate)
     {
-
         this.local = window.indexedDB ? new IndexedDB(app) : new LocalStorage();
 
         this.alertDelegate = alertDelegate;
+        this.alert("Hey!");
+
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};
         if(this.local.getValue(this.REMOTE_SETTINGS_KEY) != null)
