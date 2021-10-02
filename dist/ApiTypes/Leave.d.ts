@@ -6,13 +6,13 @@ export declare const leaveRequest: zod.ZodObject<{
     keys: zod.ZodArray<zod.ZodString, "many">;
 }, "strip", zod.ZodTypeAny, {
     keys?: string[];
-    username?: string;
     password?: string;
+    username?: string;
     app?: string;
 }, {
     keys?: string[];
-    username?: string;
     password?: string;
+    username?: string;
     app?: string;
 }>;
 export declare type LeaveRequest = zod.infer<typeof leaveRequest>;

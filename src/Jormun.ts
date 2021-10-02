@@ -1,5 +1,5 @@
 import { ILocal } from "./ILocal";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { IRemote} from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";

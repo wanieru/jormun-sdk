@@ -4,12 +4,12 @@ export declare const banRequest: zod.ZodObject<{
     password: zod.ZodString;
     bannedUsername: zod.ZodString;
 }, "strip", zod.ZodTypeAny, {
-    username?: string;
     password?: string;
+    username?: string;
     bannedUsername?: string;
 }, {
-    username?: string;
     password?: string;
+    username?: string;
     bannedUsername?: string;
 }>;
 export declare type BanRequest = zod.infer<typeof banRequest>;

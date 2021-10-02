@@ -1,4 +1,4 @@
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { Ajax } from "./Ajax";
 import { BanRequest, BanResponse } from "./ApiTypes/Ban";
 import { DeleteRequest, DeleteResponse } from "./ApiTypes/Delete";

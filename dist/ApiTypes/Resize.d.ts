@@ -5,13 +5,13 @@ export declare const resizeRequest: zod.ZodObject<{
     targetUsername: zod.ZodString;
     newSize: zod.ZodNumber;
 }, "strip", zod.ZodTypeAny, {
-    username?: string;
     password?: string;
+    username?: string;
     targetUsername?: string;
     newSize?: number;
 }, {
-    username?: string;
     password?: string;
+    username?: string;
     targetUsername?: string;
     newSize?: number;
 }>;

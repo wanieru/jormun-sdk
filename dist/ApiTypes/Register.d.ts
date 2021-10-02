@@ -7,18 +7,18 @@ export declare const registerRequest: zod.ZodObject<{
     size: zod.ZodNumber;
     isAdmin: zod.ZodBoolean;
 }, "strip", zod.ZodTypeAny, {
-    username?: string;
     password?: string;
+    size?: number;
+    username?: string;
     newPassword?: string;
     newUsername?: string;
-    size?: number;
     isAdmin?: boolean;
 }, {
-    username?: string;
     password?: string;
+    size?: number;
+    username?: string;
     newPassword?: string;
     newUsername?: string;
-    size?: number;
     isAdmin?: boolean;
 }>;
 export declare type RegisterRequest = zod.infer<typeof registerRequest>;
