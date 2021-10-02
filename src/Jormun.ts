@@ -251,7 +251,7 @@ export class Jormun
         this.data = newData;
         if(this.remote)
         {
-            await this.sync();
+            await this.sync().catch(e => this.alert(e));
         }
     }
     public static hashedRemote = () => this.local.getValue(this.REMOTE_SETTINGS_KEY);

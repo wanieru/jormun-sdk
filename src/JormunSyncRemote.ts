@@ -36,7 +36,7 @@ export class JomrunSyncRemote implements IRemote
         const response = await Ajax(uri, data);
         if(response.status != 200)
         {
-            await Jormun.alert(`${uri} returned ${response.status}: ${response.body.message}`);
+            await Jormun.alert(`${uri} returned ${response.status}: ${response.body.message ?? ""}`);
             return null;
         }
         return response.body;
