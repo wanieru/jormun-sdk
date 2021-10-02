@@ -16,5 +16,6 @@ export interface UsersResponse {
         isAdmin: boolean;
         size: number;
         used: number;
+        id: number;
     };
 }
