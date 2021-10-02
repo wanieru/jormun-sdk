@@ -1,5 +1,5 @@
 import { ILocal } from "./ILocal";
-import * as bcrypt from "bcryptjs";
+import {sha512} from "js-sha512";
 import { IRemote} from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
@@ -64,7 +64,7 @@ export class Jormun
     }
     public static async login(remote : JormunRemote)
     {
-        remote.password = await bcrypt.hash(remote.password, "jormun");
+        remote.password = sha512(remote.password);
         await this.local.setValue(this.REMOTE_SETTINGS_KEY, remote);
         await this.setup({app:this.options.app, type : "LocalAndRemote", remote : remote});
     }
