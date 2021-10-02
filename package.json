@@ -6,8 +6,8 @@
     "types": "dist",
     "scripts": {
         "start": "node dist/index.js",
-        "build": "tsc src/index.ts --outDir dist -d",
-        "watch": "tsc src/index.ts --outDir dist -d --watch"
+        "build": "tsc",
+        "watch": "tsc --watch"
     },
     "dependencies": {
         "@types/bcrypt": "^5.0.0",

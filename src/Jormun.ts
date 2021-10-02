@@ -217,6 +217,13 @@ export class Jormun
         }
         return {download: download, upload: upload, missingLocal : missingLocal, missingRemote : missingRemote, newerLocal : newerLocal, newerRemote : newerRemote, newShared : newShared, deleteShared : deleteShared};
     }
+    public static async different() : Promise<boolean>
+    {
+        const status = await this.remote.status();
+        const keys = await this.remote.keys();
+        const comparison = await this.compareRemoteKeys(status, keys);
+        return comparison.download || comparison.upload;
+    }
     
 
     private static async setup(options : JormunOptions)
