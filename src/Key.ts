@@ -12,7 +12,7 @@ export class Key
     public static parse(json : string, remoteId : number)
     {
         const parsed = <Key>JSON.parse(json); //Not actually a key instance
-        const key = new Key(parsed.app, parsed.userId, parsed.app);
+        const key = new Key(parsed.app, parsed.userId, parsed.fragment);
         if(key.userId == remoteId)
             key.userId = -1;
         return key;
