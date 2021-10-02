@@ -136,7 +136,7 @@ export class JomrunSyncRemote implements IRemote
     }
     public async password(newPassword: string): Promise<PasswordResponse> 
     {
-        newPassword = await bcrypt.hash(newPassword, "");
+        newPassword = await bcrypt.hash(newPassword, "jormun");
         const request = this.adminRequest();
         request["newPassword"] = newPassword;
 
@@ -144,7 +144,7 @@ export class JomrunSyncRemote implements IRemote
     }
     public async register(newUsername: string, newPassword: string, size : number, isAdmin : boolean): Promise<RegisterResponse> 
     {
-        newPassword = await bcrypt.hash(newPassword, "");
+        newPassword = await bcrypt.hash(newPassword, "jormun");
         const request = this.adminRequest();
         request["newUsername"] = newUsername;
         request["newPassword"] = newPassword;
@@ -159,7 +159,7 @@ export class JomrunSyncRemote implements IRemote
     }
     public async setup(username: string, password: string): Promise<SetupResponse> 
     {
-        password = await bcrypt.hash(password, "");
+        password = await bcrypt.hash(password, "jormun");
         const request = {username : username, password : password};
         return await this.request<SetupRequest, SetupResponse>("setup", request);
     }

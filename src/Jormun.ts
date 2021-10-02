@@ -64,7 +64,7 @@ export class Jormun
     }
     public static async login(remote : JormunRemote)
     {
-        remote.password = await bcrypt.hash(remote.password, "");
+        remote.password = await bcrypt.hash(remote.password, "jormun");
         await this.local.setValue(this.REMOTE_SETTINGS_KEY, remote);
         await this.setup({app:this.options.app, type : "LocalAndRemote", remote : remote});
     }
