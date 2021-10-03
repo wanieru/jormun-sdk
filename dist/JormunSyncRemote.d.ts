@@ -20,11 +20,16 @@ import { Key } from "./Key";
 export declare class JomrunSyncRemote implements IRemote {
     private jormunOptions;
     private statusCache;
+    private isLoggedIn;
+    private isConnected;
     constructor(jormunOptions: JormunOptions);
+    private checkConnection;
     private request;
     private baseRequest;
     private adminRequest;
     cachedStatus(): StatusResponse;
+    loggedIn(): Promise<boolean>;
+    connected(): Promise<boolean>;
     status(): Promise<StatusResponse>;
     keys(): Promise<KeysResponse>;
     get(keys: Key[]): Promise<GetResponse>;

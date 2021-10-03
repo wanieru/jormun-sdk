@@ -25,15 +25,31 @@ export class JomrunSyncRemote implements IRemote
     private jormunOptions : JormunOptions;
     private statusCache : StatusResponse;
 
+    private isLoggedIn : boolean;
+    private isConnected : boolean;
+
     public constructor(jormunOptions : JormunOptions)
     {
         this.jormunOptions = jormunOptions;
+        this.checkConnection();
+    }
+    private async checkConnection()
+    {
+        if(!this.statusCache)
+        {
+            this.isConnected = (await this.empty()) != null;
+            this.isLoggedIn = (await this.status()) != null;
+        }
     }
 
     private async request<TRequest, TResponse>(endpoint : string, data : TRequest) : Promise<TResponse>
     {
         const uri = this.jormunOptions.remote.host + "/" + endpoint;
         const response = await Ajax(uri, data);
+        if(response == null)
+        {
+            return null;
+        }
         if(response.status != 200)
         {
             await Jormun.alert(`${uri} returned ${response.status}: ${response.body.message ?? ""}`);
@@ -55,6 +71,17 @@ export class JomrunSyncRemote implements IRemote
     {
         return this.statusCache;
     }
+    public async loggedIn() : Promise<boolean>
+    {
+        await this.checkConnection();
+        return this.isLoggedIn;
+    }
+    public async connected() : Promise<boolean>
+    {
+        await this.checkConnection();
+        return this.isConnected;
+    }
+
     public async status(): Promise<StatusResponse> 
     {
         this.statusCache = await this.request<StatusRequest, StatusResponse>("status", this.adminRequest());

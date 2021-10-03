@@ -35,6 +35,7 @@ export declare class Jormun {
         [key: string]: JormunEvent<JormunEventPayload>;
     };
     static onSync: JormunEvent<boolean>;
+    static onSetup: JormunEvent<void>;
     static initialize(app: string, alertDelegate: AlertDelegate): Promise<void>;
     static login(remote: JormunRemote): Promise<void>;
     static sync(): Promise<void>;

@@ -37,12 +37,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.Ajax = void 0;
+var Jormun_1 = require("./Jormun");
 function Ajax(endpoint, body) {
     return __awaiter(this, void 0, void 0, function () {
-        var options, response, responseBody;
+        var options, response, responseBody, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    _a.trys.push([0, 3, , 4]);
                     options = {
                         method: 'POST',
                         headers: {
@@ -57,9 +59,14 @@ function Ajax(endpoint, body) {
                 case 2:
                     responseBody = _a.sent();
                     return [2 /*return*/, { status: response.status, body: responseBody }];
+                case 3:
+                    e_1 = _a.sent();
+                    Jormun_1.Jormun.alert(e_1.message);
+                    return [2 /*return*/, null];
+                case 4: return [2 /*return*/];
             }
         });
     });
 }
 exports.Ajax = Ajax;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWpheC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy9BamF4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQXNCLElBQUksQ0FBQyxRQUFpQixFQUFFLElBQVU7Ozs7OztvQkFFOUMsT0FBTyxHQUNiO3dCQUNJLE1BQU0sRUFBRSxNQUFNO3dCQUNkLE9BQU8sRUFDUDs0QkFDSSxjQUFjLEVBQUUsZ0NBQWdDO3lCQUNuRDt3QkFDRCxJQUFJLEVBQUUsSUFBSSxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUM7cUJBQzdCLENBQUM7b0JBQ2UscUJBQU0sS0FBSyxDQUFDLFFBQVEsRUFBRSxPQUFPLENBQUMsRUFBQTs7b0JBQXpDLFFBQVEsR0FBRyxTQUE4QjtvQkFDMUIscUJBQU0sUUFBUSxDQUFDLElBQUksRUFBRSxFQUFBOztvQkFBcEMsWUFBWSxHQUFHLFNBQXFCO29CQUMxQyxzQkFBTyxFQUFDLE1BQU0sRUFBRyxRQUFRLENBQUMsTUFBTSxFQUFFLElBQUksRUFBRyxZQUFZLEVBQUMsRUFBQzs7OztDQUMxRDtBQWRELG9CQWNDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWpheC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy9BamF4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLG1DQUFrQztBQUVsQyxTQUFzQixJQUFJLENBQUMsUUFBaUIsRUFBRSxJQUFVOzs7Ozs7O29CQUkxQyxPQUFPLEdBQ2I7d0JBQ0ksTUFBTSxFQUFFLE1BQU07d0JBQ2QsT0FBTyxFQUNQOzRCQUNJLGNBQWMsRUFBRSxnQ0FBZ0M7eUJBQ25EO3dCQUNELElBQUksRUFBRSxJQUFJLENBQUMsU0FBUyxDQUFDLElBQUksQ0FBQztxQkFDN0IsQ0FBQztvQkFDZSxxQkFBTSxLQUFLLENBQUMsUUFBUSxFQUFFLE9BQU8sQ0FBQyxFQUFBOztvQkFBekMsUUFBUSxHQUFHLFNBQThCO29CQUMxQixxQkFBTSxRQUFRLENBQUMsSUFBSSxFQUFFLEVBQUE7O29CQUFwQyxZQUFZLEdBQUcsU0FBcUI7b0JBQzFDLHNCQUFPLEVBQUMsTUFBTSxFQUFHLFFBQVEsQ0FBQyxNQUFNLEVBQUUsSUFBSSxFQUFHLFlBQVksRUFBQyxFQUFDOzs7b0JBSXZELGVBQU0sQ0FBQyxLQUFLLENBQUMsR0FBQyxDQUFDLE9BQU8sQ0FBQyxDQUFDO29CQUN4QixzQkFBTyxJQUFJLEVBQUM7Ozs7O0NBRW5CO0FBdEJELG9CQXNCQyJ9

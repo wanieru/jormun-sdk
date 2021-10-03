@@ -44,6 +44,7 @@ export class Jormun
 
     public static onDataChange : {[key : string] : JormunEvent<JormunEventPayload>} = {};
     public static onSync = new JormunEvent<boolean>();
+    public static onSetup = new JormunEvent<void>();
 
     public static async initialize(app : string, alertDelegate : AlertDelegate)
     {
@@ -70,7 +71,7 @@ export class Jormun
     }
     public static async sync()
     {
-        if(!this.remote)
+        if(!this.remote || !(await this.remote.loggedIn()))
             return;
 
         this.onSync.trigger(true);
@@ -249,9 +250,12 @@ export class Jormun
                 newData[key.userId][key.fragment] = new Data(key);
         }
         this.data = newData;
+
+        this.onSetup.trigger();
+
         if(this.remote)
         {
-            await this.sync().catch(e => this.alert(e));
+            await this.sync();
         }
     }
     public static hashedRemote = () => this.local.getValue(this.REMOTE_SETTINGS_KEY);

@@ -17,6 +17,8 @@ import { UsersResponse } from "./ApiTypes/Users";
 import { Key } from "./Key";
 export interface IRemote {
     cachedStatus(): StatusResponse;
+    connected(): Promise<boolean>;
+    loggedIn(): Promise<boolean>;
     status(): Promise<StatusResponse>;
     keys(): Promise<KeysResponse>;
     get(keys: Key[]): Promise<GetResponse>;
