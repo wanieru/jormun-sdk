@@ -36,7 +36,7 @@ export declare class Jormun {
     };
     static onSync: JormunEvent<boolean>;
     static onSetup: JormunEvent<void>;
-    static initialize(app: string, alertDelegate: AlertDelegate): Promise<void>;
+    static initialize(app: string, alertDelegate: AlertDelegate | null): Promise<void>;
     static login(remote: JormunRemote): Promise<void>;
     static sync(): Promise<void>;
     private static getUploadData;
@@ -49,6 +49,7 @@ export declare class Jormun {
     static hashedRemote: () => Promise<any>;
     static alert(message: string): Promise<void>;
     static ask(message: string, options: string[]): Promise<number>;
+    private static defaultAlertDelegate;
     static me(): JormunDataSet;
     static user(userId: number): JormunDataSet;
     static friends(): {

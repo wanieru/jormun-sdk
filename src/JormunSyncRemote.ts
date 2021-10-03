@@ -44,7 +44,7 @@ export class JomrunSyncRemote implements IRemote
 
     private async request<TRequest, TResponse>(endpoint : string, data : TRequest) : Promise<TResponse>
     {
-        const uri = this.jormunOptions.remote.host + "/" + endpoint;
+        const uri = this.jormunOptions.remote.host + "/api/" + endpoint;
         const response = await Ajax(uri, data);
         if(response == null)
         {

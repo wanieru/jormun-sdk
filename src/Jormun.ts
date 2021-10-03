@@ -46,11 +46,11 @@ export class Jormun
     public static onSync = new JormunEvent<boolean>();
     public static onSetup = new JormunEvent<void>();
 
-    public static async initialize(app : string, alertDelegate : AlertDelegate)
+    public static async initialize(app : string, alertDelegate : AlertDelegate | null)
     {
         this.local = window.indexedDB ? new IndexedDB(app) : new LocalStorage();
 
-        this.alertDelegate = alertDelegate;
+        this.alertDelegate = alertDelegate ?? this.defaultAlertDelegate;
 
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};
@@ -267,6 +267,19 @@ export class Jormun
     public static async ask(message : string, options : string[])
     {
         return this.alertDelegate(message, options);
+    }
+    private static async defaultAlertDelegate(message: string, options: string[]) : Promise<number>
+    {
+        if(options.length < 1)
+        {
+          alert(message);
+          return -1;
+        }
+        for(let i =0;true; i = (i + 1) % options.length)
+        {
+          if(window.confirm(`${message}\n\n${options.join(" | ")}\n\n${options[i]}?`))
+            return i;
+        }
     }
     
     public static me() : JormunDataSet
