@@ -8,4 +8,5 @@ export declare const peekRequest: zod.ZodObject<{
 }>;
 export declare type PeekRequest = zod.infer<typeof peekRequest>;
 export interface PeekResponse {
+    [key: string]: any;
 }
