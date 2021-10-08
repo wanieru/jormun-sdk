@@ -4,7 +4,7 @@ import { IRemote} from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
 import { LocalStorage } from "./LocalStorage";
-import { JomrunSyncRemote } from "./JormunSyncRemote";
+import { JormunSyncRemote } from "./JormunSyncRemote";
 import { JormunEvent } from "./Event";
 import { StatusResponse } from "./ApiTypes/Status";
 import { KeysResponse } from "./ApiTypes/Keys";
@@ -14,8 +14,7 @@ import { IndexedDB } from "./IndexedDB";
 
 export interface JormunOptions
 {
-    app : string,
-    type : "LocalOnly" | "LocalAndRemote",
+    app : string
     remote? : JormunRemote
 }
 export interface JormunRemote
@@ -33,43 +32,82 @@ export type AlertDelegate = (message : string, options : string[]) => Promise<nu
 export type JormunEventPayload = {key : Key, data : Data, value : any, raw : LocalData};
 export class Jormun
 {
-    private static REMOTE_SETTINGS_KEY : Key;
+    private REMOTE_SETTINGS_KEY : Key;
 
-    private static alertDelegate : AlertDelegate;
+    private alertDelegate : AlertDelegate;
 
-    private static options : JormunOptions;
-    public static local : ILocal;
-    public static remote : IRemote;
-    private static data : {[id:number] : JormunDataSet};
+    private options : JormunOptions;
+    public local : ILocal;
+    public remote : IRemote;
+    private data : {[id:number] : JormunDataSet};
 
-    public static onDataChange : {[key : string] : JormunEvent<JormunEventPayload>} = {};
-    public static onSync = new JormunEvent<boolean>();
-    public static onSetup = new JormunEvent<void>();
+    public onDataChange : {[key : string] : JormunEvent<JormunEventPayload>} = {};
+    public onSync = new JormunEvent<boolean>();
+    public onSetup = new JormunEvent<void>();
 
-    public static async initialize(app : string, alertDelegate : AlertDelegate | null)
+    public async initialize(app : string, alertDelegate : AlertDelegate | null)
     {
         this.local = window.indexedDB ? new IndexedDB(app) : new LocalStorage();
 
-        this.alertDelegate = alertDelegate ?? this.defaultAlertDelegate;
+        this.alertDelegate = alertDelegate ?? Jormun.defaultAlertDelegate;
 
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};
         if(await this.local.getValue(this.REMOTE_SETTINGS_KEY) != null)
         {
-            await this.setup({app:app, type : "LocalAndRemote", remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
+            await this.setup({app:app, remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
         }
         else
         {
-            await this.setup({app: app, type : "LocalOnly", remote: null});
+            await this.setup({app: app, remote: null});
         }
     }
-    public static async login(remote : JormunRemote)
+    public async alert(message : string)
+    {
+        await this.alertDelegate(message, []);
+    }
+    public async ask(message : string, options : string[])
+    {
+        return this.alertDelegate(message, options);
+    }
+    private async setup(options : JormunOptions)
+    {
+        this.options = options;
+        if(options.remote)
+        {
+            this.remote = new JormunSyncRemote(this, options);
+        }
+        const keys = await this.local.getKeys();
+        const newData = {};
+        
+        for(const i in keys)
+        {
+            const key = keys[i];
+            if(!newData[key.userId])
+                newData[key.userId] = {};
+            if(this.data[key.userId] && this.data[key.userId][key.fragment])
+                newData[key.userId][key.fragment] = this.data[key.userId][key.fragment];
+            else
+                newData[key.userId][key.fragment] = new Data(this, key);
+        }
+        this.data = newData;
+
+        this.onSetup.trigger();
+
+        if(this.remote)
+        {
+            await this.sync();
+        }
+    }
+    public async login(remote : JormunRemote)
     {
         remote.password = sha512(remote.password);
         await this.local.setValue(this.REMOTE_SETTINGS_KEY, remote);
-        await this.setup({app:this.options.app, type : "LocalAndRemote", remote : remote});
+        await this.setup({app:this.options.app, remote : remote});
     }
-    public static async sync()
+    public hashedRemote = () => this.local.getValue(this.REMOTE_SETTINGS_KEY);
+
+    public async sync()
     {
         if(!this.remote || !(await this.remote.loggedIn()))
             return;
@@ -117,50 +155,7 @@ export class Jormun
 
         this.onSync.trigger(false);
     }
-    private static async getUploadData(status : StatusResponse, keys : Key[])
-    {
-        const uploadData = {};
-        for(const i in keys)
-        {
-            const key = keys[i];
-            const keyString = key.stringifyRemote(status.userId);
-            uploadData[keyString] = await this.data[key.userId][key.fragment].get();
-        }
-        return uploadData;
-    }
-    private static async removeLocalKeys(keys : Key[])
-    {
-        for(const i in keys)
-        {
-            const key = keys[i];
-            await this.data[key.userId][key.fragment].remove();
-            delete this.data[key.userId][key.fragment];
-        }
-    }
-    private static async processDataResponse(status : StatusResponse, keys : KeysResponse, result : GetResponse)
-    {
-        for(const key in result)
-        {
-            const parsed = Key.parse(key, status.userId);
-            if(!this.data[parsed.userId])
-                this.data[parsed.userId] = {};
-            if(!this.data[parsed.userId][parsed.fragment])
-                this.data[parsed.userId][parsed.fragment] = new Data(parsed);
-            await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false); 
-        }
-    }
-    public static async add(fragment : string, defaultValue : any) : Promise<Data>
-    {
-        if(!this.data[-1])
-            this.data[-1] = {};
-        if(!this.data[-1][fragment])
-        {
-            this.data[-1][fragment] = new Data(new Key(this.options.app, -1, fragment));
-            await this.data[-1][fragment].preset(defaultValue, Unix(), true); 
-        }
-        return this.data[-1][fragment];
-    }
-    private static async compareRemoteKeys(status : StatusResponse, remoteKeys : KeysResponse)
+    private async compareRemoteKeys(status : StatusResponse, remoteKeys : KeysResponse)
     {
         let missingLocal : Key[] = []; //Keys that exist on remote but not on local
         let missingRemote : Key[] = []; //Keys that exist on local but not on remote
@@ -220,54 +215,69 @@ export class Jormun
         }
         return {download: download, upload: upload, missingLocal : missingLocal, missingRemote : missingRemote, newerLocal : newerLocal, newerRemote : newerRemote, newShared : newShared, deleteShared : deleteShared};
     }
-    public static async different() : Promise<boolean>
+    public async different() : Promise<boolean>
     {
         const status = await this.remote.status();
         const keys = await this.remote.keys();
         const comparison = await this.compareRemoteKeys(status, keys);
         return comparison.download || comparison.upload;
     }
-    
-
-    private static async setup(options : JormunOptions)
+    private async getUploadData(status : StatusResponse, keys : Key[])
     {
-        this.options = options;
-        if(options.type == "LocalAndRemote" && options.remote)
-        {
-            this.remote = new JomrunSyncRemote(options);
-        }
-        const keys = await this.local.getKeys();
-        const newData = {};
-        
+        const uploadData = {};
         for(const i in keys)
         {
             const key = keys[i];
-            if(!newData[key.userId])
-                newData[key.userId] = {};
-            if(this.data[key.userId] && this.data[key.userId][key.fragment])
-                newData[key.userId][key.fragment] = this.data[key.userId][key.fragment];
-            else
-                newData[key.userId][key.fragment] = new Data(key);
+            const keyString = key.stringifyRemote(status.userId);
+            uploadData[keyString] = await this.data[key.userId][key.fragment].get();
         }
-        this.data = newData;
-
-        this.onSetup.trigger();
-
-        if(this.remote)
+        return uploadData;
+    }
+    private async removeLocalKeys(keys : Key[])
+    {
+        for(const i in keys)
         {
-            await this.sync();
+            const key = keys[i];
+            await this.data[key.userId][key.fragment].remove();
+            delete this.data[key.userId][key.fragment];
         }
     }
-    public static hashedRemote = () => this.local.getValue(this.REMOTE_SETTINGS_KEY);
+    private async processDataResponse(status : StatusResponse, keys : KeysResponse, result : GetResponse)
+    {
+        for(const key in result)
+        {
+            const parsed = Key.parse(key, status.userId);
+            if(!this.data[parsed.userId])
+                this.data[parsed.userId] = {};
+            if(!this.data[parsed.userId][parsed.fragment])
+                this.data[parsed.userId][parsed.fragment] = new Data(this, parsed);
+            await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false); 
+        }
+    }
+    public async add(fragment : string, defaultValue : any) : Promise<Data>
+    {
+        if(!this.data[0])
+            this.data[0] = {};
+        if(!this.data[0][fragment])
+        {
+            this.data[0][fragment] = new Data(this, new Key(this.options.app, 0, fragment));
+            await this.data[0][fragment].preset(defaultValue, Unix(), true); 
+        }
+        return this.data[0][fragment];
+    }
+    public me(fragment : string) : Data
+    {
+        if(!this.data[0])
+            return null;
+        return this.data[0][fragment] ?? null;
+    }
+    public user(userId : number, fragment : string) : Data
+    {
+        if(!this.data[userId])
+            return null;
+        return this.data[userId][fragment] ?? null;
+    } 
 
-    public static async alert(message : string)
-    {
-        await this.alertDelegate(message, []);
-    }
-    public static async ask(message : string, options : string[])
-    {
-        return this.alertDelegate(message, options);
-    }
     private static async defaultAlertDelegate(message: string, options: string[]) : Promise<number>
     {
         if(options.length < 1)
@@ -281,22 +291,7 @@ export class Jormun
             return i;
         }
     }
-    
-    public static me() : JormunDataSet
-    {
-        if(!this.data[-1])
-            this.data[-1] = {};
-        return this.data[-1];
-    }
-    public static user(userId : number) : JormunDataSet
-    {
-        if(userId == this.remote?.cachedStatus()?.userId)
-            return this.me();
-        if(!this.data[userId])
-            return null;
-        return this.data[userId];
-    } 
-    public static friends() : {[id : number] : string}
+    public friends() : {[id : number] : string}
     {
         return this.remote?.cachedStatus()?.friends;
     }

@@ -10,18 +10,20 @@ export interface LocalData
 }
 export class Data
 {
+    private jormun : Jormun;
     private key : Key;
-    public constructor(key : Key)
+    public constructor(jormun : Jormun, key : Key)
     {
+        this.jormun = jormun;
         this.key = key;
     }
     public async sync()
     {
-        await Jormun.sync();
+        await this.jormun.sync();
     }
     public async getRaw()
     {
-        return <LocalData>await Jormun.local.getValue(this.key);
+        return <LocalData>await this.jormun.local.getValue(this.key);
     }
     public async get()
     {
@@ -47,13 +49,13 @@ export class Data
             isDirty : isDirty, 
             json : JSON.stringify(value)
         };
-        await Jormun.local.setValue(this.key, localData);
+        await this.jormun.local.setValue(this.key, localData);
 
         const keyString = this.key.stringifyLocal();
-        if(Jormun.onDataChange[keyString])
+        if(this.jormun.onDataChange[keyString])
         {
             const payload = await this.getEventPayload();
-            Jormun.onDataChange[keyString].trigger(payload);
+            this.jormun.onDataChange[keyString].trigger(payload);
         }
     }
     public async set(value : any)
@@ -67,7 +69,7 @@ export class Data
     }
     public async remove()
     {
-        await Jormun.local.removeValue(this.key);
+        await this.jormun.local.removeValue(this.key);
     }
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;
@@ -75,18 +77,18 @@ export class Data
     public onChange(handler : (payload : JormunEventPayload) => void) : number
     {
         const key = this.key.stringifyLocal();
-        if(!Jormun.onDataChange[key])
-            Jormun.onDataChange[key] = new JormunEvent<JormunEventPayload>();
-        const id = Jormun.onDataChange[key].on(handler);
+        if(!this.jormun.onDataChange[key])
+            this.jormun.onDataChange[key] = new JormunEvent<JormunEventPayload>();
+        const id = this.jormun.onDataChange[key].on(handler);
         this.getEventPayload().then(payload => handler(payload));
         return id;
     }
     public offChange(eventId : number)
     {
         const key = this.key.stringifyLocal();
-        if(Jormun.onDataChange[key])
+        if(this.jormun.onDataChange[key])
         {
-            Jormun.onDataChange[key].off(eventId);
+            this.jormun.onDataChange[key].off(eventId);
         }
     }
 }

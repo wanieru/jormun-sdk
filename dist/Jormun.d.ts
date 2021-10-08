@@ -5,7 +5,6 @@ import { Key } from "./Key";
 import { JormunEvent } from "./Event";
 export interface JormunOptions {
     app: string;
-    type: "LocalOnly" | "LocalAndRemote";
     remote?: JormunRemote;
 }
 export interface JormunRemote {
@@ -25,34 +24,34 @@ export declare type JormunEventPayload = {
     raw: LocalData;
 };
 export declare class Jormun {
-    private static REMOTE_SETTINGS_KEY;
-    private static alertDelegate;
-    private static options;
-    static local: ILocal;
-    static remote: IRemote;
-    private static data;
-    static onDataChange: {
+    private REMOTE_SETTINGS_KEY;
+    private alertDelegate;
+    private options;
+    local: ILocal;
+    remote: IRemote;
+    private data;
+    onDataChange: {
         [key: string]: JormunEvent<JormunEventPayload>;
     };
-    static onSync: JormunEvent<boolean>;
-    static onSetup: JormunEvent<void>;
-    static initialize(app: string, alertDelegate: AlertDelegate | null): Promise<void>;
-    static login(remote: JormunRemote): Promise<void>;
-    static sync(): Promise<void>;
-    private static getUploadData;
-    private static removeLocalKeys;
-    private static processDataResponse;
-    static add(fragment: string, defaultValue: any): Promise<Data>;
-    private static compareRemoteKeys;
-    static different(): Promise<boolean>;
-    private static setup;
-    static hashedRemote: () => Promise<any>;
-    static alert(message: string): Promise<void>;
-    static ask(message: string, options: string[]): Promise<number>;
+    onSync: JormunEvent<boolean>;
+    onSetup: JormunEvent<void>;
+    initialize(app: string, alertDelegate: AlertDelegate | null): Promise<void>;
+    alert(message: string): Promise<void>;
+    ask(message: string, options: string[]): Promise<number>;
+    private setup;
+    login(remote: JormunRemote): Promise<void>;
+    hashedRemote: () => Promise<any>;
+    sync(): Promise<void>;
+    private compareRemoteKeys;
+    different(): Promise<boolean>;
+    private getUploadData;
+    private removeLocalKeys;
+    private processDataResponse;
+    add(fragment: string, defaultValue: any): Promise<Data>;
+    me(fragment: string): Data;
+    user(userId: number, fragment: string): Data;
     private static defaultAlertDelegate;
-    static me(): JormunDataSet;
-    static user(userId: number): JormunDataSet;
-    static friends(): {
+    friends(): {
         [id: number]: string;
     };
 }

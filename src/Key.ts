@@ -11,10 +11,10 @@ export class Key
     }
     public static parse(json : string, remoteId : number)
     {
-        const parsed = <Key>JSON.parse(json); //Not actually a key instance
-        const key = new Key(parsed.app, parsed.userId, parsed.fragment);
+        const parsed = <any[]>JSON.parse(json);
+        const key = new Key(parsed[0], parsed[1], parsed[2]);
         if(key.userId == remoteId)
-            key.userId = -1;
+            key.userId = 0;
         return key;
     }
     public static parseAll(jsons : string[], remoteId : number)
@@ -28,14 +28,14 @@ export class Key
     }
     public stringifyLocal()
     {
-        return JSON.stringify(this);
+        return JSON.stringify([this.app, this.userId, this.fragment]);
     }
     public stringifyRemote(remoteId : number)
     {
         const originalId = this.userId;
-        if(this.userId == -1)
+        if(this.userId == 0)
             this.userId = remoteId;
-        const json = JSON.stringify(this);
+        const json = this.stringifyLocal();
         this.userId = originalId;
         return json;
     }

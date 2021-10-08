@@ -1,4 +1,4 @@
-import { JormunEventPayload } from "./Jormun";
+import { Jormun, JormunEventPayload } from "./Jormun";
 import { Key } from "./Key";
 export interface LocalData {
     timestamp: number;
@@ -6,8 +6,9 @@ export interface LocalData {
     json: string;
 }
 export declare class Data {
+    private jormun;
     private key;
-    constructor(key: Key);
+    constructor(jormun: Jormun, key: Key);
     sync(): Promise<void>;
     getRaw(): Promise<LocalData>;
     get(): Promise<any>;

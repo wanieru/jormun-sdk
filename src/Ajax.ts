@@ -19,7 +19,6 @@ export async function Ajax(endpoint : string, body : any)
     }
     catch(e)
     {
-        Jormun.alert(e.message);
-        return null;
+        Promise.reject(e.message);
     }
 }

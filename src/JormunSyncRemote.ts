@@ -24,16 +24,18 @@ import { IRemote } from "./IRemote";
 import { Jormun, JormunOptions } from "./Jormun";
 import { Key } from "./Key";
 
-export class JomrunSyncRemote implements IRemote
+export class JormunSyncRemote implements IRemote
 {
+    private jormun : Jormun;
     private jormunOptions : JormunOptions;
     private statusCache : StatusResponse;
 
     private isLoggedIn : boolean;
     private isConnected : boolean;
 
-    public constructor(jormunOptions : JormunOptions)
+    public constructor(jormun : Jormun, jormunOptions : JormunOptions)
     {
+        this.jormun = jormun;
         this.jormunOptions = jormunOptions;
         this.checkConnection();
     }
@@ -49,17 +51,20 @@ export class JomrunSyncRemote implements IRemote
     private async request<TRequest, TResponse>(endpoint : string, data : TRequest) : Promise<TResponse>
     {
         const uri = this.jormunOptions.remote.host + "/api/" + endpoint;
-        const response = await Ajax(uri, data);
-        if(response == null)
+        const response = await Ajax(uri, data).catch(e => this.jormun.alert(e));
+        if(response)
         {
-            return null;
+            if(response == null)
+            {
+                return null;
+            }
+            if(response.status != 200)
+            {
+                await this.jormun.alert(`${uri} returned ${response.status}: ${response.body.message ?? ""}`);
+                return null;
+            }
+            return response.body;
         }
-        if(response.status != 200)
-        {
-            await Jormun.alert(`${uri} returned ${response.status}: ${response.body.message ?? ""}`);
-            return null;
-        }
-        return response.body;
     }
     private baseRequest()
     {

@@ -14,7 +14,6 @@ export class LocalStorage implements ILocal
     private keys : {[key : string] : number} = {};
     private version : number;
     
-
     public constructor()
     {
         this.version = JSON.parse(localStorage.getItem(LocalStorage.VER_KEY)) ?? 1;

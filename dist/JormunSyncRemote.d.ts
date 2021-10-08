@@ -19,14 +19,15 @@ import { UnpublishResponse } from "./ApiTypes/Unpublish";
 import { UnshareResponse } from "./ApiTypes/Unshare";
 import { UsersResponse } from "./ApiTypes/Users";
 import { IRemote } from "./IRemote";
-import { JormunOptions } from "./Jormun";
+import { Jormun, JormunOptions } from "./Jormun";
 import { Key } from "./Key";
-export declare class JomrunSyncRemote implements IRemote {
+export declare class JormunSyncRemote implements IRemote {
+    private jormun;
     private jormunOptions;
     private statusCache;
     private isLoggedIn;
     private isConnected;
-    constructor(jormunOptions: JormunOptions);
+    constructor(jormun: Jormun, jormunOptions: JormunOptions);
     private checkConnection;
     private request;
     private baseRequest;
