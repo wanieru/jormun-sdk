@@ -1,12 +1,15 @@
 import {sha512} from "js-sha512";
 import { Ajax } from "./Ajax";
 import { BanRequest, BanResponse } from "./ApiTypes/Ban";
+import { BrowseRequest, BrowseResponse } from "./ApiTypes/Browse";
 import { DeleteRequest, DeleteResponse } from "./ApiTypes/Delete";
 import { EmptyRequest, EmptyResponse } from "./ApiTypes/Empty";
 import { GetRequest, GetResponse } from "./ApiTypes/Get";
 import { KeysRequest, KeysResponse } from "./ApiTypes/Keys";
 import { LeaveRequest, LeaveResponse } from "./ApiTypes/Leave";
 import { PasswordRequest, PasswordResponse } from "./ApiTypes/Password";
+import { PeekResponse } from "./ApiTypes/Peek";
+import { PublishRequest, PublishResponse } from "./ApiTypes/Publish";
 import { RegisterRequest, RegisterResponse } from "./ApiTypes/Register";
 import { RenameRequest, RenameResponse } from "./ApiTypes/Rename";
 import { ResizeRequest, ResizeResponse } from "./ApiTypes/Resize";
@@ -14,6 +17,7 @@ import { SetRequest, SetResponse } from "./ApiTypes/Set";
 import { SetupRequest, SetupResponse } from "./ApiTypes/Setup";
 import { ShareRequest, ShareResponse } from "./ApiTypes/Share";
 import { StatusRequest, StatusResponse } from "./ApiTypes/Status";
+import { UnpublishRequest, UnpublishResponse } from "./ApiTypes/Unpublish";
 import { UnshareRequest, UnshareResponse } from "./ApiTypes/Unshare";
 import { UsersRequest, UsersResponse } from "./ApiTypes/Users";
 import { IRemote } from "./IRemote";
@@ -219,4 +223,41 @@ export class JomrunSyncRemote implements IRemote
         return await this.request<UsersRequest, UsersResponse>("users", request);
     }
     
+    public async browse(limit: number, offset: number): Promise<BrowseResponse> 
+    {
+        return await this.request<BrowseRequest, BrowseResponse>("browse", {limit: limit, offset: offset});
+    }
+    public async publish(keys: Key[]): Promise<PublishResponse> 
+    {
+        const array : string[] = [];
+        for(const i in keys)
+        {
+            array.push(keys[i].stringifyRemote(this.statusCache.userId));
+        }
+        const request = this.baseRequest();
+        request["keys"] = array;
+
+        return await this.request<PublishRequest, PublishResponse>("publish", request);
+    }
+    public async unpublish(keys: Key[]): Promise<UnpublishResponse> 
+    {
+        const array : string[] = [];
+        for(const i in keys)
+        {
+            array.push(keys[i].stringifyRemote(this.statusCache.userId));
+        }
+        const request = this.baseRequest();
+        request["keys"] = array;
+
+        return await this.request<UnpublishRequest, UnpublishResponse>("unpublish", request);
+    }
+    public async peek(keys: Key[]): Promise<PeekResponse> 
+    {
+        const array : string[] = [];
+        for(const i in keys)
+        {
+            array.push(keys[i].stringifyRemote(-1));
+        }
+        return await this.request<GetRequest, GetResponse>("peek", {keys : array});
+    }
 }
