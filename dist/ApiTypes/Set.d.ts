@@ -6,13 +6,13 @@ export declare const setRequest: zod.ZodObject<{
     data: zod.ZodRecord<zod.ZodString, zod.ZodString>;
 }, "strip", zod.ZodTypeAny, {
     data?: Record<string, string>;
-    username?: string;
     password?: string;
+    username?: string;
     app?: string;
 }, {
     data?: Record<string, string>;
-    username?: string;
     password?: string;
+    username?: string;
     app?: string;
 }>;
 export declare type SetRequest = zod.infer<typeof setRequest>;

@@ -5,13 +5,13 @@ export declare const renameRequest: zod.ZodObject<{
     oldUsername: zod.ZodString;
     newUsername: zod.ZodString;
 }, "strip", zod.ZodTypeAny, {
-    username?: string;
     password?: string;
+    username?: string;
     newUsername?: string;
     oldUsername?: string;
 }, {
-    username?: string;
     password?: string;
+    username?: string;
     newUsername?: string;
     oldUsername?: string;
 }>;
