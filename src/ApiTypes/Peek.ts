@@ -6,4 +6,5 @@ export const peekRequest = zod.object(
 export type PeekRequest = zod.infer<typeof peekRequest>;
 export interface PeekResponse
 {
+    [key : string] : any;
 }
