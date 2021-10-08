@@ -35,7 +35,7 @@ export declare class Jormun {
     };
     onSync: JormunEvent<boolean>;
     onSetup: JormunEvent<void>;
-    initialize(app: string, alertDelegate: AlertDelegate | null): Promise<void>;
+    initialize(app: string, alertDelegate: AlertDelegate | null, memoryOnly?: boolean): Promise<void>;
     alert(message: string): Promise<void>;
     ask(message: string, options: string[]): Promise<number>;
     private setup;

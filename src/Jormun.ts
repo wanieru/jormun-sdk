@@ -11,6 +11,8 @@ import { KeysResponse } from "./ApiTypes/Keys";
 import { GetResponse } from "./ApiTypes/Get";
 import { Unix } from "./Unix";
 import { IndexedDB } from "./IndexedDB";
+import { BrowseResponse } from "./ApiTypes/Browse";
+import { MemoryStorage } from "./MemoryStorage";
 
 export interface JormunOptions
 {
@@ -45,9 +47,12 @@ export class Jormun
     public onSync = new JormunEvent<boolean>();
     public onSetup = new JormunEvent<void>();
 
-    public async initialize(app : string, alertDelegate : AlertDelegate | null)
+    public async initialize(app : string, alertDelegate : AlertDelegate | null, memoryOnly : boolean = false)
     {
-        this.local = window.indexedDB ? new IndexedDB(app) : new LocalStorage();
+        if(!memoryOnly)
+            this.local = window.indexedDB ? new IndexedDB(app) : new LocalStorage();
+        else
+            this.local = new MemoryStorage();
 
         this.alertDelegate = alertDelegate ?? Jormun.defaultAlertDelegate;
 
