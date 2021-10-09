@@ -230,7 +230,7 @@ export class JormunSyncRemote implements IRemote
     
     public async browse(limit: number, offset: number): Promise<BrowseResponse> 
     {
-        return await this.request<BrowseRequest, BrowseResponse>("browse", {limit: limit, offset: offset});
+        return await this.request<BrowseRequest, BrowseResponse>("browse", {app: this.jormunOptions.app, limit: limit, offset: offset});
     }
     public async publish(keys: Key[]): Promise<PublishResponse> 
     {
@@ -263,6 +263,6 @@ export class JormunSyncRemote implements IRemote
         {
             array.push(keys[i].stringifyRemote(-1));
         }
-        return await this.request<GetRequest, GetResponse>("peek", {keys : array});
+        return await this.request<GetRequest, GetResponse>("peek", {app: this.jormunOptions.app, keys : array});
     }
 }
