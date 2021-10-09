@@ -7,6 +7,8 @@ import { EmptyRequest, EmptyResponse } from "./ApiTypes/Empty";
 import { GetRequest, GetResponse } from "./ApiTypes/Get";
 import { KeysRequest, KeysResponse } from "./ApiTypes/Keys";
 import { LeaveRequest, LeaveResponse } from "./ApiTypes/Leave";
+import { LoginRequest, LoginResponse } from "./ApiTypes/Login";
+import { LogoutRequest, LogoutResponse } from "./ApiTypes/Logout";
 import { PasswordRequest, PasswordResponse } from "./ApiTypes/Password";
 import { PeekResponse } from "./ApiTypes/Peek";
 import { PublishRequest, PublishResponse } from "./ApiTypes/Publish";
@@ -21,13 +23,13 @@ import { UnpublishRequest, UnpublishResponse } from "./ApiTypes/Unpublish";
 import { UnshareRequest, UnshareResponse } from "./ApiTypes/Unshare";
 import { UsersRequest, UsersResponse } from "./ApiTypes/Users";
 import { IRemote } from "./IRemote";
-import { Jormun, JormunOptions } from "./Jormun";
+import { Jormun, JormunOptions, JormunRemote } from "./Jormun";
 import { Key } from "./Key";
 
 export class JormunSyncRemote implements IRemote
 {
     private jormun : Jormun;
-    private jormunOptions : JormunOptions;
+    public jormunOptions : JormunOptions;
     private statusCache : StatusResponse;
 
     private isLoggedIn : boolean;
@@ -39,12 +41,18 @@ export class JormunSyncRemote implements IRemote
         this.jormunOptions = jormunOptions;
         this.checkConnection();
     }
-    private async checkConnection()
+    public async checkConnection()
     {
         if(!this.statusCache)
         {
-            this.isConnected = (await this.empty()) != null;
-            this.isLoggedIn = (await this.status()) != null;
+            if(this.jormunOptions.remote.password)
+            {
+                const login = await this.login();
+                this.jormunOptions.remote.token = login.token;
+                this.jormunOptions.remote.password = null;
+            }
+            this.isConnected = !!(await this.empty());
+            this.isLoggedIn = !!(await this.status());
         }
     }
 
@@ -68,11 +76,15 @@ export class JormunSyncRemote implements IRemote
     }
     private baseRequest()
     {
-        return {username: this.jormunOptions.remote.username, password: this.jormunOptions.remote.password, app: this.jormunOptions.app};
+        return {username: this.jormunOptions.remote.username, token: this.jormunOptions.remote.token, app: this.jormunOptions.app};
     }
     private adminRequest()
     {
-        return {username: this.jormunOptions.remote.username, password: this.jormunOptions.remote.password};
+        return {username: this.jormunOptions.remote.username, token: this.jormunOptions.remote.token};
+    }
+    private passwordRequest()
+    {
+        return {username: this.jormunOptions.remote.username, password: this.jormunOptions.remote.password, app: this.jormunOptions.app};
     }
 
 
@@ -93,7 +105,7 @@ export class JormunSyncRemote implements IRemote
 
     public async status(): Promise<StatusResponse> 
     {
-        this.statusCache = await this.request<StatusRequest, StatusResponse>("status", this.adminRequest());
+        this.statusCache = await this.request<StatusRequest, StatusResponse>("status", this.baseRequest());
         return this.statusCache;
     }
     public async keys(): Promise<KeysResponse> 
@@ -170,10 +182,11 @@ export class JormunSyncRemote implements IRemote
 
         return await this.request<LeaveRequest, LeaveResponse>("leave", request);
     }
-    public async password(newPassword: string): Promise<PasswordResponse> 
+    public async password(password : string, newPassword: string): Promise<PasswordResponse> 
     {
         newPassword = sha512(newPassword);
         const request = this.adminRequest();
+        request["password"] = password;
         request["newPassword"] = newPassword;
 
         return await this.request<PasswordRequest, PasswordResponse>("password", request);
@@ -264,5 +277,15 @@ export class JormunSyncRemote implements IRemote
             array.push(keys[i].stringifyRemote(-1));
         }
         return await this.request<GetRequest, GetResponse>("peek", {app: this.jormunOptions.app, keys : array});
+    }
+    public async login() : Promise<LoginResponse>
+    {
+        const request = this.passwordRequest();
+        return await this.request<LoginRequest, LoginResponse>("login", request);
+    }
+    public async logout() : Promise<LogoutResponse>
+    {
+        const request = this.baseRequest();
+        return await this.request<LogoutRequest, LogoutResponse>("logout", request);
     }
 }

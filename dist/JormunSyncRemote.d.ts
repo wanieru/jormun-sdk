@@ -5,6 +5,8 @@ import { EmptyResponse } from "./ApiTypes/Empty";
 import { GetResponse } from "./ApiTypes/Get";
 import { KeysResponse } from "./ApiTypes/Keys";
 import { LeaveResponse } from "./ApiTypes/Leave";
+import { LoginResponse } from "./ApiTypes/Login";
+import { LogoutResponse } from "./ApiTypes/Logout";
 import { PasswordResponse } from "./ApiTypes/Password";
 import { PeekResponse } from "./ApiTypes/Peek";
 import { PublishResponse } from "./ApiTypes/Publish";
@@ -23,15 +25,16 @@ import { Jormun, JormunOptions } from "./Jormun";
 import { Key } from "./Key";
 export declare class JormunSyncRemote implements IRemote {
     private jormun;
-    private jormunOptions;
+    jormunOptions: JormunOptions;
     private statusCache;
     private isLoggedIn;
     private isConnected;
     constructor(jormun: Jormun, jormunOptions: JormunOptions);
-    private checkConnection;
+    checkConnection(): Promise<void>;
     private request;
     private baseRequest;
     private adminRequest;
+    private passwordRequest;
     cachedStatus(): StatusResponse;
     loggedIn(): Promise<boolean>;
     connected(): Promise<boolean>;
@@ -43,7 +46,7 @@ export declare class JormunSyncRemote implements IRemote {
     share(keys: Key[], users: string[]): Promise<ShareResponse>;
     unshare(keys: Key[], users: string[]): Promise<UnshareResponse>;
     leave(keys: Key[]): Promise<LeaveResponse>;
-    password(newPassword: string): Promise<PasswordResponse>;
+    password(password: string, newPassword: string): Promise<PasswordResponse>;
     register(newUsername: string, newPassword: string, size: number, isAdmin: boolean): Promise<RegisterResponse>;
     empty(): Promise<EmptyResponse>;
     setup(username: string, password: string): Promise<SetupResponse>;
@@ -55,4 +58,6 @@ export declare class JormunSyncRemote implements IRemote {
     publish(keys: Key[]): Promise<PublishResponse>;
     unpublish(keys: Key[]): Promise<UnpublishResponse>;
     peek(keys: Key[]): Promise<PeekResponse>;
+    login(): Promise<LoginResponse>;
+    logout(): Promise<LogoutResponse>;
 }

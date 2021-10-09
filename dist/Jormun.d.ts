@@ -11,6 +11,7 @@ export interface JormunRemote {
     host: string;
     username: string;
     password: string;
+    token: string;
     downloadSharedData: boolean;
 }
 export interface JormunDataSet {

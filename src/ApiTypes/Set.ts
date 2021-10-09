@@ -2,7 +2,7 @@ import * as zod from "zod";
 export const setRequest = zod.object(
 {
     username : zod.string().min(1),
-    password : zod.string().min(1),
+    token : zod.string().min(1),
     app : zod.string().min(1),
     data : zod.record(zod.string())
 });

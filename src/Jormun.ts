@@ -24,6 +24,7 @@ export interface JormunRemote
     host : string,
     username : string,
     password : string,
+    token : string,
     downloadSharedData : boolean
 }
 export interface JormunDataSet
@@ -80,7 +81,10 @@ export class Jormun
         this.options = options;
         if(options.remote)
         {
-            this.remote = new JormunSyncRemote(this, options);
+            const remote = new JormunSyncRemote(this, options);
+            this.remote = remote;
+            await remote.checkConnection();
+            await this.local.setValue(this.REMOTE_SETTINGS_KEY, remote.jormunOptions.remote);
         }
         const keys = await this.local.getKeys();
         const newData = {};
@@ -107,7 +111,6 @@ export class Jormun
     public async login(remote : JormunRemote)
     {
         remote.password = sha512(remote.password);
-        await this.local.setValue(this.REMOTE_SETTINGS_KEY, remote);
         await this.setup({app:this.options.app, remote : remote});
     }
     public hashedRemote = () => this.local.getValue(this.REMOTE_SETTINGS_KEY);

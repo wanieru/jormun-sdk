@@ -2,7 +2,7 @@ import * as zod from "zod";
 export const resizeRequest = zod.object(
 {
     username : zod.string().min(1),
-    password : zod.string().min(1),
+    token : zod.string().min(1),
     targetUsername : zod.string().min(1),
     newSize : zod.number(),
 });

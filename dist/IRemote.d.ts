@@ -5,6 +5,8 @@ import { EmptyResponse } from "./ApiTypes/Empty";
 import { GetResponse } from "./ApiTypes/Get";
 import { KeysResponse } from "./ApiTypes/Keys";
 import { LeaveResponse } from "./ApiTypes/Leave";
+import { LoginResponse } from "./ApiTypes/Login";
+import { LogoutResponse } from "./ApiTypes/Logout";
 import { PasswordResponse } from "./ApiTypes/Password";
 import { PeekResponse } from "./ApiTypes/Peek";
 import { PublishResponse } from "./ApiTypes/Publish";
@@ -31,7 +33,7 @@ export interface IRemote {
     unshare(keys: Key[], users: string[]): Promise<UnshareResponse>;
     leave(keys: Key[]): Promise<LeaveResponse>;
     delete(keys: Key[]): Promise<DeleteResponse>;
-    password(newPassword: string): Promise<PasswordResponse>;
+    password(password: string, newPassword: string): Promise<PasswordResponse>;
     register(newUsername: string, newPassword: string, size: number, isAdmin: boolean): Promise<RegisterResponse>;
     empty(): Promise<EmptyResponse>;
     setup(username: string, password: string): Promise<SetupResponse>;
@@ -39,6 +41,8 @@ export interface IRemote {
     rename(oldUsername: string, newUsername: string): Promise<RenameResponse>;
     resize(targetUsername: string, newSize: number): Promise<ResizeResponse>;
     users(): Promise<UsersResponse>;
+    login(): Promise<LoginResponse>;
+    logout(): Promise<LogoutResponse>;
     browse(limit: number, offset: number): Promise<BrowseResponse>;
     publish(keys: Key[]): Promise<PublishResponse>;
     unpublish(keys: Key[]): Promise<UnpublishResponse>;

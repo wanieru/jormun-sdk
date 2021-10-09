@@ -1,5 +1,5 @@
 import * as zod from "zod";
-export declare const keysRequest: zod.ZodObject<{
+export declare const logoutRequest: zod.ZodObject<{
     username: zod.ZodString;
     token: zod.ZodString;
     app: zod.ZodString;
@@ -12,10 +12,6 @@ export declare const keysRequest: zod.ZodObject<{
     token?: string;
     app?: string;
 }>;
-export declare type KeysRequest = zod.infer<typeof keysRequest>;
-export interface KeysResponse {
-    [key: string]: {
-        timestamp: number;
-        public: boolean;
-    };
+export declare type LogoutRequest = zod.infer<typeof logoutRequest>;
+export interface LogoutResponse {
 }

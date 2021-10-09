@@ -1,20 +1,20 @@
 import * as zod from "zod";
 export declare const unshareRequest: zod.ZodObject<{
     username: zod.ZodString;
-    password: zod.ZodString;
+    token: zod.ZodString;
     app: zod.ZodString;
     keys: zod.ZodArray<zod.ZodString, "many">;
     users: zod.ZodArray<zod.ZodString, "many">;
 }, "strip", zod.ZodTypeAny, {
     keys?: string[];
-    password?: string;
     username?: string;
+    token?: string;
     app?: string;
     users?: string[];
 }, {
     keys?: string[];
-    password?: string;
     username?: string;
+    token?: string;
     app?: string;
     users?: string[];
 }>;

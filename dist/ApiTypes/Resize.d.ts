@@ -1,17 +1,17 @@
 import * as zod from "zod";
 export declare const resizeRequest: zod.ZodObject<{
     username: zod.ZodString;
-    password: zod.ZodString;
+    token: zod.ZodString;
     targetUsername: zod.ZodString;
     newSize: zod.ZodNumber;
 }, "strip", zod.ZodTypeAny, {
-    password?: string;
     username?: string;
+    token?: string;
     targetUsername?: string;
     newSize?: number;
 }, {
-    password?: string;
     username?: string;
+    token?: string;
     targetUsername?: string;
     newSize?: number;
 }>;
