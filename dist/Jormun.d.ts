@@ -41,7 +41,7 @@ export declare class Jormun {
     ask(message: string, options: string[]): Promise<number>;
     private setup;
     login(remote: JormunRemote): Promise<void>;
-    hashedRemote: () => Promise<any>;
+    hashedRemote: () => Promise<JormunRemote>;
     sync(): Promise<void>;
     private compareRemoteKeys;
     different(): Promise<boolean>;

@@ -113,7 +113,7 @@ export class Jormun
         remote.password = sha512(remote.password);
         await this.setup({app:this.options.app, remote : remote});
     }
-    public hashedRemote = () => this.local.getValue(this.REMOTE_SETTINGS_KEY);
+    public hashedRemote = async () : Promise<JormunRemote> => await this.local.getValue(this.REMOTE_SETTINGS_KEY);
 
     public async sync()
     {
