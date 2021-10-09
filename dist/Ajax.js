@@ -39,11 +39,11 @@ exports.__esModule = true;
 exports.Ajax = void 0;
 function Ajax(endpoint, body) {
     return __awaiter(this, void 0, void 0, function () {
-        var options, response, responseBody, e_1;
+        var options, response, responseBody;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    console.log("Request to " + endpoint);
                     options = {
                         method: 'POST',
                         headers: {
@@ -58,14 +58,9 @@ function Ajax(endpoint, body) {
                 case 2:
                     responseBody = _a.sent();
                     return [2 /*return*/, { status: response.status, body: responseBody }];
-                case 3:
-                    e_1 = _a.sent();
-                    Promise.reject(e_1.message);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
             }
         });
     });
 }
 exports.Ajax = Ajax;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWpheC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy9BamF4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUVBLFNBQXNCLElBQUksQ0FBQyxRQUFpQixFQUFFLElBQVU7Ozs7Ozs7b0JBSTFDLE9BQU8sR0FDYjt3QkFDSSxNQUFNLEVBQUUsTUFBTTt3QkFDZCxPQUFPLEVBQ1A7NEJBQ0ksY0FBYyxFQUFFLGdDQUFnQzt5QkFDbkQ7d0JBQ0QsSUFBSSxFQUFFLElBQUksQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDO3FCQUM3QixDQUFDO29CQUNlLHFCQUFNLEtBQUssQ0FBQyxRQUFRLEVBQUUsT0FBTyxDQUFDLEVBQUE7O29CQUF6QyxRQUFRLEdBQUcsU0FBOEI7b0JBQzFCLHFCQUFNLFFBQVEsQ0FBQyxJQUFJLEVBQUUsRUFBQTs7b0JBQXBDLFlBQVksR0FBRyxTQUFxQjtvQkFDMUMsc0JBQU8sRUFBQyxNQUFNLEVBQUcsUUFBUSxDQUFDLE1BQU0sRUFBRSxJQUFJLEVBQUcsWUFBWSxFQUFDLEVBQUM7OztvQkFJdkQsT0FBTyxDQUFDLE1BQU0sQ0FBQyxHQUFDLENBQUMsT0FBTyxDQUFDLENBQUM7Ozs7OztDQUVqQztBQXJCRCxvQkFxQkMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWpheC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy9BamF4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUVBLFNBQXNCLElBQUksQ0FBQyxRQUFpQixFQUFFLElBQVU7Ozs7OztvQkFFcEQsT0FBTyxDQUFDLEdBQUcsQ0FBQyxnQkFBYyxRQUFVLENBQUMsQ0FBQztvQkFDaEMsT0FBTyxHQUNiO3dCQUNJLE1BQU0sRUFBRSxNQUFNO3dCQUNkLE9BQU8sRUFDUDs0QkFDSSxjQUFjLEVBQUUsZ0NBQWdDO3lCQUNuRDt3QkFDRCxJQUFJLEVBQUUsSUFBSSxDQUFDLFNBQVMsQ0FBQyxJQUFJLENBQUM7cUJBQzdCLENBQUM7b0JBQ2UscUJBQU0sS0FBSyxDQUFDLFFBQVEsRUFBRSxPQUFPLENBQUMsRUFBQTs7b0JBQXpDLFFBQVEsR0FBRyxTQUE4QjtvQkFDMUIscUJBQU0sUUFBUSxDQUFDLElBQUksRUFBRSxFQUFBOztvQkFBcEMsWUFBWSxHQUFHLFNBQXFCO29CQUMxQyxzQkFBTyxFQUFDLE1BQU0sRUFBRyxRQUFRLENBQUMsTUFBTSxFQUFFLElBQUksRUFBRyxZQUFZLEVBQUMsRUFBQzs7OztDQUMxRDtBQWZELG9CQWVDIn0=

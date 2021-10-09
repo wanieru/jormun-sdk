@@ -3,11 +3,11 @@ export declare const setupRequest: zod.ZodObject<{
     username: zod.ZodString;
     password: zod.ZodString;
 }, "strip", zod.ZodTypeAny, {
-    password?: string;
     username?: string;
+    password?: string;
 }, {
-    password?: string;
     username?: string;
+    password?: string;
 }>;
 export declare type SetupRequest = zod.infer<typeof setupRequest>;
 export interface SetupResponse {

@@ -59,14 +59,7 @@ export class Jormun
 
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};
-        if(await this.local.getValue(this.REMOTE_SETTINGS_KEY) != null)
-        {
-            await this.setup({app:app, remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
-        }
-        else
-        {
-            await this.setup({app: app, remote: null});
-        }
+        await this.setup({app:app, remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
     }
     public async alert(message : string)
     {

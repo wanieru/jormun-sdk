@@ -34,34 +34,37 @@ export class JormunSyncRemote implements IRemote
 
     private isLoggedIn : boolean;
     private isConnected : boolean;
+    private checkedConnection : boolean;
 
     public constructor(jormun : Jormun, jormunOptions : JormunOptions)
     {
+        this.checkedConnection = false;
         this.jormun = jormun;
         this.jormunOptions = jormunOptions;
         this.checkConnection();
     }
     public async checkConnection()
     {
-        if(!this.statusCache)
+        if(!this.checkedConnection)
         {
             if(this.jormunOptions.remote.password)
             {
                 const login = await this.login();
-                this.jormunOptions.remote.token = login.token;
-                this.jormunOptions.remote.password = null;
+                this.jormunOptions.remote.token = login?.token ?? "";
+                this.jormunOptions.remote.password = "";
             }
             this.isConnected = !!(await this.empty());
             this.isLoggedIn = !!(await this.status());
+            this.checkedConnection = true;
         }
     }
 
     private async request<TRequest, TResponse>(endpoint : string, data : TRequest) : Promise<TResponse>
     {
         const uri = this.jormunOptions.remote.host + "/api/" + endpoint;
-        const response = await Ajax(uri, data).catch(e => this.jormun.alert(e));
-        if(response)
+        try
         {
+            const response = await Ajax(uri, data);
             if(response == null)
             {
                 return null;
@@ -72,6 +75,10 @@ export class JormunSyncRemote implements IRemote
                 return null;
             }
             return response.body;
+        }
+        catch(e)
+        {
+            this.jormun.alert(e);
         }
     }
     private baseRequest()
