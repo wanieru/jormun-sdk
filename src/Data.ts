@@ -12,6 +12,7 @@ export class Data
 {
     private jormun : Jormun;
     private key : Key;
+    private published : boolean = false;
     public constructor(jormun : Jormun, key : Key)
     {
         this.jormun = jormun;
@@ -41,8 +42,9 @@ export class Data
         };
         return payload;
     }
-    public async preset(value : any, timestamp : number, isDirty : boolean)
+    public async preset(value : any, timestamp : number, published : boolean, isDirty : boolean)
     {
+        this.published = published;
         const localData : LocalData = 
         {
             timestamp : timestamp, 
@@ -60,7 +62,7 @@ export class Data
     }
     public async set(value : any)
     {
-        await this.preset(value, Unix(), true);
+        await this.preset(value, Unix(), this.published, true);
     }
     public async setAndSync(value : any)
     {
@@ -91,4 +93,5 @@ export class Data
             this.jormun.onDataChange[key].off(eventId);
         }
     }
+    public isPublished(){return this.published;}
 }

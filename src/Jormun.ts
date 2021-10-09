@@ -141,7 +141,8 @@ export class Jormun
             {
                 const parsed = Key.parse(key, status.userId);
                 const remoteString = parsed.stringifyRemote(status.userId);
-                await this.data[parsed.userId][parsed.fragment].preset(uploadData[remoteString], newTimestamps[key], false);
+                const data = this.data[parsed.userId][parsed.fragment];
+                await data.preset(uploadData[remoteString], newTimestamps[key], data.isPublished(), false);
             }
         }
         else if(comparison.download)
@@ -186,7 +187,7 @@ export class Jormun
             {
                 const raw = await this.data[parsed.userId][parsed.fragment].getRaw();
                 const localTime = raw.timestamp;
-                const remoteTime = remoteKeys[key];
+                const remoteTime = remoteKeys[key].timestamp;
                 if(localTime > remoteTime || raw.isDirty)
                     (local ? newerLocal : newShared).push(parsed);
                 if(remoteTime > localTime)
@@ -256,7 +257,7 @@ export class Jormun
                 this.data[parsed.userId] = {};
             if(!this.data[parsed.userId][parsed.fragment])
                 this.data[parsed.userId][parsed.fragment] = new Data(this, parsed);
-            await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key], false); 
+            await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key].timestamp, keys[key].public, false); 
         }
     }
     public async add(fragment : string, defaultValue : any) : Promise<Data>
@@ -266,7 +267,7 @@ export class Jormun
         if(!this.data[0][fragment])
         {
             this.data[0][fragment] = new Data(this, new Key(this.options.app, 0, fragment));
-            await this.data[0][fragment].preset(defaultValue, Unix(), true); 
+            await this.data[0][fragment].preset(defaultValue, Unix(), false, true); 
         }
         return this.data[0][fragment];
     }

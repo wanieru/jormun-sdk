@@ -14,5 +14,8 @@ export declare const keysRequest: zod.ZodObject<{
 }>;
 export declare type KeysRequest = zod.infer<typeof keysRequest>;
 export interface KeysResponse {
-    [key: string]: number;
+    [key: string]: {
+        timestamp: number;
+        public: boolean;
+    };
 }

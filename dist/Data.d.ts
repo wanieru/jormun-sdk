@@ -8,12 +8,13 @@ export interface LocalData {
 export declare class Data {
     private jormun;
     private key;
+    private published;
     constructor(jormun: Jormun, key: Key);
     sync(): Promise<void>;
     getRaw(): Promise<LocalData>;
     get(): Promise<any>;
     private getEventPayload;
-    preset(value: any, timestamp: number, isDirty: boolean): Promise<void>;
+    preset(value: any, timestamp: number, published: boolean, isDirty: boolean): Promise<void>;
     set(value: any): Promise<void>;
     setAndSync(value: any): Promise<void>;
     remove(): Promise<void>;
@@ -21,4 +22,5 @@ export declare class Data {
     getFragment: () => string;
     onChange(handler: (payload: JormunEventPayload) => void): number;
     offChange(eventId: number): void;
+    isPublished(): boolean;
 }
