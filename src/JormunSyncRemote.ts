@@ -184,6 +184,7 @@ export class JormunSyncRemote implements IRemote
     }
     public async password(password : string, newPassword: string): Promise<PasswordResponse> 
     {
+        password = sha512(password);
         newPassword = sha512(newPassword);
         const request = this.adminRequest();
         request["password"] = password;
