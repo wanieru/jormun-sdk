@@ -104,6 +104,8 @@ export class Jormun
     public async login(remote : JormunRemote)
     {
         remote.password = sha512(remote.password);
+        if(!remote.host.startsWith("http"))
+            remote.host = `http://${remote.host}`;
         await this.setup({app:this.options.app, remote : remote});
     }
     public hashedRemote = async () : Promise<JormunRemote> => await this.local.getValue(this.REMOTE_SETTINGS_KEY);
