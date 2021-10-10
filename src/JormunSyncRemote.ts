@@ -48,14 +48,15 @@ export class JormunSyncRemote implements IRemote
         if(!this.checkedConnection)
         {
             this.checkedConnection = true;
-            if(this.jormunOptions.remote.password)
+            const empty = await this.empty();
+            this.isConnected = !!(empty);
+            if(this.isConnected && !empty.empty && this.jormunOptions.remote.password)
             {
                 const login = await this.login();
                 this.jormunOptions.remote.token = login?.token ?? "";
                 this.jormunOptions.remote.password = "";
             }
-            this.isConnected = !!(await this.empty());
-            this.isLoggedIn = this.isConnected && !!(await this.status());
+            this.isLoggedIn = this.isConnected && this.jormunOptions.remote.token && !!(await this.status());
         }
     }
 
