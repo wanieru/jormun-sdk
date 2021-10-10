@@ -2,7 +2,6 @@ import { Jormun } from "./Jormun";
 
 export async function Ajax(endpoint : string, body : any)
 {
-    console.log(`Request to ${endpoint}`);
     const options = 
     {
         method: 'POST', 

@@ -85,6 +85,8 @@ export class Jormun
         for(const i in keys)
         {
             const key = keys[i];
+            if(key.stringifyLocal() == this.REMOTE_SETTINGS_KEY.stringifyLocal())
+                continue;
             if(!newData[key.userId])
                 newData[key.userId] = {};
             if(this.data[key.userId] && this.data[key.userId][key.fragment])
@@ -153,8 +155,11 @@ export class Jormun
         if(this.options.remote?.downloadSharedData)
         {
             await this.removeLocalKeys(comparison.deleteShared);
-            const result = await this.remote.get(comparison.newShared);
-            await this.processDataResponse(status, keys, result);
+            if(comparison.newShared.length > 0)
+            {
+                const result = await this.remote.get(comparison.newShared);
+                await this.processDataResponse(status, keys, result);
+            }
         }
 
         this.onSync.trigger(false);
@@ -242,6 +247,8 @@ export class Jormun
         for(const i in keys)
         {
             const key = keys[i];
+            if(key.stringifyLocal() == this.REMOTE_SETTINGS_KEY.stringifyLocal())
+                continue;
             await this.data[key.userId][key.fragment].remove();
             delete this.data[key.userId][key.fragment];
         }
