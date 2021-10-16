@@ -149,8 +149,11 @@ export class Jormun
         {
             await this.removeLocalKeys(comparison.missingRemote);
             const getKeys = comparison.missingLocal.concat(comparison.newerRemote);
-            const result = await this.remote.get(getKeys);
-            await this.processDataResponse(status, keys, result);
+            if(getKeys.length > 0)
+            {
+                const result = await this.remote.get(getKeys);
+                await this.processDataResponse(status, keys, result);
+            }
         }
         if(this.options.remote?.downloadSharedData)
         {
