@@ -21,4 +21,5 @@ export interface StatusResponse {
     friends: {
         [id: number]: string;
     };
+    apps: string[];
 }
