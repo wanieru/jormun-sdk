@@ -31,7 +31,8 @@ export interface JormunDataSet
 {
     [fragment:string] : Data
 }
-export type AlertDelegate = (obj : {message : string, options : string[]}) => Promise<number>;
+export type AlertContent = {message : string, options : string[]};
+export type AlertDelegate = (obj : AlertContent) => Promise<number>;
 export type JormunEventPayload = {key : Key, data : Data, value : any, raw : LocalData};
 export class Jormun
 {
@@ -292,7 +293,7 @@ export class Jormun
         return this.data[userId][fragment] ?? null;
     } 
 
-    private static async defaultAlertDelegate(obj : {message: string, options: string[]}) : Promise<number>
+    private static async defaultAlertDelegate(obj : AlertContent) : Promise<number>
     {
         if(obj.options.length < 1)
         {
