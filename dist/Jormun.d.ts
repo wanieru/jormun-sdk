@@ -17,7 +17,10 @@ export interface JormunRemote {
 export interface JormunDataSet {
     [fragment: string]: Data;
 }
-export declare type AlertDelegate = (message: string, options: string[]) => Promise<number>;
+export declare type AlertDelegate = (obj: {
+    message: string;
+    options: string[];
+}) => Promise<number>;
 export declare type JormunEventPayload = {
     key: Key;
     data: Data;

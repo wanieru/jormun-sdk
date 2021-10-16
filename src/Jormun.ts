@@ -31,7 +31,7 @@ export interface JormunDataSet
 {
     [fragment:string] : Data
 }
-export type AlertDelegate = (message : string, options : string[]) => Promise<number>;
+export type AlertDelegate = (obj : {message : string, options : string[]}) => Promise<number>;
 export type JormunEventPayload = {key : Key, data : Data, value : any, raw : LocalData};
 export class Jormun
 {
@@ -63,11 +63,11 @@ export class Jormun
     }
     public async alert(message : string)
     {
-        await this.alertDelegate(message, []);
+        await this.alertDelegate({message: message, options : []});
     }
     public async ask(message : string, options : string[])
     {
-        return this.alertDelegate(message, options);
+        return this.alertDelegate({message: message, options: options});
     }
     private async setup(options : JormunOptions)
     {
@@ -292,16 +292,16 @@ export class Jormun
         return this.data[userId][fragment] ?? null;
     } 
 
-    private static async defaultAlertDelegate(message: string, options: string[]) : Promise<number>
+    private static async defaultAlertDelegate(obj : {message: string, options: string[]}) : Promise<number>
     {
-        if(options.length < 1)
+        if(obj.options.length < 1)
         {
-          alert(message);
+          alert(obj.message);
           return -1;
         }
-        for(let i =0;true; i = (i + 1) % options.length)
+        for(let i =0;true; i = (i + 1) % obj.options.length)
         {
-          if(window.confirm(`${message}\n\n${options.join(" | ")}\n\n${options[i]}?`))
+          if(window.confirm(`${obj.message}\n\n${obj.options.join(" | ")}\n\n${obj.options[i]}?`))
             return i;
         }
     }
