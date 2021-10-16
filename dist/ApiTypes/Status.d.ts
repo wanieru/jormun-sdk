@@ -14,6 +14,7 @@ export declare const statusRequest: zod.ZodObject<{
 }>;
 export declare type StatusRequest = zod.infer<typeof statusRequest>;
 export interface StatusResponse {
+    username: string;
     userId: number;
     isAdmin: boolean;
     storage: number;

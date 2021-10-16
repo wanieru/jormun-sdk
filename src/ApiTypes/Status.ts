@@ -8,6 +8,7 @@ export const statusRequest = zod.object(
 export type StatusRequest = zod.infer<typeof statusRequest>;
 export interface StatusResponse
 {
+    username : string,
     userId : number,
     isAdmin : boolean,
     storage : number,
