@@ -17,5 +17,6 @@ export interface KeysResponse {
     [key: string]: {
         timestamp: number;
         public: boolean;
+        sharedWith: number[];
     };
 }
