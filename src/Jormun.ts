@@ -140,7 +140,10 @@ export class Jormun
         }
         if(comparison.upload)
         {
-            await this.remote.delete(comparison.missingLocal);
+            if(comparison.missingLocal.length > 0)
+            {
+                await this.remote.delete(comparison.missingLocal);
+            }
             const uploadData = await this.getUploadData(status, comparison.newerLocal.concat(comparison.missingRemote));
             const newTimestamps = await this.remote.set(uploadData);
             for(const key in newTimestamps)
