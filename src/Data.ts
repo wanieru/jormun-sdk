@@ -96,5 +96,13 @@ export class Data
     }
     public isPublished(){return this.published;}
     public getSharedWith(){return this.sharedWith;}
-    public setSharedWith(sharedWith : number[]){this.sharedWith = sharedWith;}
+    public setSharedWith(sharedWith : number[], localUserId : number)
+    {
+        this.sharedWith = sharedWith;
+        for(const i in this.sharedWith)
+        {
+            if(this.sharedWith[i] == localUserId)
+                this.sharedWith[i] = 0;
+        }
+    }
 }

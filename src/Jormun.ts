@@ -272,7 +272,7 @@ export class Jormun
             if(!this.data[parsed.userId][parsed.fragment])
                 this.data[parsed.userId][parsed.fragment] = new Data(this, parsed);
             await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key].timestamp, keys[key].public, false);
-            this.data[parsed.userId][parsed.fragment].setSharedWith(keys[key].sharedWith); 
+            this.data[parsed.userId][parsed.fragment].setSharedWith(keys[key].sharedWith, status.userId); 
         }
     }
     public async add(fragment : string, defaultValue : any) : Promise<Data>

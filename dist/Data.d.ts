@@ -25,5 +25,5 @@ export declare class Data {
     offChange(eventId: number): void;
     isPublished(): boolean;
     getSharedWith(): number[];
-    setSharedWith(sharedWith: number[]): void;
+    setSharedWith(sharedWith: number[], localUserId: number): void;
 }
