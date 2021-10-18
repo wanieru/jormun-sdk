@@ -13,6 +13,7 @@ export class Data
     private jormun : Jormun;
     private key : Key;
     private published : boolean = false;
+    private sharedWith : number[];
     public constructor(jormun : Jormun, key : Key)
     {
         this.jormun = jormun;
@@ -94,4 +95,6 @@ export class Data
         }
     }
     public isPublished(){return this.published;}
+    public getSharedWith(){return this.sharedWith;}
+    public setSharedWith(sharedWith : number[]){this.sharedWith = sharedWith;}
 }

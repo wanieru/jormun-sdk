@@ -271,7 +271,8 @@ export class Jormun
                 this.data[parsed.userId] = {};
             if(!this.data[parsed.userId][parsed.fragment])
                 this.data[parsed.userId][parsed.fragment] = new Data(this, parsed);
-            await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key].timestamp, keys[key].public, false); 
+            await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key].timestamp, keys[key].public, false);
+            this.data[parsed.userId][parsed.fragment].setSharedWith(keys[key].sharedWith); 
         }
     }
     public async add(fragment : string, defaultValue : any) : Promise<Data>
@@ -296,7 +297,8 @@ export class Jormun
         if(!this.data[userId])
             return null;
         return this.data[userId][fragment] ?? null;
-    } 
+    }
+    public getData() {return this.data;} 
 
     private static async defaultAlertDelegate(obj : AlertContent) : Promise<number>
     {

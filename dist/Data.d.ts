@@ -9,6 +9,7 @@ export declare class Data {
     private jormun;
     private key;
     private published;
+    private sharedWith;
     constructor(jormun: Jormun, key: Key);
     sync(): Promise<void>;
     getRaw(): Promise<LocalData>;
@@ -23,4 +24,6 @@ export declare class Data {
     onChange(handler: (payload: JormunEventPayload) => void): number;
     offChange(eventId: number): void;
     isPublished(): boolean;
+    getSharedWith(): number[];
+    setSharedWith(sharedWith: number[]): void;
 }

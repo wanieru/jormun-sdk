@@ -55,6 +55,9 @@ export declare class Jormun {
     add(fragment: string, defaultValue: any): Promise<Data>;
     me(fragment: string): Data;
     user(userId: number, fragment: string): Data;
+    getData(): {
+        [id: number]: JormunDataSet;
+    };
     private static defaultAlertDelegate;
     friends(): {
         [id: number]: string;
