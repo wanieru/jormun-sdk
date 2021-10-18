@@ -60,7 +60,7 @@ export class LocalStorage implements ILocal
         const result = [];
         for(const key in this.keys)
         {
-            result.push(Key.parse(key, -1));
+            result.push(Key.parse(key, 0));
         }
         return result;
     }

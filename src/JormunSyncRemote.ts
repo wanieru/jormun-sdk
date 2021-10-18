@@ -283,7 +283,7 @@ export class JormunSyncRemote implements IRemote
         const array : string[] = [];
         for(const i in keys)
         {
-            array.push(keys[i].stringifyRemote(-1));
+            array.push(keys[i].stringifyRemote(0));
         }
         return await this.request<GetRequest, GetResponse>("peek", {app: this.jormunOptions.app, keys : array});
     }

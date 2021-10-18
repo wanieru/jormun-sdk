@@ -189,7 +189,7 @@ export class Jormun
             const local = parsed.userId == status.userId;
             if(local)
             {
-                parsed.userId = -1;
+                parsed.userId = 0;
             }
             if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
             {
@@ -212,7 +212,7 @@ export class Jormun
             {
                 const key = this.data[user][fragment].getKey();
                 if(!remoteKeys[key.stringifyRemote(status.userId)])
-                    (user == "-1" ? missingRemote : deleteShared).push(key);
+                    (user == "0" ? missingRemote : deleteShared).push(key);
             }
         }
 
