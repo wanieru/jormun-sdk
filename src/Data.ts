@@ -73,6 +73,7 @@ export class Data
     public async remove()
     {
         await this.jormun.local.removeValue(this.key);
+        delete this.jormun.getData()[this.key.userId][this.key.fragment];
     }
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;
