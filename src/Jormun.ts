@@ -129,8 +129,8 @@ export class Jormun
         {
             const choice = await this.ask("The local and remote data cannot be combined. Which do you want to keep?", 
                 [
-                        `Local (↑${comparison.missingRemote.length + comparison.newerLocal.length + comparison.missingLocal.length} )`, 
-                        `Remote (↓${comparison.missingLocal.length + comparison.newerRemote.length + comparison.missingRemote.length}})`, 
+                        `Local (↑${comparison.missingRemote.length + comparison.newerLocal.length + comparison.missingLocal.length})`, 
+                        `Remote (↓${comparison.missingLocal.length + comparison.newerRemote.length + comparison.missingRemote.length})`, 
                         "Cancel"
                 ]);
             if(choice == 0)
