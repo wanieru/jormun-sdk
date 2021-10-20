@@ -127,10 +127,17 @@ export class Jormun
 
         if(comparison.download && comparison.upload)
         {
+            const dl = comparison.missingLocal.length + comparison.newerRemote.length;
+            const up = comparison.missingRemote.length + comparison.newerLocal.length;
+            const delLocal = comparison.missingRemote.length;
+            const delRemote = comparison.missingLocal.length;
+            const localChange = [up > 0 ? `☁️ +${up}`:"", delRemote > 0 ? `☁️ -${delRemote}`:""].filter(v => v != "").join(", ");
+            const remoteChange = [dl > 0 ? `🖥️ +${dl}`:"", delLocal > 0 ? `🖥️ -${delLocal}`:""].filter(v => v != "").join(", ");
+
             const choice = await this.ask("The local and remote data cannot be combined. Which do you want to keep?", 
                 [
-                        `🖥️ Local (${(comparison.missingRemote.length + comparison.newerLocal.length) > 0 ? `☁️ +${comparison.missingRemote.length + comparison.newerLocal.length}`:""}${comparison.missingLocal.length > 0 ? `, ☁️ -${comparison.missingLocal.length}`:""})`, 
-                        `☁️ Remote (${(comparison.missingLocal.length + comparison.newerRemote.length) > 0 ? `🖥️ +${comparison.missingLocal.length + comparison.newerRemote.length}`:""}${comparison.missingRemote.length > 0 ? `, 🖥️ -${comparison.missingRemote.length}`:""})`, 
+                        `🖥️ Local (${localChange})`, 
+                        `☁️ Remote (${remoteChange})`, 
                         "Cancel"
                 ]);
             if(choice == 0)
