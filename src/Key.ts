@@ -12,6 +12,12 @@ export class Key
     public static parse(json : string, remoteId : number)
     {
         const parsed = <any[]>JSON.parse(json);
+        if(!Array.isArray(parsed))
+            return null;
+        if(parsed.length != 3)
+            return null;
+        if(isNaN(parseInt(parsed[1])))
+            return null;
         const key = new Key(parsed[0], parsed[1], parsed[2]);
         if(key.userId == remoteId)
             key.userId = 0;
