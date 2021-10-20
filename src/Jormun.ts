@@ -127,7 +127,12 @@ export class Jormun
 
         if(comparison.download && comparison.upload)
         {
-            const choice = await this.ask("The local and remote data cannot be combined. Which do you want to keep?", ["Local", "Remote", "Cancel"]);
+            const choice = await this.ask("The local and remote data cannot be combined. Which do you want to keep?", 
+                [
+                        `Local (⬆️${comparison.missingRemote.length + comparison.newerLocal.length} 🗑️${comparison.missingLocal.length} 🔗${comparison.deleteShared.length + comparison.newShared.length})`, 
+                        `Remote (⬇️${comparison.missingLocal.length + comparison.newerRemote.length} 🗑️${comparison.missingRemote.length} 🔗${comparison.deleteShared.length + comparison.newShared.length})`, 
+                        "Cancel"
+                ]);
             if(choice == 0)
                 comparison.download = false;
             else if(choice == 1)
