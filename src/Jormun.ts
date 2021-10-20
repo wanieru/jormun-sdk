@@ -197,7 +197,6 @@ export class Jormun
             if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
             {
                 (local ? missingLocal : newShared).push(parsed);
-                if(local) console.log("Missing local", parsed);
             }
             else
             {
@@ -209,7 +208,6 @@ export class Jormun
                 if(remoteTime > localTime)
                 {
                     newerRemote.push(parsed);
-                    console.log("Newer remote", parsed, remoteTime, localTime);
                 }
             }
         }
@@ -221,7 +219,6 @@ export class Jormun
                 if(!remoteKeys[key.stringifyRemote(status.userId)])
                 {
                     (user == "0" ? missingRemote : deleteShared).push(key);
-                    if(user == "0") console.log("Missing remote", key);
                 }
             }
         }
