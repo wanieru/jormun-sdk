@@ -197,6 +197,7 @@ export class Jormun
             if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
             {
                 (local ? missingLocal : newShared).push(parsed);
+                console.log("local", local, parsed);
             }
             else
             {
