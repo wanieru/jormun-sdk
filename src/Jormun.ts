@@ -189,15 +189,11 @@ export class Jormun
         for(const key in remoteKeys)
         {
             const parsed = Key.parse(key, status.userId);
-            const local = parsed.userId == status.userId;
-            if(local)
-            {
-                parsed.userId = 0;
-            }
+            const remoteParsed = Key.parse(key, -1);
+            const local = remoteParsed.userId == status.userId;
             if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
             {
                 (local ? missingLocal : newShared).push(parsed);
-                console.log("local", local, parsed);
             }
             else
             {
