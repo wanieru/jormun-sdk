@@ -197,6 +197,7 @@ export class Jormun
             if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
             {
                 (local ? missingLocal : newShared).push(parsed);
+                if(local) console.log("Missing local", parsed);
             }
             else
             {
@@ -206,7 +207,10 @@ export class Jormun
                 if(localTime > remoteTime || raw.isDirty)
                     (local ? newerLocal : newShared).push(parsed);
                 if(remoteTime > localTime)
+                {
                     newerRemote.push(parsed);
+                    console.log("Newer remote", parsed, remoteTime, localTime);
+                }
             }
         }
         for(const user in this.data)
@@ -215,7 +219,10 @@ export class Jormun
             {
                 const key = this.data[user][fragment].getKey();
                 if(!remoteKeys[key.stringifyRemote(status.userId)])
+                {
                     (user == "0" ? missingRemote : deleteShared).push(key);
+                    if(user == "0") console.log("Missing remote", key);
+                }
             }
         }
 
