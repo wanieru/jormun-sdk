@@ -227,7 +227,7 @@ export class Jormun
             for(const fragment in this.data[user])
             {
                 const key = this.data[user][fragment].getKey();
-                if(!remoteKeys[key.stringifyRemote(status.userId)])
+                if(!remoteKeys[key.stringifyRemote(status?.userId ?? -1)])
                 {
                     (user == "0" ? missingRemote : deleteShared).push(key);
                 }
