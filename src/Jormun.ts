@@ -256,6 +256,8 @@ export class Jormun
     }
     public async different() : Promise<boolean>
     {
+        if(!this.remote || !(await this.remote.loggedIn()))
+            return false;
         const status = await this.remote.status();
         const keys = await this.remote.keys();
         const comparison = await this.compareRemoteKeys(status, keys);
