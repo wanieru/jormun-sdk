@@ -35,6 +35,7 @@ export class JormunSyncRemote implements IRemote
     private isLoggedIn : boolean;
     private isConnected : boolean;
     private checkedConnection : boolean;
+    private checkingConnection : Promise<void> | null = null;
 
     public constructor(jormun : Jormun, jormunOptions : JormunOptions)
     {
@@ -45,8 +46,16 @@ export class JormunSyncRemote implements IRemote
     }
     public async checkConnection()
     {
+        if(this.checkingConnection != null)
+        {
+            await this.checkingConnection;
+            return;
+        }
         if(!this.checkedConnection)
         {
+            let resolve : any = null;
+            this.checkingConnection = new Promise<void>(r => resolve = r);
+
             const empty = await this.empty();
             this.isConnected = !!(empty);
             if(this.isConnected && !empty.empty && this.jormunOptions.remote.password)
@@ -57,6 +66,8 @@ export class JormunSyncRemote implements IRemote
             }
             this.isLoggedIn = this.isConnected && this.jormunOptions.remote.token && !!(await this.status());
             this.checkedConnection = true;
+
+            resolve();
         }
     }
     private statusToString(status : number) : string
