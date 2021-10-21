@@ -214,9 +214,9 @@ export class Jormun
                 else
                 {
                     const raw = await this.data[parsed.userId][parsed.fragment].getRaw();
-                    const localTime = raw.timestamp;
+                    const localTime = raw?.timestamp ?? 0;
                     const remoteTime = remoteKeys[key].timestamp;
-                    if(localTime > remoteTime || raw.isDirty)
+                    if(localTime > remoteTime || (raw?.isDirty ?? false))
                         (local ? newerLocal : newShared).push(parsed);
                     if(remoteTime > localTime)
                     {
