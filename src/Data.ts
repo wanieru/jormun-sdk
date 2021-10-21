@@ -30,6 +30,8 @@ export class Data
     public async get()
     {
         const localData = await this.getRaw();
+        if(!localData)
+            return null;
         return JSON.parse(localData.json);
     }
     private async getEventPayload() : Promise<JormunEventPayload>
@@ -55,7 +57,7 @@ export class Data
         await this.jormun.local.setValue(this.key, localData);
 
         const keyString = this.key.stringifyLocal();
-        if(this.jormun.onDataChange[keyString])
+        if(this.jormun.onDataChange.hasOwnProperty(keyString))
         {
             const payload = await this.getEventPayload();
             this.jormun.onDataChange[keyString].trigger(payload);
@@ -81,7 +83,7 @@ export class Data
     public onChange(handler : (payload : JormunEventPayload) => void) : number
     {
         const key = this.key.stringifyLocal();
-        if(!this.jormun.onDataChange[key])
+        if(!this.jormun.onDataChange.hasOwnProperty(key))
             this.jormun.onDataChange[key] = new JormunEvent<JormunEventPayload>();
         const id = this.jormun.onDataChange[key].on(handler);
         this.getEventPayload().then(payload => handler(payload));
@@ -90,7 +92,7 @@ export class Data
     public offChange(eventId : number)
     {
         const key = this.key.stringifyLocal();
-        if(this.jormun.onDataChange[key])
+        if(this.jormun.onDataChange.hasOwnProperty(key))
         {
             this.jormun.onDataChange[key].off(eventId);
         }

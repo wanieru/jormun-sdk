@@ -15,7 +15,7 @@ export class JormunEvent<TPayload>
     {
         for(const id in this.handlers)
         {
-            if(this.handlers[id])
+            if(this.handlers.hasOwnProperty(id))
                 this.handlers[id](payload);
         }
     }

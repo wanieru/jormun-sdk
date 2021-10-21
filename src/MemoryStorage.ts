@@ -44,7 +44,7 @@ export class MemoryStorage implements ILocal
     public async removeValue(key: Key): Promise<void> 
     {
         const str = key.stringifyLocal();
-        if(this.data[str])
+        if(this.data.hasOwnProperty(str))
             delete this.data[str];
     }
 

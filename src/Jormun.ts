@@ -88,9 +88,9 @@ export class Jormun
             const key = keys[i];
             if(key.stringifyLocal() == this.REMOTE_SETTINGS_KEY.stringifyLocal())
                 continue;
-            if(!newData[key.userId])
+            if(!newData.hasOwnProperty(key.userId))
                 newData[key.userId] = {};
-            if(this.data[key.userId] && this.data[key.userId][key.fragment])
+            if(this.data[key.userId] && this.data[key.userId].hasOwnProperty(key.fragment))
                 newData[key.userId][key.fragment] = this.data[key.userId][key.fragment];
             else
                 newData[key.userId][key.fragment] = new Data(this, key);
@@ -127,19 +127,10 @@ export class Jormun
 
         if(comparison.download && comparison.upload)
         {
-            const dl = comparison.missingLocal.length + comparison.newerRemote.length;
-            const up = comparison.missingRemote.length + comparison.newerLocal.length;
-            const delLocal = comparison.missingRemote.length;
-            const delRemote = comparison.missingLocal.length;
-            let localChange = [up > 0 ? `+${up}`:"", delRemote > 0 ? `-${delRemote}`:""].filter(v => v != "").join(", ");
-            let remoteChange = [dl > 0 ? `+${dl}`:"", delLocal > 0 ? `-${delLocal}`:""].filter(v => v != "").join(", ");
-            if(localChange != "") localChange = `🖥️ ${localChange}`;
-            if(remoteChange != "") remoteChange = `☁️ ${remoteChange}`;
-
-            const choice = await this.ask("Syncing", `The local and remote data cannot be combined. Which do you want to keep?\n${localChange}\n${remoteChange}`, 
+            const choice = await this.ask("Syncing", `The local and remote data cannot be combined. Which do you want to keep?`, 
                 [
-                        `🖥️ Local`, 
-                        `☁️ Remote`, 
+                        `Local`, 
+                        `Remote`, 
                         "Cancel"
                 ]);
             if(choice == 0)
@@ -207,8 +198,9 @@ export class Jormun
                 const parsed = Key.parse(key, status.userId);
                 const remoteParsed = Key.parse(key, -1);
                 const local = remoteParsed.userId == status.userId;
-                if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
+                if(!this.data.hasOwnProperty(parsed.userId) || !this.data[parsed.userId].hasOwnProperty(parsed.fragment))
                 {
+                    console.log(parsed.fragment, "Missing from", this.data);
                     (local ? missingLocal : newShared).push(parsed);
                 }
                 else
@@ -229,8 +221,9 @@ export class Jormun
                 for(const fragment in this.data[user])
                 {
                     const key = this.data[user][fragment].getKey();
-                    if(remoteKeys && !remoteKeys[key.stringifyRemote(status?.userId ?? -1)])
+                    if(remoteKeys && !remoteKeys.hasOwnProperty(key.stringifyRemote(status?.userId ?? -1)))
                     {
+                        console.log(key.fragment, "Missing from", remoteKeys);
                         (user == "0" ? missingRemote : deleteShared).push(key);
                     }
                 }
@@ -290,9 +283,9 @@ export class Jormun
         for(const key in result)
         {
             const parsed = Key.parse(key, status.userId);
-            if(!this.data[parsed.userId])
+            if(!this.data.hasOwnProperty(parsed.userId))
                 this.data[parsed.userId] = {};
-            if(!this.data[parsed.userId][parsed.fragment])
+            if(!this.data[parsed.userId].hasOwnProperty(parsed.fragment))
                 this.data[parsed.userId][parsed.fragment] = new Data(this, parsed);
             await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key].timestamp, keys[key].public, false);
             this.data[parsed.userId][parsed.fragment].setSharedWith(keys[key].sharedWith, status.userId); 
@@ -300,9 +293,9 @@ export class Jormun
     }
     public async add(fragment : string, defaultValue : any) : Promise<Data>
     {
-        if(!this.data[0])
+        if(!this.data.hasOwnProperty(0))
             this.data[0] = {};
-        if(!this.data[0][fragment])
+        if(!this.data[0].hasOwnProperty(fragment))
         {
             this.data[0][fragment] = new Data(this, new Key(this.options.app, 0, fragment));
             await this.data[0][fragment].preset(defaultValue, Unix(), false, true); 
@@ -311,13 +304,13 @@ export class Jormun
     }
     public me(fragment : string) : Data
     {
-        if(!this.data[0])
+        if(!this.data.hasOwnProperty(0))
             return null;
         return this.data[0][fragment] ?? null;
     }
     public user(userId : number, fragment : string) : Data
     {
-        if(!this.data[userId])
+        if(!this.data.hasOwnProperty(userId))
             return null;
         return this.data[userId][fragment] ?? null;
     }
