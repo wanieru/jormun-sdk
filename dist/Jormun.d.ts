@@ -53,6 +53,7 @@ export declare class Jormun {
     private getUploadData;
     private removeLocalKeys;
     private processDataResponse;
+    private setSharedWith;
     add(fragment: string, defaultValue: any): Promise<Data>;
     me(fragment: string): Data;
     user(userId: number, fragment: string): Data;

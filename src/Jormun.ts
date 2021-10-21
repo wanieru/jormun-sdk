@@ -122,6 +122,7 @@ export class Jormun
 
         const status = await this.remote.status();
         const keys = await this.remote.keys();
+        this.setSharedWith(status, keys);
 
         const comparison = await this.compareRemoteKeys(status, keys);
 
@@ -253,6 +254,7 @@ export class Jormun
             return false;
         const status = await this.remote.status();
         const keys = await this.remote.keys();
+        this.setSharedWith(status, keys);
         const comparison = await this.compareRemoteKeys(status, keys);
         return comparison.download || comparison.upload;
     }
@@ -289,6 +291,17 @@ export class Jormun
                 this.data[parsed.userId][parsed.fragment] = new Data(this, parsed);
             await this.data[parsed.userId][parsed.fragment].preset(result[key], keys[key].timestamp, keys[key].public, false);
             this.data[parsed.userId][parsed.fragment].setSharedWith(keys[key].sharedWith, status.userId); 
+        }
+    }
+    private async setSharedWith(status : StatusResponse, keys : KeysResponse)
+    {
+        for(const key in keys)
+        {
+            const parsed = Key.parse(key, status.userId);
+            if(!this.data.hasOwnProperty(parsed.userId))
+                this.data[parsed.userId] = {};
+            if(this.data[parsed.userId].hasOwnProperty(parsed.fragment))
+                this.data[parsed.userId][parsed.fragment].setSharedWith(keys[key].sharedWith, status.userId); 
         }
     }
     public async add(fragment : string, defaultValue : any) : Promise<Data>
