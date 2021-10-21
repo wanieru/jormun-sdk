@@ -200,36 +200,39 @@ export class Jormun
         let newShared : Key[] = []; //Shared keys that are newer on remote
         let deleteShared : Key[] = []; //Shared keys that exist on local but not on remote
 
-        for(const key in remoteKeys)
+        if(status && remoteKeys)
         {
-            const parsed = Key.parse(key, status.userId);
-            const remoteParsed = Key.parse(key, -1);
-            const local = remoteParsed.userId == status.userId;
-            if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
+            for(const key in remoteKeys)
             {
-                (local ? missingLocal : newShared).push(parsed);
-            }
-            else
-            {
-                const raw = await this.data[parsed.userId][parsed.fragment].getRaw();
-                const localTime = raw.timestamp;
-                const remoteTime = remoteKeys[key].timestamp;
-                if(localTime > remoteTime || raw.isDirty)
-                    (local ? newerLocal : newShared).push(parsed);
-                if(remoteTime > localTime)
+                const parsed = Key.parse(key, status.userId);
+                const remoteParsed = Key.parse(key, -1);
+                const local = remoteParsed.userId == status.userId;
+                if(!this.data[parsed.userId] || !this.data[parsed.userId][parsed.fragment])
                 {
-                    newerRemote.push(parsed);
+                    (local ? missingLocal : newShared).push(parsed);
+                }
+                else
+                {
+                    const raw = await this.data[parsed.userId][parsed.fragment].getRaw();
+                    const localTime = raw.timestamp;
+                    const remoteTime = remoteKeys[key].timestamp;
+                    if(localTime > remoteTime || raw.isDirty)
+                        (local ? newerLocal : newShared).push(parsed);
+                    if(remoteTime > localTime)
+                    {
+                        newerRemote.push(parsed);
+                    }
                 }
             }
-        }
-        for(const user in this.data)
-        {
-            for(const fragment in this.data[user])
+            for(const user in this.data)
             {
-                const key = this.data[user][fragment].getKey();
-                if(!remoteKeys[key.stringifyRemote(status?.userId ?? -1)])
+                for(const fragment in this.data[user])
                 {
-                    (user == "0" ? missingRemote : deleteShared).push(key);
+                    const key = this.data[user][fragment].getKey();
+                    if(remoteKeys && !remoteKeys[key.stringifyRemote(status?.userId ?? -1)])
+                    {
+                        (user == "0" ? missingRemote : deleteShared).push(key);
+                    }
                 }
             }
         }
