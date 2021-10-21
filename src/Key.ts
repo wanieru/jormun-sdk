@@ -34,7 +34,7 @@ export class Key
     }
     public stringifyLocal()
     {
-        return JSON.stringify([this.app, this.userId, this.fragment]);
+        return JSON.stringify([this.app, parseInt(<any>this.userId), this.fragment.toString()]);
     }
     public stringifyRemote(remoteId : number)
     {
