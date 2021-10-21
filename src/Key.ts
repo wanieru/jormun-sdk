@@ -18,7 +18,7 @@ export class Key
             return null;
         if(isNaN(parseInt(parsed[1])))
             return null;
-        const key = new Key(parsed[0], parsed[1], parsed[2]);
+        const key = new Key(parsed[0].toString(), parseInt(parsed[1]), parsed[2].toString());
         if(key.userId == remoteId)
             key.userId = 0;
         return key;
@@ -34,7 +34,7 @@ export class Key
     }
     public stringifyLocal()
     {
-        return JSON.stringify([this.app, parseInt(<any>this.userId), this.fragment.toString()]);
+        return JSON.stringify([this.app.toString(), parseInt(<any>this.userId), this.fragment.toString()]);
     }
     public stringifyRemote(remoteId : number)
     {
