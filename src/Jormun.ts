@@ -133,8 +133,8 @@ export class Jormun
             const delRemote = comparison.missingLocal.length;
             let localChange = [up > 0 ? `+${up}`:"", delRemote > 0 ? `-${delRemote}`:""].filter(v => v != "").join(", ");
             let remoteChange = [dl > 0 ? `+${dl}`:"", delLocal > 0 ? `-${delLocal}`:""].filter(v => v != "").join(", ");
-            if(localChange != "") localChange = ` $🖥️ ${localChange}`;
-            if(remoteChange != "") remoteChange = ` $☁️ ${remoteChange}`;
+            if(localChange != "") localChange = `🖥️ ${localChange}`;
+            if(remoteChange != "") remoteChange = `☁️ ${remoteChange}`;
 
             const choice = await this.ask("Syncing", `The local and remote data cannot be combined. Which do you want to keep?\n${localChange}\n${remoteChange}`, 
                 [
