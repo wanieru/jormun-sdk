@@ -59,7 +59,19 @@ export class JormunSyncRemote implements IRemote
             this.checkedConnection = true;
         }
     }
-
+    private statusToString(status : number) : string
+    {
+        switch(status)
+        {
+            case 200: return "OK";
+            case 400: return "Invalid Request";
+            case 401: return "Invalid Login";
+            case 413: return "Storage Space Exceeded";
+            case 500: return "Server Error";
+        }
+        if(status.toString().startsWith("4")) return "OK";
+        else return "Error";
+    }
     private async request<TRequest, TResponse>(endpoint : string, data : TRequest) : Promise<TResponse>
     {
         const uri = this.jormunOptions.remote.host + "/api/" + endpoint;
@@ -72,14 +84,14 @@ export class JormunSyncRemote implements IRemote
             }
             if(response.status != 200)
             {
-                await this.jormun.alert(`${uri} returned ${response.status}: ${response.body.message ?? ""}`);
+                await this.jormun.alert(`${endpoint} ${response.status}`, `${this.statusToString(response.status)} ${response.body.message ? ` - ${response.body.message}` : ""}`);
                 return null;
             }
             return response.body;
         }
         catch(e)
         {
-            this.jormun.alert(e);
+            this.jormun.alert("Network Error", e);
         }
     }
     private baseRequest()

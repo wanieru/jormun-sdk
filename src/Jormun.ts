@@ -31,7 +31,7 @@ export interface JormunDataSet
 {
     [fragment:string] : Data
 }
-export type AlertContent = {message : string, options : string[]};
+export type AlertContent = {title : string, message : string, options : string[]};
 export type AlertDelegate = (obj : AlertContent) => Promise<number>;
 export type JormunEventPayload = {key : Key, data : Data, value : any, raw : LocalData};
 export class Jormun
@@ -62,13 +62,13 @@ export class Jormun
         this.data = {};
         await this.setup({app:app, remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
     }
-    public async alert(message : string)
+    public async alert(title : string, message : string)
     {
-        await this.alertDelegate({message: message, options : []});
+        await this.alertDelegate({title : title, message: message, options : []});
     }
-    public async ask(message : string, options : string[])
+    public async ask(title : string, message : string, options : string[])
     {
-        return this.alertDelegate({message: message, options: options});
+        return this.alertDelegate({title : title, message: message, options: options});
     }
     private async setup(options : JormunOptions)
     {
@@ -131,13 +131,15 @@ export class Jormun
             const up = comparison.missingRemote.length + comparison.newerLocal.length;
             const delLocal = comparison.missingRemote.length;
             const delRemote = comparison.missingLocal.length;
-            const localChange = [up > 0 ? `☁️ +${up}`:"", delRemote > 0 ? `☁️ -${delRemote}`:""].filter(v => v != "").join(", ");
-            const remoteChange = [dl > 0 ? `🖥️ +${dl}`:"", delLocal > 0 ? `🖥️ -${delLocal}`:""].filter(v => v != "").join(", ");
+            let localChange = [up > 0 ? `+${up}`:"", delRemote > 0 ? `-${delRemote}`:""].filter(v => v != "").join(", ");
+            let remoteChange = [dl > 0 ? `+${dl}`:"", delLocal > 0 ? `-${delLocal}`:""].filter(v => v != "").join(", ");
+            if(localChange != "") localChange = ` $🖥️ ${localChange}`;
+            if(remoteChange != "") remoteChange = ` $☁️ ${remoteChange}`;
 
-            const choice = await this.ask("The local and remote data cannot be combined. Which do you want to keep?", 
+            const choice = await this.ask("Syncing", `The local and remote data cannot be combined. Which do you want to keep?\n${localChange}\n${remoteChange}`, 
                 [
-                        `🖥️ Local (${localChange})`, 
-                        `☁️ Remote (${remoteChange})`, 
+                        `🖥️ Local`, 
+                        `☁️ Remote`, 
                         "Cancel"
                 ]);
             if(choice == 0)

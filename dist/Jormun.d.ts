@@ -18,6 +18,7 @@ export interface JormunDataSet {
     [fragment: string]: Data;
 }
 export declare type AlertContent = {
+    title: string;
     message: string;
     options: string[];
 };
@@ -41,8 +42,8 @@ export declare class Jormun {
     onSync: JormunEvent<boolean>;
     onSetup: JormunEvent<void>;
     initialize(app: string, alertDelegate: AlertDelegate | null, memoryOnly?: boolean): Promise<void>;
-    alert(message: string): Promise<void>;
-    ask(message: string, options: string[]): Promise<number>;
+    alert(title: string, message: string): Promise<void>;
+    ask(title: string, message: string, options: string[]): Promise<number>;
     private setup;
     login(remote: JormunRemote): Promise<void>;
     hashedRemote: () => Promise<JormunRemote>;
