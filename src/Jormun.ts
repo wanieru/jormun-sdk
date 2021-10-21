@@ -301,7 +301,11 @@ export class Jormun
             if(!this.data.hasOwnProperty(parsed.userId))
                 this.data[parsed.userId] = {};
             if(this.data[parsed.userId].hasOwnProperty(parsed.fragment))
-                this.data[parsed.userId][parsed.fragment].setSharedWith(keys[key].sharedWith, status.userId); 
+            {
+                const data = this.data[parsed.userId][parsed.fragment];
+                await data.preset(await data.get(), keys[key].timestamp, keys[key].public, false);
+                data.setSharedWith(keys[key].sharedWith, status.userId); 
+            }
         }
     }
     public async add(fragment : string, defaultValue : any) : Promise<Data>
