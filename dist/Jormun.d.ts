@@ -31,6 +31,7 @@ export declare type JormunEventPayload = {
 };
 export declare class Jormun {
     private REMOTE_SETTINGS_KEY;
+    static readonly CHANGED_KEYS_KEY: string;
     private alertDelegate;
     private options;
     local: ILocal;

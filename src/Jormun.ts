@@ -37,6 +37,7 @@ export type JormunEventPayload = {key : Key, data : Data, value : any, raw : Loc
 export class Jormun
 {
     private REMOTE_SETTINGS_KEY : Key;
+    public static readonly CHANGED_KEYS_KEY : string = "CHANGED_KEYS";
 
     private alertDelegate : AlertDelegate;
 
@@ -184,6 +185,8 @@ export class Jormun
     }
     private async compareRemoteKeys(status : StatusResponse, remoteKeys : KeysResponse)
     {
+        this.add(Jormun.CHANGED_KEYS_KEY, Unix());
+
         let missingLocal : Key[] = []; //Keys that exist on remote but not on local
         let missingRemote : Key[] = []; //Keys that exist on local but not on remote
         let newerLocal : Key[] = []; //Keys that are newer on local
@@ -201,7 +204,6 @@ export class Jormun
                 const local = remoteParsed.userId == status.userId;
                 if(!this.data.hasOwnProperty(parsed.userId) || !this.data[parsed.userId].hasOwnProperty(parsed.fragment))
                 {
-                    console.log(parsed.fragment, "Missing from", this.data);
                     (local ? missingLocal : newShared).push(parsed);
                 }
                 else
@@ -224,7 +226,6 @@ export class Jormun
                     const key = this.data[user][fragment].getKey();
                     if(remoteKeys && !remoteKeys.hasOwnProperty(key.stringifyRemote(status?.userId ?? -1)))
                     {
-                        console.log(key.fragment, "Missing from", remoteKeys);
                         (user == "0" ? missingRemote : deleteShared).push(key);
                     }
                 }
@@ -233,11 +234,11 @@ export class Jormun
 
         let download = false;
         let upload = false;
-        if(missingLocal.length > 0 || missingRemote.length > 0)
+        /*if(missingLocal.length > 0 || missingRemote.length > 0)
         {
             download = true;
             upload = true;
-        }
+        }*/
         if(newerLocal.length > 0)
         {
             upload = true;
@@ -317,6 +318,7 @@ export class Jormun
         {
             this.data[0][fragment] = new Data(this, new Key(this.options.app, 0, fragment));
             await this.data[0][fragment].preset(defaultValue, Unix(), false, true); 
+            await this.me(Jormun.CHANGED_KEYS_KEY).set(Unix());
         }
         return this.data[0][fragment];
     }

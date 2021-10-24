@@ -76,6 +76,7 @@ export class Data
     {
         await this.jormun.local.removeValue(this.key);
         delete this.jormun.getData()[this.key.userId][this.key.fragment];
+        await this.jormun.me(Jormun.CHANGED_KEYS_KEY).set(Unix());
     }
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;
