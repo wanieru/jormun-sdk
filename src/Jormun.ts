@@ -27,6 +27,10 @@ export interface JormunRemote
     token : string,
     downloadSharedData : boolean
 }
+export interface JormunDataUsers
+{
+    [id:number] : JormunDataSet;
+}
 export interface JormunDataSet
 {
     [fragment:string] : Data
@@ -44,7 +48,7 @@ export class Jormun
     private options : JormunOptions;
     public local : ILocal;
     public remote : IRemote;
-    private data : {[id:number] : JormunDataSet};
+    private data : JormunDataUsers;
 
     public onDataChange : {[key : string] : JormunEvent<JormunEventPayload>} = {};
     public onSync = new JormunEvent<boolean>();
@@ -73,11 +77,13 @@ export class Jormun
     }
     private async setup(options : JormunOptions)
     {
+        let oldRemote : JormunRemote | null = null;
         this.options = options;
         if(options.remote)
         {
             const remote = new JormunSyncRemote(this, options);
             this.remote = remote;
+            oldRemote = await this.local.getValue(this.REMOTE_SETTINGS_KEY);
             await remote.checkConnection();
             await this.local.setValue(this.REMOTE_SETTINGS_KEY, remote.jormunOptions.remote);
         }
@@ -102,7 +108,13 @@ export class Jormun
 
         if(this.remote)
         {
-            await this.sync();
+            let forceDownload = false;
+            if(oldRemote && oldRemote.username != options.remote?.username)
+            {
+                const response = await this.ask("New User", `You seem to have switched from user ${oldRemote.username} to ${options.remote.username}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
+                forceDownload = response == 0;
+            }
+            await this.sync(forceDownload);
         }
     }
     public async login(remote : JormunRemote)
@@ -114,7 +126,7 @@ export class Jormun
     }
     public hashedRemote = async () : Promise<JormunRemote> => await this.local.getValue(this.REMOTE_SETTINGS_KEY);
 
-    public async sync()
+    public async sync(forceDownload = false)
     {
         if(!this.remote || !(await this.remote.loggedIn()))
             return;
@@ -126,6 +138,11 @@ export class Jormun
         this.setSharedWith(status, keys);
 
         const comparison = await this.compareRemoteKeys(status, keys);
+        if(forceDownload)
+        {
+            comparison.upload = false;
+            comparison.download = true;
+        }
 
         if(comparison.download && comparison.upload)
         {
@@ -226,7 +243,14 @@ export class Jormun
                     const key = this.data[user][fragment].getKey();
                     if(remoteKeys && !remoteKeys.hasOwnProperty(key.stringifyRemote(status?.userId ?? -1)))
                     {
-                        (user == "0" ? missingRemote : deleteShared).push(key);
+                        if(user == "0")
+                        {
+                            missingRemote.push(key);
+                        }
+                        else
+                        {
+                            deleteShared.push(key);
+                        }
                     }
                 }
             }
@@ -234,11 +258,6 @@ export class Jormun
 
         let download = false;
         let upload = false;
-        /*if(missingLocal.length > 0 || missingRemote.length > 0)
-        {
-            download = true;
-            upload = true;
-        }*/
         if(newerLocal.length > 0)
         {
             upload = true;
@@ -246,6 +265,16 @@ export class Jormun
         if(newerRemote.length > 0)
         {
             download = true;
+        }
+        if(missingRemote.find(k => k.fragment == Jormun.CHANGED_KEYS_KEY))
+        {
+            //we haven't initialized with the remote.
+            upload = true;
+            if(this.fragments(0).length > 0)
+            {
+                //We have other keys locally though, which might be carried over from a different session. Let's make downloading an option too.
+                download = true;
+            }
         }
         return {download: download, upload: upload, missingLocal : missingLocal, missingRemote : missingRemote, newerLocal : newerLocal, newerRemote : newerRemote, newShared : newShared, deleteShared : deleteShared};
     }
@@ -318,7 +347,7 @@ export class Jormun
         {
             this.data[0][fragment] = new Data(this, new Key(this.options.app, 0, fragment));
             await this.data[0][fragment].preset(defaultValue, Unix(), false, true); 
-            await this.me(Jormun.CHANGED_KEYS_KEY).set(Unix());
+            await this.bumpChangedKeys();
         }
         return this.data[0][fragment];
     }
@@ -328,13 +357,40 @@ export class Jormun
             return null;
         return this.data[0][fragment] ?? null;
     }
-    public user(userId : number, fragment : string) : Data
+    public user(userId : number | string, fragment : string) : Data
     {
         if(!this.data.hasOwnProperty(userId))
             return null;
         return this.data[userId][fragment] ?? null;
     }
-    public getData() {return this.data;} 
+    public async bumpChangedKeys()
+    {
+        await (await this.add(Jormun.CHANGED_KEYS_KEY, Unix())).set(Unix());
+    }
+    public users() : number[]
+    {
+        const users : number[] = [];
+        for(const userId in this.data)
+        {
+            users.push(parseInt(userId));
+        }
+        return users;
+    }
+    public fragments(userId : number | string)
+    {
+        const keys : string[] = [];
+        if(this.data.hasOwnProperty(userId))
+        {
+            for(const fragment in this.data[userId])
+            {
+                if(fragment != Jormun.CHANGED_KEYS_KEY)
+                {
+                    keys.push(fragment);
+                }
+            }
+        }
+        return keys;
+    }
 
     private static async defaultAlertDelegate(obj : AlertContent) : Promise<number>
     {

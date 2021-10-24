@@ -14,6 +14,9 @@ export interface JormunRemote {
     token: string;
     downloadSharedData: boolean;
 }
+export interface JormunDataUsers {
+    [id: number]: JormunDataSet;
+}
 export interface JormunDataSet {
     [fragment: string]: Data;
 }
@@ -48,7 +51,7 @@ export declare class Jormun {
     private setup;
     login(remote: JormunRemote): Promise<void>;
     hashedRemote: () => Promise<JormunRemote>;
-    sync(): Promise<void>;
+    sync(forceDownload?: boolean): Promise<void>;
     private compareRemoteKeys;
     different(): Promise<boolean>;
     private getUploadData;
@@ -57,10 +60,10 @@ export declare class Jormun {
     private setSharedWith;
     add(fragment: string, defaultValue: any): Promise<Data>;
     me(fragment: string): Data;
-    user(userId: number, fragment: string): Data;
-    getData(): {
-        [id: number]: JormunDataSet;
-    };
+    user(userId: number | string, fragment: string): Data;
+    bumpChangedKeys(): Promise<void>;
+    users(): number[];
+    fragments(userId: number | string): string[];
     private static defaultAlertDelegate;
     friends(): {
         [id: number]: string;

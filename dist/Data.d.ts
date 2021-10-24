@@ -10,6 +10,7 @@ export declare class Data {
     private key;
     private published;
     private sharedWith;
+    private deleted;
     constructor(jormun: Jormun, key: Key);
     sync(): Promise<void>;
     getRaw(): Promise<LocalData>;

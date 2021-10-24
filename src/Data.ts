@@ -1,5 +1,5 @@
 import { JormunEvent } from "./Event";
-import { Jormun, JormunEventPayload } from "./Jormun";
+import { Jormun, JormunDataUsers, JormunEventPayload } from "./Jormun";
 import { Key } from "./Key";
 import {Unix} from "./Unix";
 export interface LocalData
@@ -11,9 +11,11 @@ export interface LocalData
 export class Data
 {
     private jormun : Jormun;
+
     private key : Key;
     private published : boolean = false;
     private sharedWith : number[] = [];
+    private deleted = false;
     public constructor(jormun : Jormun, key : Key)
     {
         this.jormun = jormun;
@@ -47,6 +49,8 @@ export class Data
     }
     public async preset(value : any, timestamp : number, published : boolean, isDirty : boolean)
     {
+        if(this.deleted)
+            return;
         this.published = published;
         const localData : LocalData = 
         {
@@ -74,9 +78,12 @@ export class Data
     }
     public async remove()
     {
+        if(this.getFragment() == Jormun.CHANGED_KEYS_KEY)
+            return;
         await this.jormun.local.removeValue(this.key);
-        delete this.jormun.getData()[this.key.userId][this.key.fragment];
-        await this.jormun.me(Jormun.CHANGED_KEYS_KEY).set(Unix());
+        delete this.jormun["data"][this.key.userId][this.key.fragment];
+        await this.jormun.bumpChangedKeys();
+        this.deleted = true;
     }
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;
