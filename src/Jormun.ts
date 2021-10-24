@@ -303,7 +303,8 @@ export class Jormun
             if(this.data[parsed.userId].hasOwnProperty(parsed.fragment))
             {
                 const data = this.data[parsed.userId][parsed.fragment];
-                await data.preset(await data.get(), keys[key].timestamp, keys[key].public, false);
+                const raw = await data.getRaw();
+                await data.preset(JSON.parse(raw.json), raw.timestamp, keys[key].public, raw.isDirty);
                 data.setSharedWith(keys[key].sharedWith, status.userId); 
             }
         }
