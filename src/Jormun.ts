@@ -127,7 +127,11 @@ export class Jormun
         if(this.remote)
         {
             let forceDownload = false;
-            if(oldRemote && oldRemote.username != options.remote?.username)
+            if((await this.local.getKeys()).length <= 1)
+            {
+                forceDownload = true;
+            }
+            else if(oldRemote && oldRemote.username != options.remote?.username)
             {
                 const response = await this.ask("New User", `You seem to have switched from user ${oldRemote.username} to ${options.remote.username}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
                 forceDownload = response == 0;

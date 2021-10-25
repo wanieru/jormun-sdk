@@ -3,7 +3,7 @@ import { Key } from "./Key";
 
 export class MemoryStorage implements ILocal
 {
-    private data : {[key : string] : string};
+    private data : {[key : string] : string} = {};
     public async getKeys(): Promise<Key[]> 
     {
         const keys : Key[] = [];
