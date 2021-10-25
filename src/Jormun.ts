@@ -1,6 +1,6 @@
 import { ILocal } from "./ILocal";
 import {sha512} from "js-sha512";
-import { IRemote} from "./IRemote";
+import { IPublicRemote, IRemote} from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
 import { LocalStorage } from "./LocalStorage";
@@ -35,6 +35,20 @@ export interface JormunDataSet
 {
     [fragment:string] : Data
 }
+export interface JormunRemoteKeyComparison
+{
+    download: boolean, 
+    upload: boolean, 
+    missingLocal : Key[], 
+    missingRemote : Key[], 
+    newerLocal : Key[], 
+    newerRemote : Key[], 
+    newShared : Key[], 
+    deleteShared : Key[],
+    localVersion : string,
+    remoteVersion : string
+}
+
 export type AlertContent = {title : string, message : string, options : string[]};
 export type AlertDelegate = (obj : AlertContent) => Promise<number>;
 export type JormunEventPayload = {key : Key, data : Data, value : any, raw : LocalData};
@@ -46,8 +60,8 @@ export class Jormun
     private alertDelegate : AlertDelegate;
 
     private options : JormunOptions;
-    public local : ILocal;
-    public remote : IRemote;
+    private local : ILocal;
+    private remote : IRemote;
     private data : JormunDataUsers;
 
     public onDataChange : {[key : string] : JormunEvent<JormunEventPayload>} = {};
@@ -66,6 +80,10 @@ export class Jormun
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};
         await this.setup({app:app, remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
+    }
+    public getRemote() : IPublicRemote
+    {
+        return this.remote;
     }
     public async alert(title : string, message : string)
     {
@@ -148,8 +166,8 @@ export class Jormun
         {
             const choice = await this.ask("Syncing", `The local and remote data cannot be combined. Which do you want to keep?`, 
                 [
-                        `Local`, 
-                        `Remote`, 
+                        `Local (${comparison.localVersion})`, 
+                        `Remote (${comparison.remoteVersion})`, 
                         "Cancel"
                 ]);
             if(choice == 0)
@@ -200,7 +218,7 @@ export class Jormun
 
         this.onSync.trigger(false);
     }
-    private async compareRemoteKeys(status : StatusResponse, remoteKeys : KeysResponse)
+    private async compareRemoteKeys(status : StatusResponse, remoteKeys : KeysResponse) : Promise<JormunRemoteKeyComparison>
     {
         this.add(Jormun.CHANGED_KEYS_KEY, Unix());
 
@@ -212,6 +230,12 @@ export class Jormun
         let newShared : Key[] = []; //Shared keys that are newer on remote
         let deleteShared : Key[] = []; //Shared keys that exist on local but not on remote
 
+        let localVersionTime = 0;
+        let localVersionDirty = false;
+        let remoteVersionTime = 0;
+
+        const raws : {[key : string] : LocalData} = {};
+        
         if(status && remoteKeys)
         {
             for(const key in remoteKeys)
@@ -219,6 +243,8 @@ export class Jormun
                 const parsed = Key.parse(key, status.userId);
                 const remoteParsed = Key.parse(key, -1);
                 const local = remoteParsed.userId == status.userId;
+                const remoteTime = remoteKeys[key].timestamp;
+                remoteVersionTime = Math.max(remoteTime, remoteVersionTime);
                 if(!this.data.hasOwnProperty(parsed.userId) || !this.data[parsed.userId].hasOwnProperty(parsed.fragment))
                 {
                     (local ? missingLocal : newShared).push(parsed);
@@ -226,8 +252,8 @@ export class Jormun
                 else
                 {
                     const raw = await this.data[parsed.userId][parsed.fragment].getRaw();
+                    raws[parsed.stringifyLocal()] = raw;
                     const localTime = raw?.timestamp ?? 0;
-                    const remoteTime = remoteKeys[key].timestamp;
                     if(localTime > remoteTime || (raw?.isDirty ?? false))
                         (local ? newerLocal : newShared).push(parsed);
                     if(remoteTime > localTime)
@@ -241,6 +267,9 @@ export class Jormun
                 for(const fragment in this.data[user])
                 {
                     const key = this.data[user][fragment].getKey();
+                    const raw = raws[key.stringifyLocal()] ?? await this.data[user][fragment].getRaw();
+                    localVersionDirty = localVersionDirty || raw.isDirty;
+                    localVersionTime = Math.max(localVersionTime, raw.timestamp);
                     if(remoteKeys && !remoteKeys.hasOwnProperty(key.stringifyRemote(status?.userId ?? -1)))
                     {
                         if(user == "0")
@@ -276,17 +305,24 @@ export class Jormun
                 download = true;
             }
         }
-        return {download: download, upload: upload, missingLocal : missingLocal, missingRemote : missingRemote, newerLocal : newerLocal, newerRemote : newerRemote, newShared : newShared, deleteShared : deleteShared};
+
+        return {download: download, upload: upload, missingLocal : missingLocal, missingRemote : missingRemote, newerLocal : newerLocal, newerRemote : newerRemote, newShared : newShared, deleteShared : deleteShared, localVersion: this.timeToVersion(localVersionTime, localVersionDirty), remoteVersion : this.timeToVersion(remoteVersionTime, false)};
     }
-    public async different() : Promise<boolean>
+    private timeToVersion(time : number, dirty : boolean)
+    {
+        const date = new Date(time);
+        const str = `${date.getFullYear().toString().substr(2)}-${date.getMonth().toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}-${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}${dirty?`:new`:""}`;
+        return str;
+    }
+    public async different() : Promise<{different : boolean, comparison : JormunRemoteKeyComparison | null}>
     {
         if(!this.remote || !(await this.remote.loggedIn()))
-            return false;
+            return {different : false, comparison : null};
         const status = await this.remote.status();
         const keys = await this.remote.keys();
         this.setSharedWith(status, keys);
         const comparison = await this.compareRemoteKeys(status, keys);
-        return comparison.download || comparison.upload;
+        return {different : comparison.download || comparison.upload, comparison : comparison};
     }
     private async getUploadData(status : StatusResponse, keys : Key[])
     {
@@ -346,7 +382,7 @@ export class Jormun
         if(!this.data[0].hasOwnProperty(fragment))
         {
             this.data[0][fragment] = new Data(this, new Key(this.options.app, 0, fragment));
-            await this.data[0][fragment].preset(defaultValue, Unix(), false, true); 
+            await this.data[0][fragment].preset(defaultValue, -Unix(), false, true); 
             await this.bumpChangedKeys();
         }
         return this.data[0][fragment];

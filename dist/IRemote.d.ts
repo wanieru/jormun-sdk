@@ -48,3 +48,17 @@ export interface IRemote {
     unpublish(keys: Key[]): Promise<UnpublishResponse>;
     peek(keys: Key[]): Promise<PeekResponse>;
 }
+export interface IPublicRemote {
+    cachedStatus(): StatusResponse;
+    connected(): Promise<boolean>;
+    loggedIn(): Promise<boolean>;
+    status(): Promise<StatusResponse>;
+    share(keys: Key[], users: string[]): Promise<ShareResponse>;
+    unshare(keys: Key[], users: string[]): Promise<UnshareResponse>;
+    leave(keys: Key[]): Promise<LeaveResponse>;
+    delete(keys: Key[]): Promise<DeleteResponse>;
+    browse(limit: number, offset: number): Promise<BrowseResponse>;
+    publish(keys: Key[]): Promise<PublishResponse>;
+    unpublish(keys: Key[]): Promise<UnpublishResponse>;
+    peek(keys: Key[]): Promise<PeekResponse>;
+}

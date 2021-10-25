@@ -1,5 +1,4 @@
-import { ILocal } from "./ILocal";
-import { IRemote } from "./IRemote";
+import { IPublicRemote } from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
 import { JormunEvent } from "./Event";
@@ -20,6 +19,18 @@ export interface JormunDataUsers {
 export interface JormunDataSet {
     [fragment: string]: Data;
 }
+export interface JormunRemoteKeyComparison {
+    download: boolean;
+    upload: boolean;
+    missingLocal: Key[];
+    missingRemote: Key[];
+    newerLocal: Key[];
+    newerRemote: Key[];
+    newShared: Key[];
+    deleteShared: Key[];
+    localVersion: string;
+    remoteVersion: string;
+}
 export declare type AlertContent = {
     title: string;
     message: string;
@@ -37,8 +48,8 @@ export declare class Jormun {
     static readonly CHANGED_KEYS_KEY: string;
     private alertDelegate;
     private options;
-    local: ILocal;
-    remote: IRemote;
+    private local;
+    private remote;
     private data;
     onDataChange: {
         [key: string]: JormunEvent<JormunEventPayload>;
@@ -46,6 +57,7 @@ export declare class Jormun {
     onSync: JormunEvent<boolean>;
     onSetup: JormunEvent<void>;
     initialize(app: string, alertDelegate: AlertDelegate | null, memoryOnly?: boolean): Promise<void>;
+    getRemote(): IPublicRemote;
     alert(title: string, message: string): Promise<void>;
     ask(title: string, message: string, options: string[]): Promise<number>;
     private setup;
@@ -53,7 +65,11 @@ export declare class Jormun {
     hashedRemote: () => Promise<JormunRemote>;
     sync(forceDownload?: boolean): Promise<void>;
     private compareRemoteKeys;
-    different(): Promise<boolean>;
+    private timeToVersion;
+    different(): Promise<{
+        different: boolean;
+        comparison: JormunRemoteKeyComparison | null;
+    }>;
     private getUploadData;
     private removeLocalKeys;
     private processDataResponse;

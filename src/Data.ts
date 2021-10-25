@@ -27,7 +27,7 @@ export class Data
     }
     public async getRaw()
     {
-        return <LocalData>await this.jormun.local.getValue(this.key);
+        return <LocalData>await this.jormun["local"].getValue(this.key);
     }
     public async get()
     {
@@ -58,7 +58,7 @@ export class Data
             isDirty : isDirty, 
             json : JSON.stringify(value)
         };
-        await this.jormun.local.setValue(this.key, localData);
+        await this.jormun["local"].setValue(this.key, localData);
 
         const keyString = this.key.stringifyLocal();
         if(this.jormun.onDataChange.hasOwnProperty(keyString))
@@ -69,7 +69,8 @@ export class Data
     }
     public async set(value : any)
     {
-        await this.preset(value, Unix(), this.published, true);
+        const raw = await this.getRaw();
+        await this.preset(value, raw.timestamp, this.published, true);
     }
     public async setAndSync(value : any)
     {
@@ -80,7 +81,7 @@ export class Data
     {
         if(this.getFragment() == Jormun.CHANGED_KEYS_KEY)
             return;
-        await this.jormun.local.removeValue(this.key);
+        await this.jormun["local"].removeValue(this.key);
         delete this.jormun["data"][this.key.userId][this.key.fragment];
         await this.jormun.bumpChangedKeys();
         this.deleted = true;
