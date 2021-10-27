@@ -272,7 +272,7 @@ export class Jormun
                 {
                     const key = this.data[user][fragment].getKey();
                     const raw = raws[key.stringifyLocal()] ?? await this.data[user][fragment].getRaw();
-                    localVersionDirty = localVersionDirty || raw.isDirty;
+                    localVersionDirty = localVersionDirty || (raw?.isDirty ?? false);
                     localVersionTime = Math.max(localVersionTime, raw.timestamp);
                     if(remoteKeys && !remoteKeys.hasOwnProperty(key.stringifyRemote(status?.userId ?? -1)))
                     {

@@ -24,6 +24,7 @@ import { UsersRequest, UsersResponse } from "./ApiTypes/Users";
 import { IRemote } from "./IRemote";
 import { Jormun, JormunOptions, JormunRemote } from "./Jormun";
 import { Key } from "./Key";
+import { Unix } from "./Unix";
 
 export class JormunSyncRemote implements IRemote
 {
@@ -35,6 +36,9 @@ export class JormunSyncRemote implements IRemote
     private isConnected : boolean;
     private checkedConnection : boolean;
     private checkingConnection : Promise<void> | null = null;
+
+    private cache : {[endpoint : string] : {timestamp : number, result: any}} = {};
+    private cacheTime = 2000;
 
     public constructor(jormun : Jormun, jormunOptions : JormunOptions)
     {
@@ -83,21 +87,29 @@ export class JormunSyncRemote implements IRemote
         if(status.toString().startsWith("4")) return "OK";
         else return "Error";
     }
-    private async request<TRequest, TResponse>(endpoint : string, data : TRequest) : Promise<TResponse>
+    private async request<TRequest, TResponse>(options : {endpoint : string, data : TRequest, hasParameters : boolean, hasSideEffects : boolean}) : Promise<TResponse>
     {
-        const uri = this.jormunOptions.remote.host + "/api/" + endpoint;
+        if(!options.hasParameters && !options.hasSideEffects && this.cache.hasOwnProperty(options.endpoint) && Unix() - this.cache[options.endpoint].timestamp < this.cacheTime)
+        {
+            return this.cache[options.endpoint].result;
+        }
+        const uri = this.jormunOptions.remote.host + "/api/" + options.endpoint;
         try
         {
-            const response = await Ajax(uri, data);
+            const response = await Ajax(uri, options.data);
             if(response == null)
             {
                 return null;
             }
             if(response.status != 200)
             {
-                await this.jormun.alert(`${endpoint} ${response.status}`, `${this.statusToString(response.status)} ${response.body.message ? ` - ${response.body.message}` : ""}`);
+                await this.jormun.alert(`${options.endpoint} ${response.status}`, `${this.statusToString(response.status)} ${response.body.message ? ` - ${response.body.message}` : ""}`);
                 return null;
             }
+            if(options.hasSideEffects)
+                this.cache = {};
+            if(!options.hasParameters)
+                this.cache[options.endpoint] = {timestamp : Unix(), result : response.body};
             return response.body;
         }
         catch(e)
@@ -136,12 +148,12 @@ export class JormunSyncRemote implements IRemote
 
     public async status(): Promise<StatusResponse> 
     {
-        this.statusCache = await this.request<StatusRequest, StatusResponse>("status", this.baseRequest());
+        this.statusCache = await this.request<StatusRequest, StatusResponse>({endpoint: "status", data: this.baseRequest(), hasSideEffects : false, hasParameters : false});
         return this.statusCache;
     }
     public async keys(): Promise<KeysResponse> 
     {
-        return await this.request<KeysRequest, KeysResponse>("keys", this.baseRequest());
+        return await this.request<KeysRequest, KeysResponse>({endpoint: "keys", data: this.baseRequest(), hasSideEffects: false, hasParameters: false});
     }
     public async get(keys: Key[]): Promise<GetResponse> 
     {
@@ -153,14 +165,14 @@ export class JormunSyncRemote implements IRemote
         const request = this.baseRequest();
         request["keys"] = array;
 
-        return await this.request<GetRequest, GetResponse>("get", request);
+        return await this.request<GetRequest, GetResponse>({endpoint: "get",data:  request, hasSideEffects: false, hasParameters: true});
     }
     public async set(data: GetResponse): Promise<SetResponse> 
     {
         const request = this.baseRequest();
         request["data"] = data;
 
-        return await this.request<SetRequest, SetResponse>("set", request);
+        return await this.request<SetRequest, SetResponse>({endpoint: "set",data:  request, hasSideEffects: true, hasParameters: true});
     }
     public async delete(keys: Key[]): Promise<DeleteResponse> 
     {
@@ -172,7 +184,7 @@ export class JormunSyncRemote implements IRemote
         const request = this.baseRequest();
         request["keys"] = array;
 
-        return await this.request<DeleteRequest, DeleteResponse>("delete", request);
+        return await this.request<DeleteRequest, DeleteResponse>({endpoint: "delete", data: request, hasSideEffects: true, hasParameters: true});
     }
     
     public async share(keys: Key[], users: string[]): Promise<ShareResponse> 
@@ -186,7 +198,7 @@ export class JormunSyncRemote implements IRemote
         request["keys"] = array;
         request["users"] = users;
 
-        return await this.request<ShareRequest, ShareResponse>("share", request);
+        return await this.request<ShareRequest, ShareResponse>({endpoint: "share", data: request, hasSideEffects: true, hasParameters: true});
     }
     public async unshare(keys: Key[], users: string[]): Promise<UnshareResponse> 
     {
@@ -199,7 +211,7 @@ export class JormunSyncRemote implements IRemote
         request["keys"] = array;
         request["users"] = users;
 
-        return await this.request<UnshareRequest, UnshareResponse>("unshare", request);
+        return await this.request<UnshareRequest, UnshareResponse>({endpoint: "unshare",data:  request, hasSideEffects: true, hasParameters: true});
     }
     public async leave(keys: Key[]): Promise<LeaveResponse> 
     {
@@ -211,7 +223,7 @@ export class JormunSyncRemote implements IRemote
         const request = this.baseRequest();
         request["keys"] = array;
 
-        return await this.request<LeaveRequest, LeaveResponse>("leave", request);
+        return await this.request<LeaveRequest, LeaveResponse>({endpoint: "leave",data:  request, hasSideEffects: true, hasParameters: true});
     }
     public async password(password : string, newPassword: string): Promise<PasswordResponse> 
     {
@@ -221,7 +233,7 @@ export class JormunSyncRemote implements IRemote
         request["password"] = password;
         request["newPassword"] = newPassword;
 
-        return await this.request<PasswordRequest, PasswordResponse>("password", request);
+        return await this.request<PasswordRequest, PasswordResponse>({endpoint: "password",data:  request, hasSideEffects: true, hasParameters: true});
     }
     public async register(newUsername: string, newPassword: string, size : number, isAdmin : boolean): Promise<RegisterResponse> 
     {
@@ -232,24 +244,24 @@ export class JormunSyncRemote implements IRemote
         request["size"] = size;
         request["isAdmin"] = isAdmin;
 
-        return await this.request<RegisterRequest , RegisterResponse>("register", request);
+        return await this.request<RegisterRequest , RegisterResponse>({endpoint: "register", data: request, hasSideEffects: true, hasParameters: true});
     }
     public async empty(): Promise<EmptyResponse> 
     {
-        return await this.request<EmptyRequest, EmptyResponse>("empty", {});
+        return await this.request<EmptyRequest, EmptyResponse>({endpoint: "empty", data: {}, hasSideEffects: false, hasParameters: false});
     }
     public async setup(username: string, password: string): Promise<SetupResponse> 
     {
         password = sha512(password);
         const request = {username : username, password : password};
-        return await this.request<SetupRequest, SetupResponse>("setup", request);
+        return await this.request<SetupRequest, SetupResponse>({endpoint: "setup", data: request, hasSideEffects: true, hasParameters: true});
     }
     public async ban(bannedUsername: string): Promise<BanResponse> 
     {
         const request = this.adminRequest();
         request["bannedUsername"] = bannedUsername;
 
-        return await this.request<BanRequest, BanResponse>("ban", request);
+        return await this.request<BanRequest, BanResponse>({endpoint: "ban",data: request, hasSideEffects: true, hasParameters: true});
     }
     public async rename(oldUsername: string, newUsername: string): Promise<RenameResponse> 
     {
@@ -257,7 +269,7 @@ export class JormunSyncRemote implements IRemote
         request["oldUsername"] = oldUsername;
         request["newUsername"] = newUsername;
 
-        return await this.request<RenameRequest, RenameResponse>("rename", request);
+        return await this.request<RenameRequest, RenameResponse>({endpoint: "rename",data:  request, hasSideEffects: true, hasParameters: true});
     }
     public async resize(targetUsername: string, newSize: number): Promise<ResizeResponse> 
     {
@@ -265,24 +277,24 @@ export class JormunSyncRemote implements IRemote
         request["targetUsername"] = targetUsername;
         request["newSize"] = newSize;
 
-        return await this.request<ResizeRequest, ResizeResponse>("resize", request);
+        return await this.request<ResizeRequest, ResizeResponse>({endpoint: "resize", data: request, hasSideEffects: true, hasParameters: true});
     }
     public async users(): Promise<UsersResponse> 
     {
         const request = this.adminRequest();
-        return await this.request<UsersRequest, UsersResponse>("users", request);
+        return await this.request<UsersRequest, UsersResponse>({endpoint: "users", data: request, hasSideEffects: false, hasParameters: false});
     }
     
     public async browse(limit: number, offset: number): Promise<BrowseResponse> 
     {
-        return await this.request<BrowseRequest, BrowseResponse>("browse", {app: this.jormunOptions.app, limit: limit, offset: offset});
+        return await this.request<BrowseRequest, BrowseResponse>({endpoint: "browse", data: {app: this.jormunOptions.app, limit: limit, offset: offset}, hasSideEffects: false, hasParameters: true});
     }
     public async publish(keys: {[key : string] : Publicity}): Promise<PublishResponse> 
     {
         const request = this.baseRequest();
         request["keys"] = keys;
 
-        return await this.request<PublishRequest, PublishResponse>("publish", request);
+        return await this.request<PublishRequest, PublishResponse>({endpoint: "publish",data:  request, hasSideEffects: true, hasParameters: true});
     }
     public async peek(keys: Key[]): Promise<PeekResponse> 
     {
@@ -291,16 +303,16 @@ export class JormunSyncRemote implements IRemote
         {
             array.push(keys[i].stringifyRemote(0));
         }
-        return await this.request<GetRequest, GetResponse>("peek", {app: this.jormunOptions.app, keys : array});
+        return await this.request<GetRequest, GetResponse>({endpoint: "peek", data: {app: this.jormunOptions.app, keys : array}, hasSideEffects: false, hasParameters: true});
     }
     public async login() : Promise<LoginResponse>
     {
         const request = this.passwordRequest();
-        return await this.request<LoginRequest, LoginResponse>("login", request);
+        return await this.request<LoginRequest, LoginResponse>({endpoint: "login", data: request, hasSideEffects: true, hasParameters: true});
     }
     public async logout() : Promise<LogoutResponse>
     {
         const request = this.baseRequest();
-        return await this.request<LogoutRequest, LogoutResponse>("logout", request);
+        return await this.request<LogoutRequest, LogoutResponse>({endpoint: "logout",  data: request, hasSideEffects: true, hasParameters: false});
     }
 }

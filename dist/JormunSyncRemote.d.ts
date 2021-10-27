@@ -30,6 +30,8 @@ export declare class JormunSyncRemote implements IRemote {
     private isConnected;
     private checkedConnection;
     private checkingConnection;
+    private cache;
+    private cacheTime;
     constructor(jormun: Jormun, jormunOptions: JormunOptions);
     checkConnection(): Promise<void>;
     private statusToString;
