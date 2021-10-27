@@ -1,4 +1,5 @@
 import * as zod from "zod";
+import { Publicity } from "./Publish";
 export declare const keysRequest: zod.ZodObject<{
     username: zod.ZodString;
     token: zod.ZodString;
@@ -16,7 +17,7 @@ export declare type KeysRequest = zod.infer<typeof keysRequest>;
 export interface KeysResponse {
     [key: string]: {
         timestamp: number;
-        public: boolean;
+        public: Publicity;
         sharedWith: number[];
     };
 }

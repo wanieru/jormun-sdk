@@ -1,3 +1,4 @@
+import { Publicity } from "./ApiTypes/Publish";
 import { Jormun, JormunEventPayload } from "./Jormun";
 import { Key } from "./Key";
 export interface LocalData {
@@ -16,7 +17,7 @@ export declare class Data {
     getRaw(): Promise<LocalData>;
     get(): Promise<any>;
     private getEventPayload;
-    preset(value: any, timestamp: number, published: boolean, isDirty: boolean): Promise<void>;
+    preset(value: any, timestamp: number, published: Publicity, isDirty: boolean): Promise<void>;
     set(value: any): Promise<void>;
     setAndSync(value: any): Promise<void>;
     remove(): Promise<void>;
@@ -24,7 +25,7 @@ export declare class Data {
     getFragment: () => string;
     onChange(handler: (payload: JormunEventPayload) => void): number;
     offChange(eventId: number): void;
-    isPublished(): boolean;
+    isPublished(): Publicity;
     getSharedWith(): number[];
     setSharedWith(sharedWith: number[], localUserId: number): void;
 }

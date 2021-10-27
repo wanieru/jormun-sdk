@@ -1,4 +1,5 @@
 import * as zod from "zod";
+import { Publicity } from "./Publish";
 
 export const keysRequest = zod.object(
 {
@@ -9,5 +10,5 @@ export const keysRequest = zod.object(
 export type KeysRequest = zod.infer<typeof keysRequest>;
 export interface KeysResponse
 {
-    [key : string] : {timestamp: number, public : boolean, sharedWith : number[]}
+    [key : string] : {timestamp: number, public : Publicity, sharedWith : number[]}
 }

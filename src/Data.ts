@@ -1,3 +1,4 @@
+import { Publicity } from "./ApiTypes/Publish";
 import { JormunEvent } from "./Event";
 import { Jormun, JormunDataUsers, JormunEventPayload } from "./Jormun";
 import { Key } from "./Key";
@@ -13,7 +14,7 @@ export class Data
     private jormun : Jormun;
 
     private key : Key;
-    private published : boolean = false;
+    private published : Publicity = "private";
     private sharedWith : number[] = [];
     private deleted = false;
     public constructor(jormun : Jormun, key : Key)
@@ -47,7 +48,7 @@ export class Data
         };
         return payload;
     }
-    public async preset(value : any, timestamp : number, published : boolean, isDirty : boolean)
+    public async preset(value : any, timestamp : number, published : Publicity, isDirty : boolean)
     {
         if(this.deleted)
             return;

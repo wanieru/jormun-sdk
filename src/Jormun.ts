@@ -386,7 +386,7 @@ export class Jormun
         if(!this.data[0].hasOwnProperty(fragment))
         {
             this.data[0][fragment] = new Data(this, new Key(this.options.app, 0, fragment));
-            await this.data[0][fragment].preset(defaultValue, -Unix(), false, true); 
+            await this.data[0][fragment].preset(defaultValue, -Unix(), "private", true); 
             await this.bumpChangedKeys();
         }
         return this.data[0][fragment];
