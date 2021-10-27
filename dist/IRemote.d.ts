@@ -9,7 +9,7 @@ import { LoginResponse } from "./ApiTypes/Login";
 import { LogoutResponse } from "./ApiTypes/Logout";
 import { PasswordResponse } from "./ApiTypes/Password";
 import { PeekResponse } from "./ApiTypes/Peek";
-import { PublishResponse } from "./ApiTypes/Publish";
+import { Publicity, PublishResponse } from "./ApiTypes/Publish";
 import { RegisterResponse } from "./ApiTypes/Register";
 import { RenameResponse } from "./ApiTypes/Rename";
 import { ResizeResponse } from "./ApiTypes/Resize";
@@ -17,7 +17,6 @@ import { SetResponse } from "./ApiTypes/Set";
 import { SetupResponse } from "./ApiTypes/Setup";
 import { ShareResponse } from "./ApiTypes/Share";
 import { StatusResponse } from "./ApiTypes/Status";
-import { UnpublishResponse } from "./ApiTypes/Unpublish";
 import { UnshareResponse } from "./ApiTypes/Unshare";
 import { UsersResponse } from "./ApiTypes/Users";
 import { Key } from "./Key";
@@ -44,8 +43,9 @@ export interface IRemote {
     login(): Promise<LoginResponse>;
     logout(): Promise<LogoutResponse>;
     browse(limit: number, offset: number): Promise<BrowseResponse>;
-    publish(keys: Key[]): Promise<PublishResponse>;
-    unpublish(keys: Key[]): Promise<UnpublishResponse>;
+    publish(keys: {
+        [key: string]: Publicity;
+    }): Promise<PublishResponse>;
     peek(keys: Key[]): Promise<PeekResponse>;
 }
 export interface IPublicRemote {
@@ -58,7 +58,8 @@ export interface IPublicRemote {
     leave(keys: Key[]): Promise<LeaveResponse>;
     delete(keys: Key[]): Promise<DeleteResponse>;
     browse(limit: number, offset: number): Promise<BrowseResponse>;
-    publish(keys: Key[]): Promise<PublishResponse>;
-    unpublish(keys: Key[]): Promise<UnpublishResponse>;
+    publish(keys: {
+        [key: string]: Publicity;
+    }): Promise<PublishResponse>;
     peek(keys: Key[]): Promise<PeekResponse>;
 }
