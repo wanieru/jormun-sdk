@@ -8,5 +8,6 @@ export const browseRequest = zod.object(
 export type BrowseRequest = zod.infer<typeof browseRequest>;
 export interface BrowseResponse
 {
-    [key : string] : number
+    keys : {[key : string] : number},
+    usernames : {[id : number] : string}
 }
