@@ -108,7 +108,7 @@ export class JormunSyncRemote implements IRemote
             }
             if(options.hasSideEffects)
                 this.cache = {};
-            if(!options.hasParameters)
+            if(!options.hasParameters && !options.hasSideEffects)
                 this.cache[options.endpoint] = {timestamp : Unix(), result : response.body};
             return response.body;
         }

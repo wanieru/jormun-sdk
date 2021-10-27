@@ -131,9 +131,9 @@ export class Jormun
             {
                 forceDownload = true;
             }
-            else if(oldRemote && oldRemote.username != options.remote?.username)
+            else if(oldRemote && (oldRemote.username != options.remote?.username || oldRemote.host != options.remote?.host))
             {
-                const response = await this.ask("New User", `You seem to have switched from user ${oldRemote.username} to ${options.remote.username}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
+                const response = await this.ask("New User", `You seem to have switched from user ${oldRemote.username}@${oldRemote.host} to ${options.remote.username}@${options.remote.host}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
                 forceDownload = response == 0;
             }
             await this.sync(forceDownload);
@@ -286,6 +286,12 @@ export class Jormun
                         }
                     }
                 }
+            }
+            for(const fragment in this.data[status.userId])
+            {
+                //We should only have keys from our actual userId stored as an artifact of
+                //keys shared with us, when logged in as another user. Just delete them now.
+                deleteShared.push(this.data[status.userId][fragment].getKey());
             }
         }
 
