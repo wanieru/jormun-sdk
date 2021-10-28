@@ -321,7 +321,7 @@ export class Jormun
     private timeToVersion(time : number, dirty : boolean)
     {
         const date = new Date(time);
-        const str = `${date.getFullYear().toString().substr(2)}-${date.getMonth().toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}-${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}${dirty?`:new`:""}`;
+        const str = `${date.getFullYear().toString().substr(2)}-${(date.getMonth()+1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}-${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}${dirty?`:new`:""}`;
         return str;
     }
     public async different() : Promise<{different : boolean, comparison : JormunRemoteKeyComparison | null}>
