@@ -39,6 +39,17 @@ export class Data
     }
     private async getEventPayload() : Promise<JormunEventPayload>
     {
+        if(this.deleted)
+        {
+            const payload : JormunEventPayload = 
+            {
+                data : this,
+                raw : null,
+                value : null,
+                key : this.getKey()
+            };
+            return payload;
+        }
         const payload : JormunEventPayload = 
         {
             data : this,
@@ -60,13 +71,8 @@ export class Data
             json : JSON.stringify(value)
         };
         await this.jormun["local"].setValue(this.key, localData);
-
-        const keyString = this.key.stringifyLocal();
-        if(this.jormun.onDataChange.hasOwnProperty(keyString))
-        {
-            const payload = await this.getEventPayload();
-            this.jormun.onDataChange[keyString].trigger(payload);
-        }
+        
+        await this.fireChangeEvent();
     }
     public async set(value : any)
     {
@@ -86,6 +92,16 @@ export class Data
         delete this.jormun["data"][this.key.userId][this.key.fragment];
         await this.jormun.bumpChangedKeys();
         this.deleted = true;
+        await this.fireChangeEvent();
+    }
+    private fireChangeEvent = async () => 
+    {
+        const keyString = this.key.stringifyLocal();
+        if(this.jormun.onDataChange.hasOwnProperty(keyString))
+        {
+            const payload = await this.getEventPayload();
+            this.jormun.onDataChange[keyString].trigger(payload);
+        }
     }
     public getKey = () => this.key;
     public getFragment = () => this.key.fragment;

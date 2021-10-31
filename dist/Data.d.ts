@@ -21,6 +21,7 @@ export declare class Data {
     set(value: any): Promise<void>;
     setAndSync(value: any): Promise<void>;
     remove(): Promise<void>;
+    private fireChangeEvent;
     getKey: () => Key;
     getFragment: () => string;
     onChange(handler: (payload: JormunEventPayload) => void): number;
