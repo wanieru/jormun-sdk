@@ -278,7 +278,10 @@ export class Jormun
                     {
                         if(user == "0")
                         {
-                            missingRemote.push(key);
+                            if(raw.isDirty)
+                                newerLocal.push(key);
+                            else
+                                missingRemote.push(key);
                         }
                         else
                         {
