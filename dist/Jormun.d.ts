@@ -57,6 +57,8 @@ export declare class Jormun {
     onSync: JormunEvent<boolean>;
     onSetup: JormunEvent<void>;
     initialize(app: string, alertDelegate: AlertDelegate | null, memoryOnly?: boolean): Promise<void>;
+    static getAnonymousRemote(app: string, host: string): Promise<IPublicRemote>;
+    getApp(): string;
     getRemote(): IPublicRemote;
     alert(title: string, message: string): Promise<void>;
     ask(title: string, message: string, options: string[]): Promise<number>;
