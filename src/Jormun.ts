@@ -81,6 +81,17 @@ export class Jormun
         this.data = {};
         await this.setup({app:app, remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
     }
+    public static async getAnonymousRemote(app : string, host : string)
+    {
+        const jormun = new Jormun();
+        await jormun.initialize(app, null, true);
+        await jormun.login({host: host, username : "", password : "", token : "", downloadSharedData : false});
+        return jormun.getRemote();
+    }
+    public getApp() : string
+    {
+        return this.options.app;
+    }
     public getRemote() : IPublicRemote
     {
         return this.remote;
