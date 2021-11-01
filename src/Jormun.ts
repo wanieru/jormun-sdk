@@ -135,7 +135,7 @@ export class Jormun
 
         this.onSetup.trigger();
 
-        if(this.remote)
+        if(this.remote && await this.remote.loggedIn())
         {
             let forceDownload = false;
             if((await this.local.getKeys()).length <= 1)
