@@ -9,6 +9,7 @@ export interface LocalData
     isDirty : boolean,
     json : string
 }
+/** Represents a piece of data, which can be loaded and set. */
 export class Data
 {
     private jormun : Jormun;
@@ -22,14 +23,12 @@ export class Data
         this.jormun = jormun;
         this.key = key;
     }
-    public async sync()
-    {
-        await this.jormun.sync();
-    }
+    /** Gets the raw data, including metadata like timestamp and dirty status. */
     public async getRaw()
     {
         return <LocalData>await this.jormun["local"].getValue(this.key);
     }
+    /** Loads and parses this value. */
     public async get()
     {
         const localData = await this.getRaw();
@@ -59,6 +58,7 @@ export class Data
         };
         return payload;
     }
+    /** Preset data AND metadata. */
     public async preset(value : any, timestamp : number, published : Publicity, isDirty : boolean)
     {
         if(this.deleted)
@@ -74,16 +74,13 @@ export class Data
         
         await this.fireChangeEvent();
     }
+    /** Set this value. */
     public async set(value : any)
     {
         const raw = await this.getRaw();
         await this.preset(value, raw.timestamp, this.published, true);
     }
-    public async setAndSync(value : any)
-    {
-        await this.set(value);
-        await this.sync();
-    }
+    /** Delete this value locally. */
     public async remove()
     {
         if(this.getFragment() == Jormun.CHANGED_KEYS_KEY)
@@ -103,9 +100,12 @@ export class Data
             this.jormun.onDataChange[keyString].trigger(payload);
         }
     }
+    /** Gets this data's key. */
     public getKey = () => this.key;
+    /** Gets the fragment of this data's key. */
     public getFragment = () => this.key.fragment;
     
+    /** Bind an event to be triggered whenever this data's value is changed. Returns an id used to unsubscribe again. */
     public onChange(handler : (payload : JormunEventPayload) => void) : number
     {
         const key = this.key.stringifyLocal();
@@ -115,6 +115,7 @@ export class Data
         this.getEventPayload().then(payload => handler(payload));
         return id;
     }
+    /** Unsubscribe the bound event with the specified event Id. */
     public offChange(eventId : number)
     {
         const key = this.key.stringifyLocal();
@@ -123,8 +124,11 @@ export class Data
             this.jormun.onDataChange[key].off(eventId);
         }
     }
+    /** Gets the publicity of this data on the remote. */
     public isPublished(){return this.published;}
+    /** Gets a list of user ids this data is shared with. */
     public getSharedWith(){return this.sharedWith;}
+    /** Preset the ids of the users this data is shared with. */
     public setSharedWith(sharedWith : number[], localUserId : number)
     {
         this.sharedWith = sharedWith;

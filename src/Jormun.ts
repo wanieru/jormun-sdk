@@ -52,6 +52,8 @@ export interface JormunRemoteKeyComparison
 export type AlertContent = {title : string, message : string, options : string[]};
 export type AlertDelegate = (obj : AlertContent) => Promise<number>;
 export type JormunEventPayload = {key : Key, data : Data, value : any, raw : LocalData};
+
+/** Main object for interacting with Jormun.  */
 export class Jormun
 {
     private REMOTE_SETTINGS_KEY : Key;
@@ -65,9 +67,14 @@ export class Jormun
     private data : JormunDataUsers;
 
     public onDataChange : {[key : string] : JormunEvent<JormunEventPayload>} = {};
+    /** Subscribe to this event to be notified when a sync starts and stops. */
     public onSync = new JormunEvent<boolean>();
+    /** Subscribe to this event to be notified whenever this instance is setup again. */
     public onSetup = new JormunEvent<void>();
 
+    /** Initialize this jormun instance with the specified app, and alert handler.
+     * Will automatically load saved remote settings.
+     */
     public async initialize(app : string, alertDelegate : AlertDelegate | null, memoryOnly : boolean = false)
     {
         if(memoryOnly)
@@ -85,6 +92,7 @@ export class Jormun
         this.data = {};
         await this.setup({app:app, remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
     }
+    /** Get an interface to interact anonymously with the specified app on the specified host. */
     public static async getAnonymousRemote(app : string, host : string) : Promise<IAnonymousRemote>
     {
         const jormun = new Jormun();
@@ -96,14 +104,17 @@ export class Jormun
     {
         return this.options.app;
     }
+    /** Gets an interface to interact with the current remote. */
     public getRemote() : IPublicRemote
     {
         return this.remote;
     }
+    /** Post an alert using the provided alert handler. */
     public async alert(title : string, message : string)
     {
         await this.alertDelegate({title : title, message: message, options : []});
     }
+    /** Ask the user a question using the provided alert handler. Returns the index of the option chosen. */
     public async ask(title : string, message : string, options : string[])
     {
         return this.alertDelegate({title : title, message: message, options: options});
@@ -154,6 +165,7 @@ export class Jormun
             await this.sync(forceDownload);
         }
     }
+    /** Login to the specified remote. "token" does not need to have a value. */
     public async login(remote : JormunRemote)
     {
         remote.password = sha512(remote.password);
@@ -161,8 +173,10 @@ export class Jormun
             remote.host = `http://${remote.host}`;
         await this.setup({app:this.options.app, remote : remote});
     }
+    /** Returns the saved remote settings including the auth token, but not the password. */
     public hashedRemote = async () : Promise<JormunRemote> => await this.local.getValue(this.REMOTE_SETTINGS_KEY);
 
+    /** Initiates a sync. If a conflict occurs, the user will be prompted to resolve it using the alert handler. If forceDownload is true, automatically clears local data and redownloads it. */
     public async sync(forceDownload = false)
     {
         if(!this.remote || !(await this.remote.loggedIn()))
@@ -352,6 +366,7 @@ export class Jormun
         const str = `${date.getFullYear().toString().substr(2)}-${(date.getMonth()+1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}-${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}${dirty?`:new`:""}`;
         return str;
     }
+    /** Queries the remote and returns a comparison of keys. */
     public async different() : Promise<{different : boolean, comparison : JormunRemoteKeyComparison | null}>
     {
         if(!this.remote || !(await this.remote.loggedIn()))
@@ -413,6 +428,7 @@ export class Jormun
             }
         }
     }
+    /** Add a new data entry with the specified fragment and specified default value. */
     public async add(fragment : string, defaultValue : any) : Promise<Data>
     {
         if(!this.data.hasOwnProperty(0))
@@ -425,22 +441,26 @@ export class Jormun
         }
         return this.data[0][fragment];
     }
+    /** Get a piece of data owned by the local user. */
     public me(fragment : string) : Data
     {
         if(!this.data.hasOwnProperty(0))
             return null;
         return this.data[0][fragment] ?? null;
     }
+    /** Get a piece of data owned by another user, but shared with the local user. */
     public user(userId : number | string, fragment : string) : Data
     {
         if(!this.data.hasOwnProperty(userId))
             return null;
         return this.data[userId][fragment] ?? null;
     }
+    /** Called automatically to indicate that a piece of data has been deleted or created. */
     public async bumpChangedKeys()
     {
         await (await this.add(Jormun.CHANGED_KEYS_KEY, Unix())).set(Unix());
     }
+    /** Returns a list of user ids we have data from locally. The local user is always 0. */
     public users() : number[]
     {
         const users : number[] = [];
@@ -450,6 +470,7 @@ export class Jormun
         }
         return users;
     }
+    /** Returns a list of local fragments. */
     public fragments(userId : number | string)
     {
         const keys : string[] = [];
@@ -479,10 +500,12 @@ export class Jormun
             return i;
         }
     }
+    /* Returns a dictionary of users who shared data with us or whom we shared data with, mapping user ids and usernames. */
     public friends() : {[id : number] : string}
     {
         return this.remote?.cachedStatus()?.friends;
     }
+    /** Export all the local data to a string. */
     public async export()
     {
         const obj = {};
@@ -492,6 +515,7 @@ export class Jormun
         }
         return JSON.stringify(obj);
     }
+    /** Clear local data and import it from the specified string (should be created with the export method.) */
     public async import(data : string)
     {
         if(await this.ask("Import new data?", "Do you want to import this data? This will clear your current local data.", ["Yes", "No"]) != 0)

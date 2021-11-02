@@ -1,7 +1,11 @@
+/** Represents the key of some data. */
 export class Key
 {
+    /** The app-component of the key. */
     public app: string;
+    /** The userId-component of the key. Always 0 if the data belongs to the local user. */
     public userId: number;
+    /** The unique fragment-component of the key. */
     public fragment : string
     public constructor(app : string, userId : number, fragment : string)
     {
@@ -9,6 +13,7 @@ export class Key
         this.userId = userId;
         this.fragment = fragment;
     }
+    /** Parse a stringified key. If the stringified key belongs to the specified remoteId, the userId will instead be 0. Returns null if the key is malformed. */
     public static parse(json : string, remoteId : number)
     {
         const parsed = <any[]>JSON.parse(json);
@@ -32,10 +37,12 @@ export class Key
         }
         return result;
     }
+    /** Stringify the key for local use. If userId is 0, it will remain 0. */
     public stringifyLocal()
     {
         return JSON.stringify([this.app.toString(), parseInt(<any>this.userId), this.fragment.toString()]);
     }
+    /** Stringify the key for remote use. If userId is 0, it will instead be the specified remoteId. RemoteId should be the userId gotten from remote's "status". */
     public stringifyRemote(remoteId : number)
     {
         const originalId = this.userId;
