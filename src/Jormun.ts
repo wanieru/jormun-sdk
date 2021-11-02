@@ -483,4 +483,34 @@ export class Jormun
     {
         return this.remote?.cachedStatus()?.friends;
     }
+    public async export()
+    {
+        const obj = {};
+        for(const fragment in this.fragments(0))
+        {
+            obj[fragment] = await this.me(fragment).get();
+        }
+        return JSON.stringify(obj);
+    }
+    public async import(data : string)
+    {
+        if(await this.ask("Import new data?", "Do you want to import this data? This will clear your current local data.", ["Yes", "No"]) != 0)
+            return;
+        try
+        {
+            const obj = JSON.parse(data);
+            for(const fragment in this.fragments(0))
+            {
+                await this.me(fragment)?.remove();
+            }
+            for(const fragment in obj)
+            {
+                await this.add(fragment, obj[fragment]);
+            }
+        }
+        catch(e)
+        {
+            this.alert("Import failed", e);
+        }
+    }
 }

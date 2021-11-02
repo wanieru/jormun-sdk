@@ -86,4 +86,6 @@ export declare class Jormun {
     friends(): {
         [id: number]: string;
     };
+    export(): Promise<string>;
+    import(data: string): Promise<void>;
 }
