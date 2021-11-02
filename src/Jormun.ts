@@ -507,6 +507,7 @@ export class Jormun
             {
                 await this.add(fragment, obj[fragment]);
             }
+            this.alert("Import success!", "");
         }
         catch(e)
         {
