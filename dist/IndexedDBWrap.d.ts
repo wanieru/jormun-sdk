@@ -1,15 +1,14 @@
 import { ILocal } from "./ILocal";
 import { Key } from "./Key";
-export declare class LocalStorageWrap implements ILocal {
-    static isAvailable(): void;
-    private static KEYS_KEY;
-    private static VER_KEY;
-    private keys;
-    private version;
-    constructor();
+export declare class IndexedDBWrap implements ILocal {
+    static isAvailable: (app: string) => Promise<boolean>;
+    private app;
+    private _db;
+    constructor(app: string);
     private migrate;
-    private addKey;
-    private removeKey;
+    private db;
+    private createDb;
+    private request;
     getKeys(): Promise<Key[]>;
     setValue(key: Key, value: any): Promise<void>;
     setValues(data: {

@@ -63,3 +63,8 @@ export interface IPublicRemote {
     }): Promise<PublishResponse>;
     peek(keys: Key[]): Promise<PeekResponse>;
 }
+export interface IAnonymousRemote {
+    connected(): Promise<boolean>;
+    browse(limit: number, offset: number): Promise<BrowseResponse>;
+    peek(keys: Key[]): Promise<PeekResponse>;
+}

@@ -1,4 +1,4 @@
-import { IPublicRemote } from "./IRemote";
+import { IAnonymousRemote, IPublicRemote } from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
 import { JormunEvent } from "./Event";
@@ -57,7 +57,7 @@ export declare class Jormun {
     onSync: JormunEvent<boolean>;
     onSetup: JormunEvent<void>;
     initialize(app: string, alertDelegate: AlertDelegate | null, memoryOnly?: boolean): Promise<void>;
-    static getAnonymousRemote(app: string, host: string): Promise<IPublicRemote>;
+    static getAnonymousRemote(app: string, host: string): Promise<IAnonymousRemote>;
     getApp(): string;
     getRemote(): IPublicRemote;
     alert(title: string, message: string): Promise<void>;

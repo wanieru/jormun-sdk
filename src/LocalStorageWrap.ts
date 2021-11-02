@@ -7,8 +7,21 @@ if (typeof localStorage === "undefined" || localStorage === null)
     localStorage = new ls('./scratch');
 }
 
-export class LocalStorage implements ILocal
+export class LocalStorageWrap implements ILocal
 {
+    public static isAvailable()
+    {
+        try
+        {
+            const localStorage = new LocalStorageWrap();
+            return true;
+        }
+        catch(e)
+        {
+            console.log(e);
+            return false;
+        }
+    }
     private static KEYS_KEY = "$$KEYS$$";
     private static VER_KEY = "$$VERSION$$";
     private keys : {[key : string] : number} = {};
@@ -16,11 +29,11 @@ export class LocalStorage implements ILocal
     
     public constructor()
     {
-        this.version = JSON.parse(localStorage.getItem(LocalStorage.VER_KEY)) ?? 1;
+        this.version = JSON.parse(localStorage.getItem(LocalStorageWrap.VER_KEY)) ?? 1;
         this.migrate();
-        localStorage.setItem(LocalStorage.VER_KEY, JSON.stringify(this.version));
+        localStorage.setItem(LocalStorageWrap.VER_KEY, JSON.stringify(this.version));
 
-        this.keys = JSON.parse(localStorage.getItem(LocalStorage.KEYS_KEY) ?? "{}");
+        this.keys = JSON.parse(localStorage.getItem(LocalStorageWrap.KEYS_KEY) ?? "{}");
     }
     private migrate()
     {
@@ -43,7 +56,7 @@ export class LocalStorage implements ILocal
         if(!this.keys[key])
         {
             this.keys[key] = 1;
-            localStorage.setItem(LocalStorage.KEYS_KEY, JSON.stringify(this.keys));
+            localStorage.setItem(LocalStorageWrap.KEYS_KEY, JSON.stringify(this.keys));
         }
     }
     private removeKey(key : string)
@@ -51,7 +64,7 @@ export class LocalStorage implements ILocal
         if(this.keys[key])
         {
             delete this.keys[key];
-            localStorage.setItem(LocalStorage.KEYS_KEY, JSON.stringify(this.keys));
+            localStorage.setItem(LocalStorageWrap.KEYS_KEY, JSON.stringify(this.keys));
         }
     }
 

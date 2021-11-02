@@ -1,16 +1,16 @@
 import { ILocal } from "./ILocal";
 import {sha512} from "js-sha512";
-import { IPublicRemote, IRemote} from "./IRemote";
+import { IAnonymousRemote, IPublicRemote, IRemote} from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
-import { LocalStorage } from "./LocalStorage";
+import { LocalStorageWrap } from "./LocalStorageWrap";
 import { JormunSyncRemote } from "./JormunSyncRemote";
 import { JormunEvent } from "./Event";
 import { StatusResponse } from "./ApiTypes/Status";
 import { KeysResponse } from "./ApiTypes/Keys";
 import { GetResponse } from "./ApiTypes/Get";
 import { Unix } from "./Unix";
-import { IndexedDB } from "./IndexedDB";
+import { IndexedDBWrap } from "./IndexedDBWrap";
 import { BrowseResponse } from "./ApiTypes/Browse";
 import { MemoryStorage } from "./MemoryStorage";
 
@@ -70,8 +70,12 @@ export class Jormun
 
     public async initialize(app : string, alertDelegate : AlertDelegate | null, memoryOnly : boolean = false)
     {
-        if(!memoryOnly)
-            this.local = window.indexedDB ? new IndexedDB(app) : new LocalStorage();
+        if(memoryOnly)
+            this.local = new MemoryStorage();
+        else if(IndexedDBWrap.isAvailable(app))
+            this.local = new IndexedDBWrap(app);
+        else if(LocalStorageWrap.isAvailable())
+            this.local = new LocalStorageWrap();
         else
             this.local = new MemoryStorage();
 
@@ -81,7 +85,7 @@ export class Jormun
         this.data = {};
         await this.setup({app:app, remote : await this.local.getValue(this.REMOTE_SETTINGS_KEY)});
     }
-    public static async getAnonymousRemote(app : string, host : string)
+    public static async getAnonymousRemote(app : string, host : string) : Promise<IAnonymousRemote>
     {
         const jormun = new Jormun();
         await jormun.initialize(app, null, true);

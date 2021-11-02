@@ -1,7 +1,7 @@
 import { ILocal } from "./ILocal";
 import { Key } from "./Key";
 export declare class LocalStorageWrap implements ILocal {
-    static isAvailable(): void;
+    static isAvailable(): boolean;
     private static KEYS_KEY;
     private static VER_KEY;
     private keys;

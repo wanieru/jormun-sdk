@@ -1,8 +1,24 @@
+import { getTokenSourceMapRange } from "typescript";
 import { ILocal } from "./ILocal";
 import { Key } from "./Key";
 
-export class IndexedDB implements ILocal
+export class IndexedDBWrap implements ILocal
 {
+    public static isAvailable = async (app : string) => 
+    {
+        try
+        {
+            const indexedDb : IndexedDBWrap = new IndexedDBWrap(app);
+            const db = await indexedDb.db();
+            return true;
+        }
+        catch(e)
+        {
+            console.log(e);
+            return false;
+        }
+    }
+    
     private app : string;
     private _db : IDBDatabase;
     public constructor(app : string)
