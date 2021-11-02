@@ -170,7 +170,7 @@ export class Jormun
         {
             for(const fragment in this.fragments(0))
             {
-                await this.me(fragment).remove();
+                await this.me(fragment)?.remove();
             }
         }
 
