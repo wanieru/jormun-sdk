@@ -172,7 +172,7 @@ export class Jormun
 
         if(forceDownload)
         {
-            for(const fragment in this.fragments(0))
+            for(const fragment of this.fragments(0))
             {
                 await this.me(fragment)?.remove();
             }
@@ -485,9 +485,8 @@ export class Jormun
     }
     public async export()
     {
-        console.log(this.data);
         const obj = {};
-        for(const fragment in this.fragments(0))
+        for(const fragment of this.fragments(0))
         {
             obj[fragment] = await this.me(fragment)?.get();
         }
@@ -500,7 +499,7 @@ export class Jormun
         try
         {
             const obj = JSON.parse(data);
-            for(const fragment in this.fragments(0))
+            for(const fragment of this.fragments(0))
             {
                 await this.me(fragment)?.remove();
             }
