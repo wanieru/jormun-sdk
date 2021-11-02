@@ -72,7 +72,7 @@ export class Jormun
     {
         if(memoryOnly)
             this.local = new MemoryStorage();
-        else if(IndexedDBWrap.isAvailable(app))
+        else if(await IndexedDBWrap.isAvailable(app))
             this.local = new IndexedDBWrap(app);
         else if(LocalStorageWrap.isAvailable())
             this.local = new LocalStorageWrap();
