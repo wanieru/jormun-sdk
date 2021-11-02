@@ -488,7 +488,7 @@ export class Jormun
         const obj = {};
         for(const fragment in this.fragments(0))
         {
-            obj[fragment] = await this.me(fragment).get();
+            obj[fragment] = await this.me(fragment)?.get();
         }
         return JSON.stringify(obj);
     }
