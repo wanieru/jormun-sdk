@@ -7,3 +7,5 @@ The intended use case is utility web apps such as Budget Management, Calorie Cou
 Instead, we deploy a "bring-your-own-server" approach. The Jormun SDK lets the app easily save and load data, and then with a single method call, synchronize the local collection with the remote the user has specified, resolving any conflicts that may arise.
 
 The SDK and Sync Server also support sharnig data between users on the same server, and even making data available "unlisted" or "public".
+
+My sync server implementation is not currently available.
