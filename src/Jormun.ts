@@ -276,12 +276,14 @@ export class Jormun
                 {
                     const raw = await this.data[parsed.userId][parsed.fragment].getRaw();
                     raws[parsed.stringifyLocal()] = raw;
-                    const localTime = raw?.timestamp ?? 0;
-                    if(localTime > remoteTime || (raw?.isDirty ?? false))
-                        (local ? newerLocal : newShared).push(parsed);
-                    if(remoteTime > localTime)
+                    if(local && (raw?.isDirty ?? false))
                     {
-                        newerRemote.push(parsed);
+                        newerLocal.push(parsed);
+                    }
+                    const localTime = raw?.timestamp ?? 0;
+                    if(remoteTime != localTime) //Local time should never be newer than remote time, so if different, consider remote to be newer.
+                    {
+                        (local ? newerRemote : newShared).push(parsed);
                     }
                 }
             }
