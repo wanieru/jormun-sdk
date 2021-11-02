@@ -166,6 +166,14 @@ export class Jormun
 
         this.onSync.trigger(true);
 
+        if(forceDownload)
+        {
+            for(const fragment in this.fragments(0))
+            {
+                await this.me(fragment).remove();
+            }
+        }
+
         const status = await this.remote.status();
         const keys = await this.remote.keys();
         this.setSharedWith(status, keys);
