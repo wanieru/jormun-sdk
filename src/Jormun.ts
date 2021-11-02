@@ -485,6 +485,7 @@ export class Jormun
     }
     public async export()
     {
+        console.log(this.data);
         const obj = {};
         for(const fragment in this.fragments(0))
         {
