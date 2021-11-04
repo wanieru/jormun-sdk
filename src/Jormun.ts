@@ -170,7 +170,7 @@ export class Jormun
     {
         remote.password = sha512(remote.password);
         if(!remote.host.startsWith("http"))
-            remote.host = `http://${remote.host}`;
+            remote.host = `https://${remote.host}`;
         await this.setup({app:this.options.app, remote : remote});
     }
     /** Returns the saved remote settings including the auth token, but not the password. */
