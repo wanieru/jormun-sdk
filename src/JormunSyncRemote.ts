@@ -360,6 +360,7 @@ export class JormunSyncRemote implements IRemote
         }
         const request = this.baseRequest();
         request["token"] = guestToken;
+        request["username"] = "";
         request["keys"] = array;
 
         return await this.request<GetRequest, GetResponse>({endpoint: "get",data:  request, hasSideEffects: false, hasParameters: true});
@@ -368,6 +369,7 @@ export class JormunSyncRemote implements IRemote
     {
         const request = this.baseRequest();
         request["token"] = guestToken;
+        request["username"] = "";
         request["data"] = data;
 
         return await this.request<SetRequest, SetResponse>({endpoint: "set",data:  request, hasSideEffects: true, hasParameters: true});
