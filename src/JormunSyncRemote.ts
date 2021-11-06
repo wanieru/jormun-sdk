@@ -334,14 +334,14 @@ export class JormunSyncRemote implements IRemote
         const request = this.baseRequest();
         request["keys"] = array;
 
-        return await this.request<InviteRequest, InviteResponse>({endpoint: "grant", data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<InviteRequest, InviteResponse>({endpoint: "invite", data:  request, hasSideEffects: true, hasParameters: true});
     }
     public async uninvite(tokenIds : string[]): Promise<UninviteResponse> 
     {
         const request = this.baseRequest();
         request["tokenIds"] = tokenIds;
 
-        return await this.request<UninviteRequest, UninviteResponse>({endpoint: "revoke", data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<UninviteRequest, UninviteResponse>({endpoint: "uninvite", data:  request, hasSideEffects: true, hasParameters: true});
     }
     public async invitation(guestToken: string): Promise<InvitationResponse> 
     {
@@ -349,7 +349,7 @@ export class JormunSyncRemote implements IRemote
             app : this.jormunOptions.app,
             guestToken : guestToken
         };
-        return await this.request<InvitationRequest, InvitationResponse>({endpoint: "inquire", data:  request, hasSideEffects: false, hasParameters: true});
+        return await this.request<InvitationRequest, InvitationResponse>({endpoint: "invitation", data:  request, hasSideEffects: false, hasParameters: true});
     }
     public async getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse> 
     {
