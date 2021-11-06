@@ -1,4 +1,5 @@
 import * as zod from "zod";
+import { Key } from "../Key";
 export const statusRequest = zod.object(
 {
     username : zod.string().min(1),
@@ -15,5 +16,5 @@ export interface StatusResponse
     used : number,
     friends : {[id : number] : string },
     apps : string[],
-    guestTokenIds : string[]
+    guestTokenIds : {[guestTokenId : string] : string}
 }

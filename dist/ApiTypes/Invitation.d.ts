@@ -1,5 +1,4 @@
 import * as zod from "zod";
-import { Key } from "../Key";
 export declare const invitationRequest: zod.ZodObject<{
     app: zod.ZodString;
     guestToken: zod.ZodString;
@@ -12,5 +11,5 @@ export declare const invitationRequest: zod.ZodObject<{
 }>;
 export declare type InvitationRequest = zod.infer<typeof invitationRequest>;
 export interface InvitationResponse {
-    key: Key[];
+    keys: string[];
 }

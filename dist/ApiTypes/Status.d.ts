@@ -23,5 +23,7 @@ export interface StatusResponse {
         [id: number]: string;
     };
     apps: string[];
-    guestTokenIds: string[];
+    guestTokenIds: {
+        [guestTokenId: string]: string;
+    };
 }

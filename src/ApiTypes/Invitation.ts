@@ -8,5 +8,5 @@ export const invitationRequest = zod.object(
 export type InvitationRequest = zod.infer<typeof invitationRequest>;
 export interface InvitationResponse
 {
-    key : Key[]
+    keys : string[]
 }
