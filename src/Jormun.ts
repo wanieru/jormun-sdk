@@ -164,8 +164,7 @@ export class Jormun
             }
             else if(!(await this.isLocalDirty()).isDirty)
             {
-                const response = await this.ask("New remote", `You have logged in to a new remote. Would you like to clear the local data and redownload the data on the remote?`, ["Yes", "No"]);
-                forceDownload = response == 0;
+                forceDownload = true;
             }
             await this.sync(forceDownload);
         }
