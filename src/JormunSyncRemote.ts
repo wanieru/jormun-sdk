@@ -84,6 +84,7 @@ export class JormunSyncRemote implements IRemote
             case 200: return "OK";
             case 400: return "Invalid Request";
             case 401: return "Invalid Login";
+            case 404: return "Not Found";
             case 413: return "Storage Space Exceeded";
             case 429: return "Too Many Requests - Please Wait A Bit";
             case 500: return "Server Error";
