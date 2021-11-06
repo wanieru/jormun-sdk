@@ -162,6 +162,11 @@ export class Jormun
                 const response = await this.ask("New User", `You seem to have switched from user ${oldRemote.username}@${oldRemote.host} to ${options.remote.username}@${options.remote.host}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
                 forceDownload = response == 0;
             }
+            else if(!(await this.isLocalDirty()).isDirty)
+            {
+                const response = await this.ask("New remote", `You have logged in to a new remote. Would you like to clear the local data and redownload the data on the remote?`, ["Yes", "No"]);
+                forceDownload = response == 0;
+            }
             await this.sync(forceDownload);
         }
     }
@@ -376,6 +381,24 @@ export class Jormun
         this.setSharedWith(status, keys);
         const comparison = await this.compareRemoteKeys(status, keys);
         return {different : comparison.download || comparison.upload, comparison : comparison};
+    }
+    public async isLocalDirty() : Promise<{isDirty : boolean, localVersion : string}>
+    {
+        let newest = 0;
+        let dirty = false;
+        if(this.data.hasOwnProperty("0"))
+        {
+            for(const fragment in this.data[0])
+            {
+                const raw = await this.data[0][fragment].getRaw();
+                if(raw.isDirty)
+                    dirty = true;
+                if(raw.timestamp > newest)
+                    newest = raw.timestamp;
+            }
+        }
+        const version = this.timeToVersion(newest, dirty);
+        return {isDirty : dirty, localVersion : version};
     }
     private async getUploadData(status : StatusResponse, keys : Key[])
     {

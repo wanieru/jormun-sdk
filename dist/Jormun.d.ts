@@ -86,6 +86,10 @@ export declare class Jormun {
         different: boolean;
         comparison: JormunRemoteKeyComparison | null;
     }>;
+    isLocalDirty(): Promise<{
+        isDirty: boolean;
+        localVersion: string;
+    }>;
     private getUploadData;
     private removeLocalKeys;
     private processDataResponse;
