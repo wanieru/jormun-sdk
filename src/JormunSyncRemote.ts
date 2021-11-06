@@ -235,14 +235,16 @@ export class JormunSyncRemote implements IRemote
 
         return await this.request<PasswordRequest, PasswordResponse>({endpoint: "password",data:  request, hasSideEffects: true, hasParameters: true});
     }
-    public async register(newUsername: string, newPassword: string, size : number, isAdmin : boolean): Promise<RegisterResponse> 
+    public async register(loggedInPassword : string, newUsername: string, newPassword: string, size : number, isAdmin : boolean): Promise<RegisterResponse> 
     {
+        loggedInPassword = sha512(loggedInPassword);
         newPassword = sha512(newPassword);
         const request = this.adminRequest();
         request["newUsername"] = newUsername;
         request["newPassword"] = newPassword;
         request["size"] = size;
         request["isAdmin"] = isAdmin;
+        request["password"] = loggedInPassword;
 
         return await this.request<RegisterRequest , RegisterResponse>({endpoint: "register", data: request, hasSideEffects: true, hasParameters: true});
     }
@@ -256,10 +258,12 @@ export class JormunSyncRemote implements IRemote
         const request = {username : username, password : password};
         return await this.request<SetupRequest, SetupResponse>({endpoint: "setup", data: request, hasSideEffects: true, hasParameters: true});
     }
-    public async ban(bannedUsername: string): Promise<BanResponse> 
+    public async ban(bannedUsername: string, loggedInPassword : string): Promise<BanResponse> 
     {
+        loggedInPassword = sha512(loggedInPassword);
         const request = this.adminRequest();
         request["bannedUsername"] = bannedUsername;
+        request["password"] = loggedInPassword;
 
         return await this.request<BanRequest, BanResponse>({endpoint: "ban",data: request, hasSideEffects: true, hasParameters: true});
     }

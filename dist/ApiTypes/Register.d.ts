@@ -2,6 +2,7 @@ import * as zod from "zod";
 export declare const registerRequest: zod.ZodObject<{
     username: zod.ZodString;
     token: zod.ZodString;
+    password: zod.ZodString;
     newUsername: zod.ZodString;
     newPassword: zod.ZodString;
     size: zod.ZodNumber;
@@ -9,15 +10,17 @@ export declare const registerRequest: zod.ZodObject<{
 }, "strip", zod.ZodTypeAny, {
     username?: string;
     token?: string;
-    newPassword?: string;
+    password?: string;
     newUsername?: string;
+    newPassword?: string;
     size?: number;
     isAdmin?: boolean;
 }, {
     username?: string;
     token?: string;
-    newPassword?: string;
+    password?: string;
     newUsername?: string;
+    newPassword?: string;
     size?: number;
     isAdmin?: boolean;
 }>;

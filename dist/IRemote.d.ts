@@ -33,10 +33,10 @@ export interface IRemote {
     leave(keys: Key[]): Promise<LeaveResponse>;
     delete(keys: Key[]): Promise<DeleteResponse>;
     password(password: string, newPassword: string): Promise<PasswordResponse>;
-    register(newUsername: string, newPassword: string, size: number, isAdmin: boolean): Promise<RegisterResponse>;
+    register(loggedInPassword: string, newUsername: string, newPassword: string, size: number, isAdmin: boolean): Promise<RegisterResponse>;
     empty(): Promise<EmptyResponse>;
     setup(username: string, password: string): Promise<SetupResponse>;
-    ban(bannedUsername: string): Promise<BanResponse>;
+    ban(bannedUsername: string, loggedInPassword: string): Promise<BanResponse>;
     rename(oldUsername: string, newUsername: string): Promise<RenameResponse>;
     resize(targetUsername: string, newSize: number): Promise<ResizeResponse>;
     users(): Promise<UsersResponse>;
