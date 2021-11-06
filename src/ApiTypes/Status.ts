@@ -14,5 +14,6 @@ export interface StatusResponse
     storage : number,
     used : number,
     friends : {[id : number] : string },
-    apps : string[]
+    apps : string[],
+    guestTokens : string[]
 }
