@@ -2,7 +2,7 @@ import * as zod from "zod";
 
 export const getRequest = zod.object(
 {
-    username : zod.string().min(1),
+    username : zod.string(),
     token : zod.string().min(1),
     app : zod.string().min(1),
     keys : zod.array(zod.string().min(1)).min(1)
