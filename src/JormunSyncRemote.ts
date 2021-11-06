@@ -5,8 +5,8 @@ import { BrowseRequest, BrowseResponse } from "./ApiTypes/Browse";
 import { DeleteRequest, DeleteResponse } from "./ApiTypes/Delete";
 import { EmptyRequest, EmptyResponse } from "./ApiTypes/Empty";
 import { GetRequest, GetResponse } from "./ApiTypes/Get";
-import { GrantRequest, GrantResponse } from "./ApiTypes/Grant";
-import { InquireRequest, InquireResponse } from "./ApiTypes/Inquire";
+import { InviteRequest, InviteResponse } from "./ApiTypes/Invite";
+import { InvitationRequest, InvitationResponse } from "./ApiTypes/Invitation";
 import { KeysRequest, KeysResponse } from "./ApiTypes/Keys";
 import { LeaveRequest, LeaveResponse } from "./ApiTypes/Leave";
 import { LoginRequest, LoginResponse } from "./ApiTypes/Login";
@@ -17,7 +17,7 @@ import { Publicity, PublishRequest, PublishResponse } from "./ApiTypes/Publish";
 import { RegisterRequest, RegisterResponse } from "./ApiTypes/Register";
 import { RenameRequest, RenameResponse } from "./ApiTypes/Rename";
 import { ResizeRequest, ResizeResponse } from "./ApiTypes/Resize";
-import { RevokeRequest, RevokeResponse } from "./ApiTypes/Revoke";
+import { UninviteRequest, UninviteResponse } from "./ApiTypes/Uninvite";
 import { SetRequest, SetResponse } from "./ApiTypes/Set";
 import { SetupRequest, SetupResponse } from "./ApiTypes/Setup";
 import { ShareRequest, ShareResponse } from "./ApiTypes/Share";
@@ -324,7 +324,7 @@ export class JormunSyncRemote implements IRemote
         return await this.request<LogoutRequest, LogoutResponse>({endpoint: "logout",  data: request, hasSideEffects: true, hasParameters: false});
     }
     
-    public async grant(keys: Key[]): Promise<GrantResponse> 
+    public async invite(keys: Key[]): Promise<InviteResponse> 
     {
         const array : string[] = [];
         for(const i in keys)
@@ -334,22 +334,22 @@ export class JormunSyncRemote implements IRemote
         const request = this.baseRequest();
         request["keys"] = array;
 
-        return await this.request<GrantRequest, GrantResponse>({endpoint: "grant", data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<InviteRequest, InviteResponse>({endpoint: "grant", data:  request, hasSideEffects: true, hasParameters: true});
     }
-    public async revoke(tokens : string[]): Promise<RevokeResponse> 
+    public async uninvite(tokenIds : string[]): Promise<UninviteResponse> 
     {
         const request = this.baseRequest();
-        request["guestTokens"] = tokens;
+        request["tokenIds"] = tokenIds;
 
-        return await this.request<RevokeRequest, RevokeResponse>({endpoint: "revoke", data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<UninviteRequest, UninviteResponse>({endpoint: "revoke", data:  request, hasSideEffects: true, hasParameters: true});
     }
-    public async inquire(guestToken: string): Promise<InquireResponse> 
+    public async invitation(guestToken: string): Promise<InvitationResponse> 
     {
-        const request : InquireRequest = {
+        const request : InvitationRequest = {
             app : this.jormunOptions.app,
             guestToken : guestToken
         };
-        return await this.request<InquireRequest, InquireResponse>({endpoint: "inquire", data:  request, hasSideEffects: false, hasParameters: true});
+        return await this.request<InvitationRequest, InvitationResponse>({endpoint: "inquire", data:  request, hasSideEffects: false, hasParameters: true});
     }
     public async getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse> 
     {

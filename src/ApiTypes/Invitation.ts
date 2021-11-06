@@ -1,12 +1,12 @@
 import * as zod from "zod";
 import { Key } from "../Key";
-export const inquireRequest = zod.object(
+export const invitationRequest = zod.object(
 {
     app : zod.string().min(1),
     guestToken : zod.string().min(1),
 });
-export type InquireRequest = zod.infer<typeof inquireRequest>;
-export interface InquireResponse
+export type InvitationRequest = zod.infer<typeof invitationRequest>;
+export interface InvitationResponse
 {
     key : Key[]
 }

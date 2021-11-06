@@ -3,8 +3,8 @@ import { BrowseResponse } from "./ApiTypes/Browse";
 import { DeleteResponse } from "./ApiTypes/Delete";
 import { EmptyResponse } from "./ApiTypes/Empty";
 import { GetResponse } from "./ApiTypes/Get";
-import { GrantResponse } from "./ApiTypes/Grant";
-import { InquireResponse } from "./ApiTypes/Inquire";
+import { InviteResponse } from "./ApiTypes/Invite";
+import { InvitationResponse } from "./ApiTypes/Invitation";
 import { KeysResponse } from "./ApiTypes/Keys";
 import { LeaveResponse } from "./ApiTypes/Leave";
 import { LoginResponse } from "./ApiTypes/Login";
@@ -15,7 +15,7 @@ import { Publicity, PublishResponse } from "./ApiTypes/Publish";
 import { RegisterResponse } from "./ApiTypes/Register";
 import { RenameResponse } from "./ApiTypes/Rename";
 import { ResizeResponse } from "./ApiTypes/Resize";
-import { RevokeResponse } from "./ApiTypes/Revoke";
+import { UninviteResponse } from "./ApiTypes/Uninvite";
 import { SetResponse } from "./ApiTypes/Set";
 import { SetupResponse } from "./ApiTypes/Setup";
 import { ShareResponse } from "./ApiTypes/Share";
@@ -35,8 +35,8 @@ export interface IRemote {
     unshare(keys: Key[], users: string[]): Promise<UnshareResponse>;
     leave(keys: Key[]): Promise<LeaveResponse>;
     delete(keys: Key[]): Promise<DeleteResponse>;
-    grant(keys: Key[]): Promise<GrantResponse>;
-    revoke(token: string[]): Promise<RevokeResponse>;
+    invite(keys: Key[]): Promise<InviteResponse>;
+    uninvite(tokenId: string[]): Promise<UninviteResponse>;
     password(password: string, newPassword: string): Promise<PasswordResponse>;
     register(loggedInPassword: string, newUsername: string, newPassword: string, size: number, isAdmin: boolean): Promise<RegisterResponse>;
     empty(): Promise<EmptyResponse>;
@@ -52,7 +52,7 @@ export interface IRemote {
         [key: string]: Publicity;
     }): Promise<PublishResponse>;
     peek(keys: Key[]): Promise<PeekResponse>;
-    inquire(guestToken: string): Promise<InquireResponse>;
+    invitation(guestToken: string): Promise<InvitationResponse>;
     getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse>;
     setAsGuest(data: GetResponse, guestToken: string): Promise<SetResponse>;
 }
@@ -73,9 +73,9 @@ export interface IPublicRemote {
     /** Stop the specified keys from being shared with us. */
     leave(keys: Key[]): Promise<LeaveResponse>;
     /** Create a guest token that can be used to get and set the specified keys. */
-    grant(keys: Key[]): Promise<GrantResponse>;
+    invite(keys: Key[]): Promise<InviteResponse>;
     /** Revoke the specified guest tokens. */
-    revoke(token: string[]): Promise<RevokeResponse>;
+    uninvite(tokenIds: string[]): Promise<UninviteResponse>;
     /** List public keys. */
     browse(limit: number, offset: number): Promise<BrowseResponse>;
     /** Set the publicity for the specified keys. The dictionary maps remote-stringified-keys to their new publicity. */
@@ -85,7 +85,7 @@ export interface IPublicRemote {
     /** Get the values of the specified unlisted or public keys. */
     peek(keys: Key[]): Promise<PeekResponse>;
     /** Gets a list of keys the specified guest token can be used on.  */
-    inquire(guestToken: string): Promise<InquireResponse>;
+    invitation(guestToken: string): Promise<InvitationResponse>;
     /** Get info about keys using a guest token. */
     getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse>;
     /** Set keys using a guest token. */
@@ -100,7 +100,7 @@ export interface IAnonymousRemote {
     /** Get the values of the specified unlisted or public keys. */
     peek(keys: Key[]): Promise<PeekResponse>;
     /** Gets a list of keys the specified guest token can be used on.  */
-    inquire(guestToken: string): Promise<InquireResponse>;
+    invitation(guestToken: string): Promise<InvitationResponse>;
     /** Get info about keys using a guest token. */
     getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse>;
     /** Set keys using a guest token. */
