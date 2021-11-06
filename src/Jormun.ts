@@ -188,9 +188,9 @@ export class Jormun
 
         this.onSync.trigger(true);
 
-        if(forceDownload && this.data.hasOwnProperty("0")) 
+        if(forceDownload)
         {
-            for(const fragment in this.data[0])
+            for(const fragment of this.fragments(0))
             {
                 await this.me(fragment)?.remove();
             }
@@ -259,6 +259,13 @@ export class Jormun
                 const result = await this.remote.get(comparison.newShared);
                 await this.processDataResponse(status, keys, result);
             }
+        }
+
+        const changedKeys = this.me(Jormun.CHANGED_KEYS_KEY);
+        if(changedKeys)
+        {
+            const changedKeysRaw = await changedKeys.getRaw();
+            await changedKeys.preset(changedKeysRaw.timestamp, changedKeysRaw.timestamp, changedKeys.isPublished(), false);
         }
 
         this.onSync.trigger(false);
