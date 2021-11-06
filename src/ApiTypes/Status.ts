@@ -16,5 +16,5 @@ export interface StatusResponse
     used : number,
     friends : {[id : number] : string },
     apps : string[],
-    guestTokenIds : {[guestTokenId : string] : string}
+    guestTokenIds : {[guestTokenId : string] : string[]}
 }
