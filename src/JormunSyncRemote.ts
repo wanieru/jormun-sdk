@@ -357,7 +357,7 @@ export class JormunSyncRemote implements IRemote
         const array : string[] = [];
         for(const i in keys)
         {
-            array.push(keys[i].stringifyRemote(this.statusCache.userId));
+            array.push(keys[i].stringifyLocal());
         }
         const request = this.baseRequest();
         request["token"] = guestToken;
