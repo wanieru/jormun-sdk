@@ -188,9 +188,9 @@ export class Jormun
 
         this.onSync.trigger(true);
 
-        if(forceDownload)
+        if(forceDownload && this.data.hasOwnProperty("0")) 
         {
-            for(const fragment of this.fragments(0))
+            for(const fragment in this.data[0])
             {
                 await this.me(fragment)?.remove();
             }
