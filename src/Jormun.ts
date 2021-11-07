@@ -397,10 +397,13 @@ export class Jormun
             for(const fragment in this.data[0])
             {
                 const raw = await this.data[0][fragment].getRaw();
-                if(raw.isDirty)
-                    dirty = true;
-                if(raw.timestamp > newest)
-                    newest = raw.timestamp;
+                if(raw)
+                {
+                    if(raw.isDirty)
+                        dirty = true;
+                    if(raw.timestamp > newest)
+                        newest = raw.timestamp;
+                }
             }
         }
         const version = this.timeToVersion(newest, dirty);
