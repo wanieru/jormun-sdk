@@ -88,9 +88,12 @@ export class JormunSyncRemote implements IRemote
             case 413: return "Storage Space Exceeded";
             case 429: return "Too Many Requests - Please Wait A Bit";
             case 500: return "Server Error";
+            case 503: return "Server is down for maintanence"
         }
-        if(status.toString().startsWith("4")) return "OK";
-        else return "Error";
+        if(status.toString().startsWith("2")) return "Probably OK";
+        if(status.toString().startsWith("4")) return "Unknown Request Error";
+        if(status.toString().startsWith("5")) return "Unknown Server Error";
+        else return "Unknown Error";
     }
     private async request<TRequest, TResponse>(options : {endpoint : string, data : TRequest, hasParameters : boolean, hasSideEffects : boolean}) : Promise<TResponse>
     {

@@ -5,15 +5,15 @@ export declare const setRequest: zod.ZodObject<{
     app: zod.ZodString;
     data: zod.ZodRecord<zod.ZodString, zod.ZodAny>;
 }, "strip", zod.ZodTypeAny, {
+    data?: Record<string, any>;
     username?: string;
     token?: string;
     app?: string;
-    data?: Record<string, any>;
 }, {
+    data?: Record<string, any>;
     username?: string;
     token?: string;
     app?: string;
-    data?: Record<string, any>;
 }>;
 export declare type SetRequest = zod.infer<typeof setRequest>;
 export interface SetResponse {

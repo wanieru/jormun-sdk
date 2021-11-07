@@ -4,13 +4,13 @@ export declare const browseRequest: zod.ZodObject<{
     limit: zod.ZodNumber;
     offset: zod.ZodNumber;
 }, "strip", zod.ZodTypeAny, {
+    offset?: number;
     app?: string;
     limit?: number;
-    offset?: number;
 }, {
+    offset?: number;
     app?: string;
     limit?: number;
-    offset?: number;
 }>;
 export declare type BrowseRequest = zod.infer<typeof browseRequest>;
 export interface BrowseResponse {
