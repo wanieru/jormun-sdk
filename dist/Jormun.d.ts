@@ -1,3 +1,4 @@
+import { ILocal } from "./ILocal";
 import { IAnonymousRemote, IPublicRemote } from "./IRemote";
 import { Data, LocalData } from "./Data";
 import { Key } from "./Key";
@@ -62,7 +63,7 @@ export declare class Jormun {
     /** Initialize this jormun instance with the specified app, and alert handler.
      * Will automatically load saved remote settings.
      */
-    initialize(app: string, alertDelegate: AlertDelegate | null, memoryOnly?: boolean): Promise<void>;
+    initialize(app: string, alertDelegate: AlertDelegate | null, localStorageOverride?: ILocal): Promise<void>;
     /** Get an interface to interact anonymously with the specified app on the specified host. */
     static getAnonymousRemote(app: string, host: string): Promise<IAnonymousRemote>;
     getApp(): string;
