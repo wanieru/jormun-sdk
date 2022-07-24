@@ -5,12 +5,12 @@ export declare const publishRequest: zod.ZodObject<{
     app: zod.ZodString;
     keys: zod.ZodRecord<zod.ZodString, zod.ZodEnum<["public", "unlisted", "private"]>>;
 }, "strip", zod.ZodTypeAny, {
-    keys?: Record<string, "private" | "public" | "unlisted">;
+    keys?: Record<string, "public" | "unlisted" | "private">;
     username?: string;
     token?: string;
     app?: string;
 }, {
-    keys?: Record<string, "private" | "public" | "unlisted">;
+    keys?: Record<string, "public" | "unlisted" | "private">;
     username?: string;
     token?: string;
     app?: string;

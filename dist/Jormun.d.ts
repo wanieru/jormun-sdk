@@ -32,6 +32,14 @@ export interface JormunRemoteKeyComparison {
     localVersion: string;
     remoteVersion: string;
 }
+export declare class JormunStatus {
+    initialized: boolean;
+    connected: boolean;
+    loggedIn: boolean;
+    empty: boolean;
+    syncing: boolean;
+    admin: boolean;
+}
 export declare type AlertContent = {
     title: string;
     message: string;
@@ -53,9 +61,10 @@ export declare class Jormun {
     private local;
     private remote;
     private data;
-    onDataChange: {
-        [key: string]: JormunEvent<JormunEventPayload>;
-    };
+    private status;
+    private onDataChange;
+    /** Subscribe to this event to be notified when any data changes. */
+    onAnyDataChange: JormunEvent<JormunEventPayload>;
     /** Subscribe to this event to be notified when a sync starts and stops. */
     onSync: JormunEvent<boolean>;
     /** Subscribe to this event to be notified whenever this instance is setup again. */
@@ -115,4 +124,5 @@ export declare class Jormun {
     export(): Promise<string>;
     /** Clear local data and import it from the specified string (should be created with the export method.) */
     import(data: string): Promise<void>;
+    getStatus(): JormunStatus;
 }

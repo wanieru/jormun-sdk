@@ -48,6 +48,15 @@ export interface JormunRemoteKeyComparison
     localVersion: string,
     remoteVersion: string
 }
+export class JormunStatus
+{
+    public initialized = false;
+    public connected = false;
+    public loggedIn = false;
+    public empty = false;
+    public syncing = false;
+    public admin = false;
+}
 
 export type AlertContent = { title: string, message: string, options: string[] };
 export type AlertDelegate = (obj: AlertContent) => Promise<number>;
@@ -65,8 +74,11 @@ export class Jormun
     private local: ILocal;
     private remote: IRemote;
     private data: JormunDataUsers;
+    private status: JormunStatus;
 
-    public onDataChange: { [key: string]: JormunEvent<JormunEventPayload> } = {};
+    private onDataChange: { [key: string]: JormunEvent<JormunEventPayload> } = {};
+    /** Subscribe to this event to be notified when any data changes. */
+    public onAnyDataChange = new JormunEvent<JormunEventPayload>();
     /** Subscribe to this event to be notified when a sync starts and stops. */
     public onSync = new JormunEvent<boolean>();
     /** Subscribe to this event to be notified whenever this instance is setup again. */
@@ -90,6 +102,7 @@ export class Jormun
 
         this.REMOTE_SETTINGS_KEY = new Key(app, -9999, "REMOTE_SETTINGS");
         this.data = {};
+        this.status = new JormunStatus();
         await this.setup({ app: app, remote: await this.local.getValue(this.REMOTE_SETTINGS_KEY) });
     }
     /** Get an interface to interact anonymously with the specified app on the specified host. */
@@ -148,10 +161,20 @@ export class Jormun
         }
         this.data = newData;
 
+        this.status.initialized = true;
+        this.status.connected = !!this.remote && await this.remote.connected();
+        this.status.loggedIn = false;
+        this.status.empty = false;
+        this.status.admin = false;
+
         this.onSetup.trigger();
 
         if (this.remote && await this.remote.loggedIn())
         {
+            this.status.loggedIn = true;
+            this.status.empty = (await this.remote.empty()).empty;
+            this.status.admin = this.remote.cachedStatus().isAdmin;
+
             let forceDownload = false;
             if ((await this.local.getKeys()).length <= 1)
             {
@@ -183,8 +206,10 @@ export class Jormun
     /** Initiates a sync. If a conflict occurs, the user will be prompted to resolve it using the alert handler. If forceDownload is true, automatically clears local data and redownloads it. */
     public async sync(forceDownload = false)
     {
-        if (!this.remote || !(await this.remote.loggedIn()))
+        if (!this.remote || !(await this.remote.loggedIn()) || this.status.syncing)
             return;
+
+        this.status.syncing = true;
 
         this.onSync.trigger(true);
 
@@ -267,6 +292,8 @@ export class Jormun
             const changedKeysRaw = await changedKeys.getRaw();
             await changedKeys.preset(changedKeysRaw.timestamp, changedKeysRaw.timestamp, changedKeys.isPublished(), false);
         }
+
+        this.status.syncing = false;
 
         this.onSync.trigger(false);
     }
@@ -572,5 +599,9 @@ export class Jormun
         {
             this.alert("Import failed", e);
         }
+    }
+    public getStatus(): JormunStatus
+    {
+        return { ...this.status };
     }
 }
