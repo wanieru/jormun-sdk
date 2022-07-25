@@ -201,7 +201,7 @@ export class Jormun
         await this.setup({ app: this.options.app, remote: remote });
     }
     /** Returns the saved remote settings including the auth token, but not the password. */
-    public hashedRemote = async (): Promise<JormunRemote> => await this.local.getValue(this.REMOTE_SETTINGS_KEY);
+    public hashedRemote = async (): Promise<JormunRemote> => (await this.local?.getValue(this.REMOTE_SETTINGS_KEY)) ?? null;
 
     /** Initiates a sync. If a conflict occurs, the user will be prompted to resolve it using the alert handler. If forceDownload is true, automatically clears local data and redownloads it. */
     public async sync(forceDownload = false)
