@@ -30,10 +30,10 @@ export declare class Data {
     getKey: () => Key;
     /** Gets the fragment of this data's key. */
     getFragment: () => string;
-    /** Bind an event to be triggered whenever this data's value is changed. Returns an id used to unsubscribe again. */
-    onChange(handler: (payload: JormunEventPayload) => void): number;
+    /** Bind an event to be triggered whenever this data's value is changed. */
+    onChange(handler: (payload: JormunEventPayload) => void, context: any): void;
     /** Unsubscribe the bound event with the specified event Id. */
-    offChange(eventId: number): void;
+    offChange(handler: (payload: JormunEventPayload) => void, context: any): void;
     /** Gets the publicity of this data on the remote. */
     isPublished(): Publicity;
     /** Gets a list of user ids this data is shared with. */

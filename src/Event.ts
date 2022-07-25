@@ -1,22 +1,19 @@
 export class JormunEvent<TPayload>
 {
-    private handlers : ((payload : TPayload) => void)[] = [];
-    public on(handler : (payload : TPayload) => void) : number
+    private handlers: { handler: (payload: TPayload) => void, context: any }[] = [];
+    public on(handler: (payload: TPayload) => void, context: any): void
     {
-        const id = this.handlers.length;
-        this.handlers.push(handler);
-        return id;
+        this.handlers.push({ handler: handler, context: context });
     }
-    public off(id : number)
+    public off(handler: (payload: TPayload) => void, context: any)
     {
-        this.handlers[id] = null;
+        this.handlers = this.handlers.filter(h => h.handler !== handler || h.context !== context);
     }
-    public trigger(payload : TPayload)
+    public trigger(payload: TPayload)
     {
-        for(const id in this.handlers)
+        for (const handler of this.handlers)
         {
-            if(this.handlers.hasOwnProperty(id))
-                this.handlers[id](payload);
+            handler.handler.call(handler.context, payload);
         }
     }
 }

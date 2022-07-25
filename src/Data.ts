@@ -107,25 +107,24 @@ export class Data
     /** Gets the fragment of this data's key. */
     public getFragment = () => this.key.fragment;
 
-    /** Bind an event to be triggered whenever this data's value is changed. Returns an id used to unsubscribe again. */
-    public onChange(handler: (payload: JormunEventPayload) => void): number
+    /** Bind an event to be triggered whenever this data's value is changed. */
+    public onChange(handler: (payload: JormunEventPayload) => void, context: any)
     {
         const key = this.key.stringifyLocal();
         const onDataChange = this.jormun["onDataChange"];
         if (!onDataChange.hasOwnProperty(key))
             onDataChange[key] = new JormunEvent<JormunEventPayload>();
-        const id = onDataChange[key].on(handler);
-        this.getEventPayload().then(payload => handler(payload));
-        return id;
+        onDataChange[key].on(handler, context);
+        this.getEventPayload().then(payload => handler.call(context, payload));
     }
     /** Unsubscribe the bound event with the specified event Id. */
-    public offChange(eventId: number)
+    public offChange(handler: (payload: JormunEventPayload) => void, context: any)
     {
         const key = this.key.stringifyLocal();
         const onDataChange = this.jormun["onDataChange"];
         if (onDataChange.hasOwnProperty(key))
         {
-            onDataChange[key].off(eventId);
+            onDataChange[key].off(handler, context);
         }
     }
     /** Gets the publicity of this data on the remote. */
