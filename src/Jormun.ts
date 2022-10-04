@@ -167,8 +167,6 @@ export class Jormun
         this.status.empty = false;
         this.status.admin = false;
 
-        this.onSetup.trigger();
-
         if (this.remote && await this.remote.loggedIn())
         {
             this.status.loggedIn = true;
@@ -196,6 +194,7 @@ export class Jormun
             }
             await this.sync(forceDownload);
         }
+        this.onSetup.trigger();
     }
     /** Login to the specified remote. "token" does not need to have a value. */
     public async login(remote: JormunRemote)
