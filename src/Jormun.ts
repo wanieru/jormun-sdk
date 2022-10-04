@@ -180,6 +180,11 @@ export class Jormun
             {
                 forceDownload = true;
             }
+            else if (!oldRemote)
+            {
+                const response = await this.ask("New User", `You seem to have logged in to a new user, ${options.remote.username}@${options.remote.host}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
+                forceDownload = response == 0;
+            }
             else if (oldRemote && (oldRemote.username != options.remote?.username || oldRemote.host != options.remote?.host))
             {
                 const response = await this.ask("New User", `You seem to have switched from user ${oldRemote.username}@${oldRemote.host} to ${options.remote.username}@${options.remote.host}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
