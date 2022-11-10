@@ -63,6 +63,7 @@ export class Data
     {
         if (this.deleted)
             return;
+        const oldValue = await this.getRaw();
         this.published = published;
         const localData: LocalData =
         {
@@ -72,7 +73,10 @@ export class Data
         };
         await this.jormun["local"].setValue(this.key, localData);
 
-        await this.fireChangeEvent();
+        if (oldValue.json !== localData.json)
+        {
+            await this.fireChangeEvent();
+        }
     }
     /** Set this value. */
     public async set(value: any)

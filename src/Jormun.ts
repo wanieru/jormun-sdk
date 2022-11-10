@@ -236,8 +236,6 @@ export class Jormun
             comparison.upload = false;
             comparison.download = true;
         }
-
-        let shouldBumpChangedKeys = false;
         if (comparison.download && comparison.upload)
         {
             const choice = await this.ask("Syncing", `The local and remote data cannot be combined. Which do you want to keep?`,
@@ -272,7 +270,6 @@ export class Jormun
                     const remoteString = parsed.stringifyRemote(status.userId);
                     const data = this.data[parsed.userId][parsed.fragment];
                     await data.preset(uploadData[remoteString], newTimestamps[key], data.isPublished(), false);
-                    shouldBumpChangedKeys = true;
                 }
             }
         }
@@ -286,7 +283,6 @@ export class Jormun
                 if (result) 
                 {
                     await this.processDataResponse(status, keys, result);
-                    shouldBumpChangedKeys = true;
                 }
             }
         }
@@ -299,13 +295,12 @@ export class Jormun
                 if (result) 
                 {
                     await this.processDataResponse(status, keys, result);
-                    shouldBumpChangedKeys = true;
                 }
             }
         }
 
         const changedKeys = this.me(Jormun.CHANGED_KEYS_KEY);
-        if (shouldBumpChangedKeys && changedKeys)
+        if (changedKeys)
         {
             const changedKeysRaw = await changedKeys.getRaw();
             await changedKeys.preset(changedKeysRaw.timestamp, changedKeysRaw.timestamp, changedKeys.isPublished(), false);
