@@ -100,10 +100,10 @@ export class Data
         const keyString = this.key.stringifyLocal();
         const onDataChange = this.jormun["onDataChange"];
         const payload = await this.getEventPayload();
-        this.jormun.onAnyDataChange.trigger(payload);
+        await this.jormun.onAnyDataChange.triggerAsync(payload);
         if (onDataChange.hasOwnProperty(keyString))
         {
-            onDataChange[keyString].trigger(payload);
+            await onDataChange[keyString].triggerAsync(payload);
         }
     }
     /** Gets this data's key. */

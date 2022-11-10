@@ -74,7 +74,7 @@ export declare class Jormun {
      */
     initialize(app: string, alertDelegate: AlertDelegate | null, localStorageOverride?: ILocal | null): Promise<void>;
     /** Get an interface to interact anonymously with the specified app on the specified host. */
-    static getAnonymousRemote(app: string, host: string): Promise<IAnonymousRemote>;
+    static getAnonymousRemote(app: string, host: string, alertDelegate: AlertDelegate | null): Promise<IAnonymousRemote>;
     getApp(): string;
     /** Gets an interface to interact with the current remote. */
     getRemote(): IPublicRemote;

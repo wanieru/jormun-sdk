@@ -13,6 +13,7 @@ import { Unix } from "./Unix";
 import { IndexedDBWrap } from "./IndexedDBWrap";
 import { BrowseResponse } from "./ApiTypes/Browse";
 import { MemoryStorage } from "./MemoryStorage";
+import { Wait } from "./Wait";
 
 export interface JormunOptions
 {
@@ -106,10 +107,10 @@ export class Jormun
         await this.setup({ app: app, remote: await this.local.getValue(this.REMOTE_SETTINGS_KEY) });
     }
     /** Get an interface to interact anonymously with the specified app on the specified host. */
-    public static async getAnonymousRemote(app: string, host: string): Promise<IAnonymousRemote>
+    public static async getAnonymousRemote(app: string, host: string, alertDelegate: AlertDelegate | null): Promise<IAnonymousRemote>
     {
         const jormun = new Jormun();
-        await jormun.initialize(app, null, new MemoryStorage());
+        await jormun.initialize(app, alertDelegate, new MemoryStorage());
         await jormun.login({ host: host, username: "", password: "", token: "", downloadSharedData: false });
         return jormun.getRemote();
     }
@@ -194,7 +195,7 @@ export class Jormun
             }
             await this.sync(forceDownload);
         }
-        this.onSetup.trigger();
+        await this.onSetup.triggerAsync();
     }
     /** Login to the specified remote. "token" does not need to have a value. */
     public async login(remote: JormunRemote)
@@ -210,12 +211,16 @@ export class Jormun
     /** Initiates a sync. If a conflict occurs, the user will be prompted to resolve it using the alert handler. If forceDownload is true, automatically clears local data and redownloads it. */
     public async sync(forceDownload = false)
     {
-        if (!this.remote || !(await this.remote.loggedIn()) || this.status.syncing)
+        if (!this.remote || !(await this.remote.loggedIn()))
+        {
             return;
+        }
+
+        await Wait.until(() => !this.status.syncing);
 
         this.status.syncing = true;
 
-        this.onSync.trigger(true);
+        await this.onSync.triggerAsync(true);
 
         if (forceDownload)
         {
@@ -228,7 +233,7 @@ export class Jormun
         const status = await this.remote.status();
         const keys = await this.remote.keys();
         if (!status || !keys) return;
-        this.setSharedWith(status, keys);
+        await this.setSharedWith(status, keys);
 
         const comparison = await this.compareRemoteKeys(status, keys);
         if (forceDownload)
@@ -309,7 +314,7 @@ export class Jormun
 
         this.status.syncing = false;
 
-        this.onSync.trigger(false);
+        await this.onSync.triggerAsync(false);
     }
     private async compareRemoteKeys(status: StatusResponse, remoteKeys: KeysResponse): Promise<JormunRemoteKeyComparison>
     {
