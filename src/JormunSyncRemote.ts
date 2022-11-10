@@ -1,4 +1,4 @@
-import {sha512} from "js-sha512";
+import { sha512 } from "js-sha512";
 import { Ajax } from "./Ajax";
 import { BanRequest, BanResponse } from "./ApiTypes/Ban";
 import { BrowseRequest, BrowseResponse } from "./ApiTypes/Browse";
@@ -12,7 +12,7 @@ import { LeaveRequest, LeaveResponse } from "./ApiTypes/Leave";
 import { LoginRequest, LoginResponse } from "./ApiTypes/Login";
 import { LogoutRequest, LogoutResponse } from "./ApiTypes/Logout";
 import { PasswordRequest, PasswordResponse } from "./ApiTypes/Password";
-import { PeekResponse } from "./ApiTypes/Peek";
+import { PeekRequest, PeekResponse } from "./ApiTypes/Peek";
 import { Publicity, PublishRequest, PublishResponse } from "./ApiTypes/Publish";
 import { RegisterRequest, RegisterResponse } from "./ApiTypes/Register";
 import { RenameRequest, RenameResponse } from "./ApiTypes/Rename";
@@ -28,58 +28,59 @@ import { IRemote } from "./IRemote";
 import { Jormun, JormunOptions, JormunRemote } from "./Jormun";
 import { Key } from "./Key";
 import { Unix } from "./Unix";
+import { string } from "zod";
 
 export class JormunSyncRemote implements IRemote
 {
-    private jormun : Jormun;
-    public jormunOptions : JormunOptions;
-    private statusCache : StatusResponse;
+    private jormun: Jormun;
+    public jormunOptions: JormunOptions;
+    private statusCache: StatusResponse | null;
 
-    private isLoggedIn : boolean;
-    private isConnected : boolean;
-    private checkedConnection : boolean;
-    private checkingConnection : Promise<void> | null = null;
+    private isLoggedIn: boolean;
+    private isConnected: boolean;
+    private checkedConnection: boolean;
+    private checkingConnection: Promise<void> | null = null;
 
-    private cache : {[endpoint : string] : {timestamp : number, result: any}} = {};
+    private cache: { [endpoint: string]: { timestamp: number, result: any } } = {};
     private cacheTime = 2000;
 
-    public constructor(jormun : Jormun, jormunOptions : JormunOptions)
+    public constructor(jormun: Jormun, jormunOptions: JormunOptions)
     {
         this.checkedConnection = false;
         this.jormun = jormun;
         this.jormunOptions = jormunOptions;
         this.checkConnection();
     }
-    
+
     public async checkConnection()
     {
-        if(this.checkingConnection != null)
+        if (this.checkingConnection != null)
         {
             await this.checkingConnection;
             return;
         }
-        if(!this.checkedConnection)
+        if (!this.checkedConnection)
         {
-            let resolve : any = null;
+            let resolve: any = null;
             this.checkingConnection = new Promise<void>(r => resolve = r);
 
             const empty = await this.empty();
             this.isConnected = !!(empty);
-            if(this.isConnected && !empty.empty && this.jormunOptions.remote.password && this.jormunOptions.remote.username)
+            if (this.isConnected && !empty?.empty && this.jormunOptions.remote?.password && this.jormunOptions.remote.username)
             {
                 const login = await this.login();
                 this.jormunOptions.remote.token = login?.token ?? "";
                 this.jormunOptions.remote.password = "";
             }
-            this.isLoggedIn = this.isConnected && this.jormunOptions.remote.token && !!(await this.status());
+            this.isLoggedIn = this.isConnected && !!this.jormunOptions.remote?.token && !!(await this.status());
             this.checkedConnection = true;
 
             resolve();
         }
     }
-    private statusToString(status : number) : string
+    private statusToString(status: number): string
     {
-        switch(status)
+        switch (status)
         {
             case 200: return "OK";
             case 400: return "Invalid Request";
@@ -90,14 +91,15 @@ export class JormunSyncRemote implements IRemote
             case 500: return "Server Error";
             case 503: return "Server is down for maintanence"
         }
-        if(status.toString().startsWith("2")) return "Probably OK";
-        if(status.toString().startsWith("4")) return "Unknown Request Error";
-        if(status.toString().startsWith("5")) return "Unknown Server Error";
+        if (status.toString().startsWith("2")) return "Probably OK";
+        if (status.toString().startsWith("4")) return "Unknown Request Error";
+        if (status.toString().startsWith("5")) return "Unknown Server Error";
         else return "Unknown Error";
     }
-    private async request<TRequest, TResponse>(options : {endpoint : string, data : TRequest, hasParameters : boolean, hasSideEffects : boolean}) : Promise<TResponse>
+    private async request<TRequest, TResponse>(options: { endpoint: string, data: TRequest, hasParameters: boolean, hasSideEffects: boolean }): Promise<TResponse | null>
     {
-        if(!options.hasParameters && !options.hasSideEffects && this.cache.hasOwnProperty(options.endpoint) && Unix() - this.cache[options.endpoint].timestamp < this.cacheTime)
+        if (!this.jormunOptions.remote) return null;
+        if (!options.hasParameters && !options.hasSideEffects && this.cache.hasOwnProperty(options.endpoint) && Unix() - this.cache[options.endpoint].timestamp < this.cacheTime)
         {
             return this.cache[options.endpoint].result;
         }
@@ -105,278 +107,330 @@ export class JormunSyncRemote implements IRemote
         try
         {
             const response = await Ajax(uri, options.data);
-            if(response == null)
+            if (response == null)
             {
                 return null;
             }
-            if(response.status != 200)
+            if (response.status != 200)
             {
                 await this.jormun.alert(`${options.endpoint} ${response.status}`, `${this.statusToString(response.status)} ${response.body.message ? ` - ${response.body.message}` : ""}`);
                 return null;
             }
-            if(options.hasSideEffects)
+            if (options.hasSideEffects)
                 this.cache = {};
-            if(!options.hasParameters && !options.hasSideEffects)
-                this.cache[options.endpoint] = {timestamp : Unix(), result : response.body};
+            if (!options.hasParameters && !options.hasSideEffects)
+                this.cache[options.endpoint] = { timestamp: Unix(), result: response.body };
             return response.body;
         }
-        catch(e)
+        catch (e)
         {
             this.jormun.alert("Network Error", e);
         }
+        return null;
     }
-    private baseRequest()
+    private baseRequest<T extends Record<string, any>>(extra: T = {} as any): { username: string, token: string, app: string } & T
     {
-        return {username: this.jormunOptions.remote.username, token: this.jormunOptions.remote.token, app: this.jormunOptions.app};
+        const result: ReturnType<typeof this.baseRequest<T>> = {
+            username: this.jormunOptions.remote?.username ?? "",
+            token: this.jormunOptions.remote?.token ?? "",
+            app: this.jormunOptions.app
+        } as any;
+        for (const key in extra) (result as any)[key] = extra[key];
+        return result;
     }
-    private adminRequest()
+    private adminRequest<T extends Record<string, any>>(extra: T = {} as any): { username: string, token: string } & T
     {
-        return {username: this.jormunOptions.remote.username, token: this.jormunOptions.remote.token};
+        const result: ReturnType<typeof this.adminRequest<T>> = {
+            username: this.jormunOptions.remote?.username ?? "",
+            token: this.jormunOptions.remote?.token ?? ""
+        } as any;
+        for (const key in extra) (result as any)[key] = extra[key];
+        return result;
     }
-    private passwordRequest()
+    private passwordRequest<T extends Record<string, any>>(extra: T = {} as any): { username: string, password: string, app: string } & T
     {
-        return {username: this.jormunOptions.remote.username, password: this.jormunOptions.remote.password, app: this.jormunOptions.app};
+        const result: ReturnType<typeof this.passwordRequest<T>> = {
+            username: this.jormunOptions.remote?.username ?? "",
+            password: this.jormunOptions.remote?.password ?? "",
+            app: this.jormunOptions.app
+        } as any;
+        for (const key in extra) (result as any)[key] = extra[key];
+        return result;
     }
 
-
-    public cachedStatus(): StatusResponse 
+    private async cacheStatus(): Promise<StatusResponse | null>
+    {
+        return this.cacheStatus() ?? await this.status();
+    }
+    public cachedStatus(): StatusResponse | null
     {
         return this.statusCache;
     }
-    public async loggedIn() : Promise<boolean>
+    public async loggedIn(): Promise<boolean>
     {
         await this.checkConnection();
         return this.isLoggedIn;
     }
-    public async connected() : Promise<boolean>
+    public async connected(): Promise<boolean>
     {
         await this.checkConnection();
         return this.isConnected;
     }
 
-    public async status(): Promise<StatusResponse> 
+    public async status(): Promise<StatusResponse | null>
     {
-        this.statusCache = await this.request<StatusRequest, StatusResponse>({endpoint: "status", data: this.baseRequest(), hasSideEffects : false, hasParameters : false});
+        this.statusCache = await this.request<StatusRequest, StatusResponse>({ endpoint: "status", data: this.baseRequest(), hasSideEffects: false, hasParameters: false });
         return this.statusCache;
     }
-    public async keys(): Promise<KeysResponse> 
+    public async keys(): Promise<KeysResponse | null>
     {
-        return await this.request<KeysRequest, KeysResponse>({endpoint: "keys", data: this.baseRequest(), hasSideEffects: false, hasParameters: false});
+        return await this.request<KeysRequest, KeysResponse>({ endpoint: "keys", data: this.baseRequest(), hasSideEffects: false, hasParameters: false });
     }
-    public async get(keys: Key[]): Promise<GetResponse> 
+    public async get(keys: Key[]): Promise<GetResponse | null>
     {
-        const array : string[] = [];
-        for(const i in keys)
+        if (!this.cacheStatus() || !this.statusCache) return null;
+
+        const array: string[] = [];
+        for (const i in keys)
         {
             array.push(keys[i].stringifyRemote(this.statusCache.userId));
         }
-        const request = this.baseRequest();
-        request["keys"] = array;
+        const request = this.baseRequest({
+            keys: array
+        });
 
-        return await this.request<GetRequest, GetResponse>({endpoint: "get",data:  request, hasSideEffects: false, hasParameters: true});
+        return await this.request<GetRequest, GetResponse>({ endpoint: "get", data: request, hasSideEffects: false, hasParameters: true });
     }
-    public async set(data: GetResponse): Promise<SetResponse> 
+    public async set(data: GetResponse): Promise<SetResponse | null>
     {
-        const request = this.baseRequest();
-        request["data"] = data;
+        const request = this.baseRequest({
+            data: data
+        });
 
-        return await this.request<SetRequest, SetResponse>({endpoint: "set",data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<SetRequest, SetResponse>({ endpoint: "set", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async delete(keys: Key[]): Promise<DeleteResponse> 
+    public async delete(keys: Key[]): Promise<DeleteResponse | null>
     {
-        const array : string[] = [];
-        for(const i in keys)
+        if (!this.cacheStatus() || !this.statusCache) return null;
+        const array: string[] = [];
+        for (const i in keys)
         {
             array.push(keys[i].stringifyRemote(this.statusCache.userId));
         }
-        const request = this.baseRequest();
-        request["keys"] = array;
+        const request = this.baseRequest({
+            keys: array
+        });
 
-        return await this.request<DeleteRequest, DeleteResponse>({endpoint: "delete", data: request, hasSideEffects: true, hasParameters: true});
+        return await this.request<DeleteRequest, DeleteResponse>({ endpoint: "delete", data: request, hasSideEffects: true, hasParameters: true });
     }
-    
-    public async share(keys: Key[], users: string[]): Promise<ShareResponse> 
+
+    public async share(keys: Key[], users: string[]): Promise<ShareResponse | null>
     {
-        const array : string[] = [];
-        for(const i in keys)
+        if (!this.cacheStatus() || !this.statusCache) return null;
+
+        const array: string[] = [];
+        for (const i in keys)
         {
             array.push(keys[i].stringifyRemote(this.statusCache.userId));
         }
-        const request = this.baseRequest();
-        request["keys"] = array;
-        request["users"] = users;
+        const request = this.baseRequest({
+            keys: array,
+            users: users
+        });
 
-        return await this.request<ShareRequest, ShareResponse>({endpoint: "share", data: request, hasSideEffects: true, hasParameters: true});
+        return await this.request<ShareRequest, ShareResponse>({ endpoint: "share", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async unshare(keys: Key[], users: string[]): Promise<UnshareResponse> 
+    public async unshare(keys: Key[], users: string[]): Promise<UnshareResponse | null>
     {
-        const array : string[] = [];
-        for(const i in keys)
+        if (!this.cacheStatus() || !this.statusCache) return null;
+        const array: string[] = [];
+        for (const i in keys)
         {
             array.push(keys[i].stringifyRemote(this.statusCache.userId));
         }
-        const request = this.baseRequest();
-        request["keys"] = array;
-        request["users"] = users;
+        const request = this.baseRequest({
+            keys: array,
+            users: users
+        });
 
-        return await this.request<UnshareRequest, UnshareResponse>({endpoint: "unshare",data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<UnshareRequest, UnshareResponse>({ endpoint: "unshare", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async leave(keys: Key[]): Promise<LeaveResponse> 
+    public async leave(keys: Key[]): Promise<LeaveResponse | null>
     {
-        const array : string[] = [];
-        for(const i in keys)
+        if (!this.cacheStatus() || !this.statusCache) return null;
+        const array: string[] = [];
+        for (const i in keys)
         {
             array.push(keys[i].stringifyRemote(this.statusCache.userId));
         }
-        const request = this.baseRequest();
-        request["keys"] = array;
+        const request = this.baseRequest({
+            keys: array
+        });
 
-        return await this.request<LeaveRequest, LeaveResponse>({endpoint: "leave",data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<LeaveRequest, LeaveResponse>({ endpoint: "leave", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async password(password : string, newPassword: string): Promise<PasswordResponse> 
+    public async password(password: string, newPassword: string): Promise<PasswordResponse | null>
     {
         password = sha512(password);
         newPassword = sha512(newPassword);
-        const request = this.adminRequest();
-        request["password"] = password;
-        request["newPassword"] = newPassword;
+        const request = this.adminRequest({
+            password,
+            newPassword
+        });
 
-        return await this.request<PasswordRequest, PasswordResponse>({endpoint: "password",data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<PasswordRequest, PasswordResponse>({ endpoint: "password", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async register(loggedInPassword : string, newUsername: string, newPassword: string, size : number, isAdmin : boolean): Promise<RegisterResponse> 
+    public async register(loggedInPassword: string, newUsername: string, newPassword: string, size: number, isAdmin: boolean): Promise<RegisterResponse | null>
     {
         loggedInPassword = sha512(loggedInPassword);
         newPassword = sha512(newPassword);
-        const request = this.adminRequest();
-        request["newUsername"] = newUsername;
-        request["newPassword"] = newPassword;
-        request["size"] = size;
-        request["isAdmin"] = isAdmin;
-        request["password"] = loggedInPassword;
+        const request = this.adminRequest({
+            newUsername,
+            newPassword,
+            size,
+            isAdmin,
+            password: loggedInPassword
+        });
 
-        return await this.request<RegisterRequest , RegisterResponse>({endpoint: "register", data: request, hasSideEffects: true, hasParameters: true});
+        return await this.request<RegisterRequest, RegisterResponse>({ endpoint: "register", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async empty(): Promise<EmptyResponse> 
+    public async empty(): Promise<EmptyResponse | null>
     {
-        return await this.request<EmptyRequest, EmptyResponse>({endpoint: "empty", data: {}, hasSideEffects: false, hasParameters: false});
+        return await this.request<EmptyRequest, EmptyResponse>({ endpoint: "empty", data: {}, hasSideEffects: false, hasParameters: false });
     }
-    public async setup(username: string, password: string): Promise<SetupResponse> 
+    public async setup(username: string, password: string): Promise<SetupResponse | null>
     {
         password = sha512(password);
-        const request = {username : username, password : password};
-        return await this.request<SetupRequest, SetupResponse>({endpoint: "setup", data: request, hasSideEffects: true, hasParameters: true});
+        const request = { username: username, password: password };
+        return await this.request<SetupRequest, SetupResponse>({ endpoint: "setup", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async ban(bannedUsername: string, loggedInPassword : string): Promise<BanResponse> 
+    public async ban(bannedUsername: string, loggedInPassword: string): Promise<BanResponse | null>
     {
         loggedInPassword = sha512(loggedInPassword);
-        const request = this.adminRequest();
-        request["bannedUsername"] = bannedUsername;
-        request["password"] = loggedInPassword;
+        const request = this.adminRequest({
+            bannedUsername,
+            password: loggedInPassword
+        });
 
-        return await this.request<BanRequest, BanResponse>({endpoint: "ban",data: request, hasSideEffects: true, hasParameters: true});
+        return await this.request<BanRequest, BanResponse>({ endpoint: "ban", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async rename(oldUsername: string, newUsername: string): Promise<RenameResponse> 
+    public async rename(oldUsername: string, newUsername: string): Promise<RenameResponse | null>
+    {
+        const request = this.adminRequest({
+            oldUsername,
+            newUsername
+        });
+
+        return await this.request<RenameRequest, RenameResponse>({ endpoint: "rename", data: request, hasSideEffects: true, hasParameters: true });
+    }
+    public async resize(targetUsername: string, newSize: number): Promise<ResizeResponse | null>
+    {
+        const request = this.adminRequest({
+            targetUsername,
+            newSize
+        });
+
+        return await this.request<ResizeRequest, ResizeResponse>({ endpoint: "resize", data: request, hasSideEffects: true, hasParameters: true });
+    }
+    public async users(): Promise<UsersResponse | null>
     {
         const request = this.adminRequest();
-        request["oldUsername"] = oldUsername;
-        request["newUsername"] = newUsername;
+        return await this.request<UsersRequest, UsersResponse>({ endpoint: "users", data: request, hasSideEffects: false, hasParameters: false });
+    }
 
-        return await this.request<RenameRequest, RenameResponse>({endpoint: "rename",data:  request, hasSideEffects: true, hasParameters: true});
-    }
-    public async resize(targetUsername: string, newSize: number): Promise<ResizeResponse> 
+    public async browse(limit: number, offset: number): Promise<BrowseResponse | null>
     {
-        const request = this.adminRequest();
-        request["targetUsername"] = targetUsername;
-        request["newSize"] = newSize;
+        return await this.request<BrowseRequest, BrowseResponse>({ endpoint: "browse", data: { app: this.jormunOptions.app, limit: limit, offset: offset }, hasSideEffects: false, hasParameters: true });
+    }
+    public async publish(keys: { key: Key, publicity: Publicity }[]): Promise<PublishResponse | null>
+    {
+        if (!this.cacheStatus() || !this.statusCache) return null;
+        const record: Record<string, Publicity> = {};
+        for (const key of keys)
+        {
+            const remoteStringify = key.key.stringifyRemote(this.statusCache.userId);
+            record[remoteStringify] = key.publicity;
+        }
+        const request = this.baseRequest({
+            keys: record
+        });
 
-        return await this.request<ResizeRequest, ResizeResponse>({endpoint: "resize", data: request, hasSideEffects: true, hasParameters: true});
+        return await this.request<PublishRequest, PublishResponse>({ endpoint: "publish", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async users(): Promise<UsersResponse> 
+    public async peek(keys: Key[]): Promise<PeekResponse | null>
     {
-        const request = this.adminRequest();
-        return await this.request<UsersRequest, UsersResponse>({endpoint: "users", data: request, hasSideEffects: false, hasParameters: false});
-    }
-    
-    public async browse(limit: number, offset: number): Promise<BrowseResponse> 
-    {
-        return await this.request<BrowseRequest, BrowseResponse>({endpoint: "browse", data: {app: this.jormunOptions.app, limit: limit, offset: offset}, hasSideEffects: false, hasParameters: true});
-    }
-    public async publish(keys: {[key : string] : Publicity}): Promise<PublishResponse> 
-    {
-        const request = this.baseRequest();
-        request["keys"] = keys;
-
-        return await this.request<PublishRequest, PublishResponse>({endpoint: "publish",data:  request, hasSideEffects: true, hasParameters: true});
-    }
-    public async peek(keys: Key[]): Promise<PeekResponse> 
-    {
-        const array : string[] = [];
-        for(const i in keys)
+        const array: string[] = [];
+        for (const i in keys)
         {
             array.push(keys[i].stringifyRemote(0));
         }
-        return await this.request<GetRequest, GetResponse>({endpoint: "peek", data: {app: this.jormunOptions.app, keys : array}, hasSideEffects: false, hasParameters: true});
+        const request = { app: this.jormunOptions.app, keys: array };
+        return await this.request<PeekRequest, PeekResponse>({ endpoint: "peek", data: request, hasSideEffects: false, hasParameters: true });
     }
-    public async login() : Promise<LoginResponse>
+    public async login(): Promise<LoginResponse | null>
     {
         const request = this.passwordRequest();
-        return await this.request<LoginRequest, LoginResponse>({endpoint: "login", data: request, hasSideEffects: true, hasParameters: true});
+        return await this.request<LoginRequest, LoginResponse>({ endpoint: "login", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async logout() : Promise<LogoutResponse>
+    public async logout(): Promise<LogoutResponse | null>
     {
         const request = this.baseRequest();
-        return await this.request<LogoutRequest, LogoutResponse>({endpoint: "logout",  data: request, hasSideEffects: true, hasParameters: false});
+        return await this.request<LogoutRequest, LogoutResponse>({ endpoint: "logout", data: request, hasSideEffects: true, hasParameters: false });
     }
-    
-    public async invite(keys: Key[]): Promise<InviteResponse> 
+
+    public async invite(keys: Key[]): Promise<InviteResponse | null>
     {
-        const array : string[] = [];
-        for(const i in keys)
+        if (!this.cacheStatus() || !this.statusCache) return null;
+        const array: string[] = [];
+        for (const i in keys)
         {
             array.push(keys[i].stringifyRemote(this.statusCache.userId));
         }
-        const request = this.baseRequest();
-        request["keys"] = array;
+        const request = this.baseRequest({
+            keys: array
+        });
 
-        return await this.request<InviteRequest, InviteResponse>({endpoint: "invite", data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<InviteRequest, InviteResponse>({ endpoint: "invite", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async uninvite(tokenIds : string[]): Promise<UninviteResponse> 
+    public async uninvite(tokenIds: string[]): Promise<UninviteResponse | null>
     {
-        const request = this.baseRequest();
-        request["tokenIds"] = tokenIds;
+        const request = this.baseRequest({
+            tokenIds
+        });
 
-        return await this.request<UninviteRequest, UninviteResponse>({endpoint: "uninvite", data:  request, hasSideEffects: true, hasParameters: true});
+        return await this.request<UninviteRequest, UninviteResponse>({ endpoint: "uninvite", data: request, hasSideEffects: true, hasParameters: true });
     }
-    public async invitation(guestToken: string): Promise<InvitationResponse> 
+    public async invitation(guestToken: string): Promise<InvitationResponse | null>
     {
-        const request : InvitationRequest = {
-            app : this.jormunOptions.app,
-            guestToken : guestToken
+        const request: InvitationRequest = {
+            app: this.jormunOptions.app,
+            guestToken: guestToken
         };
-        return await this.request<InvitationRequest, InvitationResponse>({endpoint: "invitation", data:  request, hasSideEffects: false, hasParameters: true});
+        return await this.request<InvitationRequest, InvitationResponse>({ endpoint: "invitation", data: request, hasSideEffects: false, hasParameters: true });
     }
-    public async getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse> 
+    public async getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse | null>
     {
-        const array : string[] = [];
-        for(const i in keys)
+        const array: string[] = [];
+        for (const i in keys)
         {
             array.push(keys[i].stringifyLocal());
         }
-        const request = this.baseRequest();
-        request["token"] = guestToken;
-        request["username"] = "";
-        request["keys"] = array;
+        const request = this.baseRequest({
+            token: guestToken,
+            username: "",
+            keys: array
+        });
 
-        return await this.request<GetRequest, GetResponse>({endpoint: "get",data:  request, hasSideEffects: false, hasParameters: true});
+        return await this.request<GetRequest, GetResponse>({ endpoint: "get", data: request, hasSideEffects: false, hasParameters: true });
     }
-    public async setAsGuest(data: GetResponse, guestToken: string): Promise<SetResponse> 
+    public async setAsGuest(data: GetResponse, guestToken: string): Promise<SetResponse | null>
     {
-        const request = this.baseRequest();
-        request["token"] = guestToken;
-        request["username"] = "";
-        request["data"] = data;
-
-        return await this.request<SetRequest, SetResponse>({endpoint: "set",data:  request, hasSideEffects: true, hasParameters: true});
+        const request = this.baseRequest({
+            token: guestToken,
+            username: "",
+            data
+        });
+        return await this.request<SetRequest, SetResponse>({ endpoint: "set", data: request, hasSideEffects: true, hasParameters: true });
     }
 
 }

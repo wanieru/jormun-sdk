@@ -26,90 +26,90 @@ import { Key } from "./Key";
 
 export interface IRemote
 {
-    cachedStatus() : StatusResponse;
-    connected() : Promise<boolean>;
-    loggedIn() : Promise<boolean>;
+    cachedStatus(): StatusResponse | null;
+    connected(): Promise<boolean>;
+    loggedIn(): Promise<boolean>;
 
-    status() : Promise<StatusResponse>;
-    keys() : Promise<KeysResponse>;
-    get(keys : Key[]) : Promise<GetResponse>;
-    set(data : GetResponse) : Promise<SetResponse>;
-    share(keys : Key[], users : string[]) : Promise<ShareResponse>;
-    unshare(keys : Key[], users : string[]) : Promise<UnshareResponse>;
-    leave(keys : Key[]) : Promise<LeaveResponse>;
-    delete(keys : Key[]) : Promise<DeleteResponse>;
-    invite(keys : Key[]) : Promise<InviteResponse>;
-    uninvite(tokenId : string[]) : Promise<UninviteResponse>;
+    status(): Promise<StatusResponse | null>;
+    keys(): Promise<KeysResponse | null>;
+    get(keys: Key[]): Promise<GetResponse | null>;
+    set(data: GetResponse): Promise<SetResponse | null>;
+    share(keys: Key[], users: string[]): Promise<ShareResponse | null>;
+    unshare(keys: Key[], users: string[]): Promise<UnshareResponse | null>;
+    leave(keys: Key[]): Promise<LeaveResponse | null>;
+    delete(keys: Key[]): Promise<DeleteResponse | null>;
+    invite(keys: Key[]): Promise<InviteResponse | null>;
+    uninvite(tokenId: string[]): Promise<UninviteResponse | null>;
 
-    password(password : string, newPassword : string) : Promise<PasswordResponse>;
-    register(loggedInPassword : string, newUsername : string, newPassword : string, size : number, isAdmin : boolean) : Promise<RegisterResponse>;
-    empty() : Promise<EmptyResponse>;
-    setup(username : string, password : string) : Promise<SetupResponse>;
-    ban(bannedUsername : string, loggedInPassword : string) : Promise<BanResponse>;
-    rename(oldUsername : string, newUsername : string) : Promise<RenameResponse>;
-    resize(targetUsername : string, newSize : number) : Promise<ResizeResponse>;
-    users() : Promise<UsersResponse>;
-    login() : Promise<LoginResponse>;
-    logout() : Promise<LogoutResponse>;
+    password(password: string, newPassword: string): Promise<PasswordResponse | null>;
+    register(loggedInPassword: string, newUsername: string, newPassword: string, size: number, isAdmin: boolean): Promise<RegisterResponse | null>;
+    empty(): Promise<EmptyResponse | null>;
+    setup(username: string, password: string): Promise<SetupResponse | null>;
+    ban(bannedUsername: string, loggedInPassword: string): Promise<BanResponse | null>;
+    rename(oldUsername: string, newUsername: string): Promise<RenameResponse | null>;
+    resize(targetUsername: string, newSize: number): Promise<ResizeResponse | null>;
+    users(): Promise<UsersResponse | null>;
+    login(): Promise<LoginResponse | null>;
+    logout(): Promise<LogoutResponse | null>;
 
-    browse(limit : number, offset : number) : Promise<BrowseResponse>;
-    publish(keys: {[key : string] : Publicity}) : Promise<PublishResponse>;
-    peek(keys : Key[]) : Promise<PeekResponse>;
-    invitation(guestToken : string) : Promise<InvitationResponse>;
-    getAsGuest(keys : Key[], guestToken : string) : Promise<GetResponse>;
-    setAsGuest(data : GetResponse, guestToken : string) : Promise<SetResponse>;
+    browse(limit: number, offset: number): Promise<BrowseResponse | null>;
+    publish(keys: { key: Key, publicity: Publicity }[]): Promise<PublishResponse | null>;
+    peek(keys: Key[]): Promise<PeekResponse | null>;
+    invitation(guestToken: string): Promise<InvitationResponse | null>;
+    getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse | null>;
+    setAsGuest(data: GetResponse, guestToken: string): Promise<SetResponse | null>;
 }
 /** Interface for interacting with a Jormun Remote from regular apps. Exposes methods like share and publish, which aren't available through the Jormun class. */
 export interface IPublicRemote
 {
     /** Returns a cache of the status endpoint. */
-    cachedStatus() : StatusResponse;
+    cachedStatus(): StatusResponse | null;
     /** True if we have gotten a valid response from the remote. */
-    connected() : Promise<boolean>;
+    connected(): Promise<boolean>;
     /** True if we have gotten a valid response from an endpoint that requires a login. */
-    loggedIn() : Promise<boolean>;
+    loggedIn(): Promise<boolean>;
 
     /** Gets status about the logged in user. */
-    status() : Promise<StatusResponse>;
+    status(): Promise<StatusResponse | null>;
 
     /** Share the specified keys with the specified usernames */
-    share(keys : Key[], users : string[]) : Promise<ShareResponse>;
+    share(keys: Key[], users: string[]): Promise<ShareResponse | null>;
     /** Unshare the specified keys with the specified usernames. */
-    unshare(keys : Key[], users : string[]) : Promise<UnshareResponse>;
+    unshare(keys: Key[], users: string[]): Promise<UnshareResponse | null>;
     /** Stop the specified keys from being shared with us. */
-    leave(keys : Key[]) : Promise<LeaveResponse>;
+    leave(keys: Key[]): Promise<LeaveResponse | null>;
     /** Create a guest token that can be used to get and set the specified keys. */
-    invite(keys : Key[]) : Promise<InviteResponse>;
+    invite(keys: Key[]): Promise<InviteResponse | null>;
     /** Revoke the specified guest tokens. */
-    uninvite(tokenIds : string[]) : Promise<UninviteResponse>;
+    uninvite(tokenIds: string[]): Promise<UninviteResponse | null>;
 
     /** List public keys. */
-    browse(limit : number, offset : number) : Promise<BrowseResponse>;
-    /** Set the publicity for the specified keys. The dictionary maps remote-stringified-keys to their new publicity. */
-    publish(keys : {[key : string] : Publicity}) : Promise<PublishResponse>;
+    browse(limit: number, offset: number): Promise<BrowseResponse | null>;
+    /** Set the publicity for the specified keys. */
+    publish(keys: { key: Key, publicity: Publicity }[]): Promise<PublishResponse | null>;
     /** Get the values of the specified unlisted or public keys. */
-    peek(keys : Key[]) : Promise<PeekResponse>;
+    peek(keys: Key[]): Promise<PeekResponse | null>;
     /** Gets a list of keys the specified guest token can be used on.  */
-    invitation(guestToken : string) : Promise<InvitationResponse>;
+    invitation(guestToken: string): Promise<InvitationResponse | null>;
     /** Get info about keys using a guest token. */
-    getAsGuest(keys : Key[], guestToken : string) : Promise<GetResponse>;
+    getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse | null>;
     /** Set keys using a guest token. */
-    setAsGuest(data : GetResponse, guestToken : string) : Promise<SetResponse>;
+    setAsGuest(data: GetResponse, guestToken: string): Promise<SetResponse | null>;
 }
 /** Interface for interacting with a Jormun Remote anonymously. */
 export interface IAnonymousRemote
 {
     /** True if we have gotten a valid response from the remote. */
-    connected() : Promise<boolean>;
+    connected(): Promise<boolean>;
 
     /** List public keys. */
-    browse(limit : number, offset : number) : Promise<BrowseResponse>;
+    browse(limit: number, offset: number): Promise<BrowseResponse | null>;
     /** Get the values of the specified unlisted or public keys. */
-    peek(keys : Key[]) : Promise<PeekResponse>;
+    peek(keys: Key[]): Promise<PeekResponse | null>;
     /** Gets a list of keys the specified guest token can be used on.  */
-    invitation(guestToken : string) : Promise<InvitationResponse>;
+    invitation(guestToken: string): Promise<InvitationResponse | null>;
     /** Get info about keys using a guest token. */
-    getAsGuest(keys : Key[], guestToken : string) : Promise<GetResponse>;
+    getAsGuest(keys: Key[], guestToken: string): Promise<GetResponse | null>;
     /** Set keys using a guest token. */
-    setAsGuest(data : GetResponse, guestToken : string) : Promise<SetResponse>;
+    setAsGuest(data: GetResponse, guestToken: string): Promise<SetResponse | null>;
 }

@@ -4,13 +4,13 @@ export declare const statusRequest: zod.ZodObject<{
     token: zod.ZodString;
     app: zod.ZodString;
 }, "strip", zod.ZodTypeAny, {
-    username?: string;
-    token?: string;
-    app?: string;
+    username: string;
+    token: string;
+    app: string;
 }, {
-    username?: string;
-    token?: string;
-    app?: string;
+    username: string;
+    token: string;
+    app: string;
 }>;
 export declare type StatusRequest = zod.infer<typeof statusRequest>;
 export interface StatusResponse {

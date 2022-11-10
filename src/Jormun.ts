@@ -60,7 +60,7 @@ export class JormunStatus
 
 export type AlertContent = { title: string, message: string, options: string[] };
 export type AlertDelegate = (obj: AlertContent) => Promise<number>;
-export type JormunEventPayload = { key: Key, data: Data, value: any, raw: LocalData };
+export type JormunEventPayload = { key: Key, data: Data, value: any, raw: LocalData | null };
 
 /** Main object for interacting with Jormun.  */
 export class Jormun
@@ -87,7 +87,7 @@ export class Jormun
     /** Initialize this jormun instance with the specified app, and alert handler.
      * Will automatically load saved remote settings.
      */
-    public async initialize(app: string, alertDelegate: AlertDelegate | null, localStorageOverride: ILocal = null)
+    public async initialize(app: string, alertDelegate: AlertDelegate | null, localStorageOverride: ILocal | null = null)
     {
         if (localStorageOverride)
             this.local = localStorageOverride;
@@ -170,20 +170,20 @@ export class Jormun
         if (this.remote && await this.remote.loggedIn())
         {
             this.status.loggedIn = true;
-            this.status.empty = (await this.remote.empty()).empty;
-            this.status.admin = this.remote.cachedStatus().isAdmin;
+            this.status.empty = (await this.remote.empty())?.empty ?? false;
+            this.status.admin = this.remote.cachedStatus()?.isAdmin ?? false;
 
             let forceDownload = false;
             if ((await this.local.getKeys()).length <= 1)
             {
                 forceDownload = true;
             }
-            else if (!oldRemote)
+            else if (!oldRemote && options.remote)
             {
                 const response = await this.ask("New User", `You seem to have logged in to a new user, ${options.remote.username}@${options.remote.host}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
                 forceDownload = response == 0;
             }
-            else if (oldRemote && (oldRemote.username != options.remote?.username || oldRemote.host != options.remote?.host))
+            else if (options.remote && oldRemote && (oldRemote.username != options.remote?.username || oldRemote.host != options.remote?.host))
             {
                 const response = await this.ask("New User", `You seem to have switched from user ${oldRemote.username}@${oldRemote.host} to ${options.remote.username}@${options.remote.host}. Would you like to clear local data and redownload from ${options.remote.username}?`, ["Yes", "No"]);
                 forceDownload = response == 0;
@@ -227,6 +227,7 @@ export class Jormun
 
         const status = await this.remote.status();
         const keys = await this.remote.keys();
+        if (!status || !keys) return;
         this.setSharedWith(status, keys);
 
         const comparison = await this.compareRemoteKeys(status, keys);
@@ -265,9 +266,12 @@ export class Jormun
             for (const key in newTimestamps)
             {
                 const parsed = Key.parse(key, status.userId);
-                const remoteString = parsed.stringifyRemote(status.userId);
-                const data = this.data[parsed.userId][parsed.fragment];
-                await data.preset(uploadData[remoteString], newTimestamps[key], data.isPublished(), false);
+                if (parsed)
+                {
+                    const remoteString = parsed.stringifyRemote(status.userId);
+                    const data = this.data[parsed.userId][parsed.fragment];
+                    await data.preset(uploadData[remoteString], newTimestamps[key], data.isPublished(), false);
+                }
             }
         }
         else if (comparison.download)
@@ -277,7 +281,7 @@ export class Jormun
             if (getKeys.length > 0)
             {
                 const result = await this.remote.get(getKeys);
-                await this.processDataResponse(status, keys, result);
+                if (result) await this.processDataResponse(status, keys, result);
             }
         }
         if (this.options.remote?.downloadSharedData)
@@ -286,7 +290,7 @@ export class Jormun
             if (comparison.newShared.length > 0)
             {
                 const result = await this.remote.get(comparison.newShared);
-                await this.processDataResponse(status, keys, result);
+                if (result) await this.processDataResponse(status, keys, result);
             }
         }
 
@@ -325,6 +329,8 @@ export class Jormun
             {
                 const parsed = Key.parse(key, status.userId);
                 const remoteParsed = Key.parse(key, -1);
+                if (!parsed || !remoteParsed) continue;
+
                 const local = remoteParsed.userId == status.userId;
                 const remoteTime = remoteKeys[key].timestamp;
                 remoteVersionTime = Math.max(remoteTime, remoteVersionTime);
@@ -415,6 +421,7 @@ export class Jormun
             return { different: false, comparison: null };
         const status = await this.remote.status();
         const keys = await this.remote.keys();
+        if (!status || !keys) return { different: false, comparison: null };
         this.setSharedWith(status, keys);
         const comparison = await this.compareRemoteKeys(status, keys);
         return { different: comparison.download || comparison.upload, comparison: comparison };
@@ -467,6 +474,7 @@ export class Jormun
         for (const key in result)
         {
             const parsed = Key.parse(key, status.userId);
+            if (!parsed) continue;
             if (!this.data.hasOwnProperty(parsed.userId))
                 this.data[parsed.userId] = {};
             if (!this.data[parsed.userId].hasOwnProperty(parsed.fragment))
@@ -480,6 +488,7 @@ export class Jormun
         for (const key in keys)
         {
             const parsed = Key.parse(key, status.userId);
+            if (!parsed) continue;
             if (!this.data.hasOwnProperty(parsed.userId))
                 this.data[parsed.userId] = {};
             if (this.data[parsed.userId].hasOwnProperty(parsed.fragment))
@@ -508,14 +517,14 @@ export class Jormun
         return this.data[0][fragment];
     }
     /** Get a piece of data owned by the local user. */
-    public me(fragment: string): Data
+    public me(fragment: string): Data | null
     {
         if (!this.data.hasOwnProperty(0))
             return null;
         return this.data[0][fragment] ?? null;
     }
     /** Get a piece of data owned by another user, but shared with the local user. */
-    public user(userId: number | string, fragment: string): Data
+    public user(userId: number | string, fragment: string): Data | null
     {
         if (!this.data.hasOwnProperty(userId))
             return null;
@@ -567,9 +576,9 @@ export class Jormun
         }
     }
     /* Returns a dictionary of users who shared data with us or whom we shared data with, mapping user ids and usernames. */
-    public friends(): { [id: number]: string }
+    public friends(): { [id: number]: string } | null
     {
-        return this.remote?.cachedStatus()?.friends;
+        return this.remote?.cachedStatus()?.friends ?? null;
     }
     /** Export all the local data to a string. */
     public async export()

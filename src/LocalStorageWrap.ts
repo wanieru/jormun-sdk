@@ -23,7 +23,7 @@ export class LocalStorageWrap implements ILocal
 
     public constructor()
     {
-        this.version = JSON.parse(localStorage.getItem(LocalStorageWrap.VER_KEY)) ?? 1;
+        this.version = JSON.parse(localStorage.getItem(LocalStorageWrap.VER_KEY) ?? "null") ?? 1;
         this.migrate();
         localStorage.setItem(LocalStorageWrap.VER_KEY, JSON.stringify(this.version));
 
@@ -64,10 +64,12 @@ export class LocalStorageWrap implements ILocal
 
     public async getKeys(): Promise<Key[]> 
     {
-        const result = [];
+        const result = [] as Key[];
         for (const key in this.keys)
         {
-            result.push(Key.parse(key, 0));
+            const parsed = Key.parse(key, 0);
+            if (!parsed) continue;
+            result.push(parsed);
         }
         return result;
     }
@@ -87,14 +89,14 @@ export class LocalStorageWrap implements ILocal
     }
     public async getValue(key: Key): Promise<any> 
     {
-        return JSON.parse(localStorage.getItem(key.stringifyLocal()));
+        return JSON.parse(localStorage.getItem(key.stringifyLocal()) ?? "null");
     }
     public async getValues(keys: Key[]): Promise<{ [key: string]: any; }> 
     {
         const result = {};
         for (const i in keys)
         {
-            result[keys[i].stringifyLocal()] = JSON.parse(localStorage.getItem(keys[i].stringifyLocal()));
+            result[keys[i].stringifyLocal()] = JSON.parse(localStorage.getItem(keys[i].stringifyLocal()) ?? "null");
         }
         return result;
     }

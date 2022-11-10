@@ -1,6 +1,6 @@
 {
     "name": "jormun-sdk",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "SDK for interacting with jormun-sync",
     "main": "dist/index.js",
     "types": "dist",

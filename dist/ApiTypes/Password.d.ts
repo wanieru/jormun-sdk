@@ -5,15 +5,15 @@ export declare const passwordRequest: zod.ZodObject<{
     password: zod.ZodString;
     newPassword: zod.ZodString;
 }, "strip", zod.ZodTypeAny, {
-    username?: string;
-    token?: string;
-    password?: string;
-    newPassword?: string;
+    password: string;
+    username: string;
+    token: string;
+    newPassword: string;
 }, {
-    username?: string;
-    token?: string;
-    password?: string;
-    newPassword?: string;
+    password: string;
+    username: string;
+    token: string;
+    newPassword: string;
 }>;
 export declare type PasswordRequest = zod.infer<typeof passwordRequest>;
 export interface PasswordResponse {

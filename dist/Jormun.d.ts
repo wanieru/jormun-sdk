@@ -50,7 +50,7 @@ export declare type JormunEventPayload = {
     key: Key;
     data: Data;
     value: any;
-    raw: LocalData;
+    raw: LocalData | null;
 };
 /** Main object for interacting with Jormun.  */
 export declare class Jormun {
@@ -72,7 +72,7 @@ export declare class Jormun {
     /** Initialize this jormun instance with the specified app, and alert handler.
      * Will automatically load saved remote settings.
      */
-    initialize(app: string, alertDelegate: AlertDelegate | null, localStorageOverride?: ILocal): Promise<void>;
+    initialize(app: string, alertDelegate: AlertDelegate | null, localStorageOverride?: ILocal | null): Promise<void>;
     /** Get an interface to interact anonymously with the specified app on the specified host. */
     static getAnonymousRemote(app: string, host: string): Promise<IAnonymousRemote>;
     getApp(): string;
@@ -107,9 +107,9 @@ export declare class Jormun {
     /** Add a new data entry with the specified fragment and specified default value. */
     add(fragment: string, defaultValue: any): Promise<Data>;
     /** Get a piece of data owned by the local user. */
-    me(fragment: string): Data;
+    me(fragment: string): Data | null;
     /** Get a piece of data owned by another user, but shared with the local user. */
-    user(userId: number | string, fragment: string): Data;
+    user(userId: number | string, fragment: string): Data | null;
     /** Called automatically to indicate that a piece of data has been deleted or created. */
     bumpChangedKeys(): Promise<void>;
     /** Returns a list of user ids we have data from locally. The local user is always 0. */
@@ -119,7 +119,7 @@ export declare class Jormun {
     private static defaultAlertDelegate;
     friends(): {
         [id: number]: string;
-    };
+    } | null;
     /** Export all the local data to a string. */
     export(): Promise<string>;
     /** Clear local data and import it from the specified string (should be created with the export method.) */
