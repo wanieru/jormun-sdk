@@ -160,7 +160,7 @@ export class JormunSyncRemote implements IRemote
 
     private async cacheStatus(): Promise<StatusResponse | null>
     {
-        return this.cacheStatus() ?? await this.status();
+        return this.cachedStatus() ?? await this.status();
     }
     public cachedStatus(): StatusResponse | null
     {
