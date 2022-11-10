@@ -237,6 +237,7 @@ export class Jormun
             comparison.download = true;
         }
 
+        let shouldBumpChangedKeys = false;
         if (comparison.download && comparison.upload)
         {
             const choice = await this.ask("Syncing", `The local and remote data cannot be combined. Which do you want to keep?`,
@@ -271,6 +272,7 @@ export class Jormun
                     const remoteString = parsed.stringifyRemote(status.userId);
                     const data = this.data[parsed.userId][parsed.fragment];
                     await data.preset(uploadData[remoteString], newTimestamps[key], data.isPublished(), false);
+                    shouldBumpChangedKeys = true;
                 }
             }
         }
@@ -281,7 +283,11 @@ export class Jormun
             if (getKeys.length > 0)
             {
                 const result = await this.remote.get(getKeys);
-                if (result) await this.processDataResponse(status, keys, result);
+                if (result) 
+                {
+                    await this.processDataResponse(status, keys, result);
+                    shouldBumpChangedKeys = true;
+                }
             }
         }
         if (this.options.remote?.downloadSharedData)
@@ -290,12 +296,16 @@ export class Jormun
             if (comparison.newShared.length > 0)
             {
                 const result = await this.remote.get(comparison.newShared);
-                if (result) await this.processDataResponse(status, keys, result);
+                if (result) 
+                {
+                    await this.processDataResponse(status, keys, result);
+                    shouldBumpChangedKeys = true;
+                }
             }
         }
 
         const changedKeys = this.me(Jormun.CHANGED_KEYS_KEY);
-        if (changedKeys)
+        if (shouldBumpChangedKeys && changedKeys)
         {
             const changedKeysRaw = await changedKeys.getRaw();
             await changedKeys.preset(changedKeysRaw.timestamp, changedKeysRaw.timestamp, changedKeys.isPublished(), false);
@@ -307,7 +317,7 @@ export class Jormun
     }
     private async compareRemoteKeys(status: StatusResponse, remoteKeys: KeysResponse): Promise<JormunRemoteKeyComparison>
     {
-        this.add(Jormun.CHANGED_KEYS_KEY, Unix());
+        await this.add(Jormun.CHANGED_KEYS_KEY, Unix());
 
         let missingLocal: Key[] = []; //Keys that exist on remote but not on local
         let missingRemote: Key[] = []; //Keys that exist on local but not on remote
