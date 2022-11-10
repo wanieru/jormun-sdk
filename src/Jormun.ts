@@ -303,7 +303,8 @@ export class Jormun
         if (changedKeys)
         {
             const changedKeysRaw = await changedKeys.getRaw();
-            await changedKeys.preset(changedKeysRaw.timestamp, changedKeysRaw.timestamp, changedKeys.isPublished(), false);
+            const timestamp = changedKeysRaw?.timestamp ?? Unix();
+            await changedKeys.preset(timestamp, timestamp, changedKeys.isPublished(), false);
         }
 
         this.status.syncing = false;
@@ -346,7 +347,10 @@ export class Jormun
                 else
                 {
                     const raw = await this.data[parsed.userId][parsed.fragment].getRaw();
-                    raws[parsed.stringifyLocal()] = raw;
+                    if (raw)
+                    {
+                        raws[parsed.stringifyLocal()] = raw;
+                    }
                     if (local && (raw?.isDirty ?? false))
                     {
                         newerLocal.push(parsed);

@@ -26,7 +26,7 @@ export class Data
     /** Gets the raw data, including metadata like timestamp and dirty status. */
     public async getRaw()
     {
-        return <LocalData>await this.jormun["local"].getValue(this.key);
+        return <LocalData | null>await this.jormun["local"].getValue(this.key);
     }
     /** Loads and parses this value. */
     public async get()
@@ -73,7 +73,7 @@ export class Data
         };
         await this.jormun["local"].setValue(this.key, localData);
 
-        if (oldValue.json !== localData.json)
+        if (oldValue?.json !== localData.json)
         {
             await this.fireChangeEvent();
         }
@@ -82,7 +82,7 @@ export class Data
     public async set(value: any)
     {
         const raw = await this.getRaw();
-        await this.preset(value, raw.timestamp, this.published, true);
+        await this.preset(value, raw?.timestamp ?? Unix(), this.published, true);
     }
     /** Delete this value locally. */
     public async remove()

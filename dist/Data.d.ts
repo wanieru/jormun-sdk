@@ -15,7 +15,7 @@ export declare class Data {
     private deleted;
     constructor(jormun: Jormun, key: Key);
     /** Gets the raw data, including metadata like timestamp and dirty status. */
-    getRaw(): Promise<LocalData>;
+    getRaw(): Promise<LocalData | null>;
     /** Loads and parses this value. */
     get(): Promise<any>;
     private getEventPayload;
