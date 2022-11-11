@@ -448,6 +448,7 @@ export class Jormun
         {
             for (const fragment in this.data[0])
             {
+                if (!this.data[0][fragment]) continue;
                 const raw = await this.data[0][fragment].getRaw();
                 if (raw)
                 {
