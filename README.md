@@ -8,4 +8,5 @@ Instead, we deploy a "bring-your-own-server" approach. The Jormun SDK lets the a
 
 The SDK and Sync Server also support sharing data between users on the same server, and even making data available "unlisted" or "public".
 
-The source for my sync server implementation is not currently available, but a public docker image is provided: https://hub.docker.com/repository/docker/wanieru/jormun-sync
+The source for my sync server implementation is available here: https://github.com/wanieru/jormun-sync/
+A public docker image is provided here: https://hub.docker.com/repository/docker/wanieru/jormun-sync
