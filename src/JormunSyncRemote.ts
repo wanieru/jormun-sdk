@@ -124,7 +124,7 @@ export class JormunSyncRemote implements IRemote
         }
         catch (e)
         {
-            this.jormun.alert("Network Error", e);
+            this.jormun.alert("Network Error", e.toString());
         }
         return null;
     }
