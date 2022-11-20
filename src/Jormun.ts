@@ -527,6 +527,10 @@ export class Jormun
         {
             this.data[0][fragment] = new Data(this, new Key(this.options.app, 0, fragment));
             await this.data[0][fragment].preset(defaultValue, -Unix(), "private", true);
+            while (defaultValue !== null && await this.data[0][fragment].get() === null)
+            {
+                await Wait.secs(0);
+            }
             await this.bumpChangedKeys();
         }
         return this.data[0][fragment];
